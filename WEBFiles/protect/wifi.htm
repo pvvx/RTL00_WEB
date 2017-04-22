@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=windows-1251">
+	<title>RTL871X WiFi</title>
+	<link rel="stylesheet" href="/style.css">
+	<script src="/scripts.js"></script>
+</head><body>
+	~inc:menu.inc~
+	<div class="content">
+		<form method='post' action='/timeout.htm'>
+		<input type='hidden' name='wifi_rdcfg' value='0xffffffff'>
+		<table class="form">
+			<tr>
+				<td colspan="2"><h2 class="title">WiFi SoftAP</h2></td>
+				<td colspan="2"><h2 class="title">WiFi Station</h2></td>
+			</tr>
+			<tr>
+			   <td class="label">WiFi Mode:</td>
+				<td><select name='wifi_mode'>
+					<option value='1'>STATION_MODE</option>
+					<option value='2'>SOFTAP_MODE</option>
+					<option value='3'>STATIONAP_MODE</option>
+				</select></td>
+				<td class="label">SSID:</td>
+				<td><input name='wifi_st_ssid' maxlength='31' value='~wifi_st_ssid~'></td>
+			</tr>
+			<tr>
+				<td class="label">AP SSID:</td>
+				<td><input name='wifi_ap_ssid' maxlength='31' value='~wifi_ap_ssid~'></td>
+				<td class="label">Password:</td>
+				<td><input name='wifi_st_psw' maxlength='63' value='~wifi_st_psw~'></td>
+			</tr>
+			<tr>
+				<td class="label">Hidden SSID:</td>
+				<td>
+					<input type='hidden' name='wifi_ap_hssid' value='0'>
+					<input type='checkbox' name='wifi_ap_hssid' value='1'>
+				</td>
+				<td class="label">BSSID:</td>
+				<td><input name='wifi_st_bssid' maxlength='17' value='~wifi_st_bssid~'></td>
+			</tr>
+			<tr>
+				<td class="label">AP Password:</td>
+				<td><input name='wifi_ap_psw' maxlength='63' value='~wifi_ap_psw~'></td>
+				<td class="label">Use BSSID:</td>
+				<td>
+					<input type='hidden' name='wifi_st_sbss' value='0'>
+					<input type='checkbox' name='wifi_st_sbss' value='1'>
+				</td>
+ 			</tr>
+			<tr>
+				<td class="label">Channel:</td>
+				<td><select name='wifi_ap_chl'>
+					<option value='0'>auto</option>
+				</select></td>
+				<td class="label">Auth Mode:</td>
+				<td><select name='wifi_st_auth'>
+					<option value='0'>OPEN</option>
+					<option value='1'>WEP_PSK</option>
+					<option value='32769'>WEP_SHAREDK</option>
+					<option value='2097154'>WPA_TKIP_PSK</option>
+					<option value='2097156'>WPA_AES_PSK</option>
+					<option value='4194306'>WPA2_TKIP_PSK</option>
+					<option value='4194308'>WPA2_AES_PSK</option>
+					<option value='4194310'>WPA2_MIXED_PSK</option>
+					<option value='6291456'>WPA_WPA2_MIXED</option>
+					<option value='268435456'>WPS_OPEN</option>
+					<option value='268435460'>WPS_SECURE</option>
+					<option value='2147483647'>UNKNOWN</option>
+				</select></td>
+			</tr>
+			<tr>
+				<td class="label">IEEE PHY:</td>
+				<td><select name='wifi_phy'>
+					<option value='1'>802.11b</option>
+					<option value='3'>802.11g</option>
+					<option value='11'>802.11n</option>
+				</select></td>
+				<td class="label">IP:</td>
+				<td><input type='text' title='Static ip, if dhcp: off' name='wifi_st_ip' maxlength='31' value='~wifi_st_ip~'></td>
+			</tr>
+			<tr>
+				<td class="label">Auth Mode:</td>
+				<td><select name='wifi_ap_auth'>
+					<option value='0'>OPEN</option>
+					<option value='1'>WPA_WPA2_PSK</option>
+				</select></td>
+				<td class="label">Subnet Mask:</td>
+				<td><input name='wifi_st_msk' maxlength='31' value='~wifi_st_msk~'></td>
+			</tr>
+			<tr>
+				<td class="label">IP:</td>
+				<td><input name='wifi_ap_ip' maxlength='31' value='~wifi_ap_ip~'></td>
+				<td class="label">Gateway:</td>
+				<td><input name='wifi_st_gw' maxlength='31' value='~wifi_st_gw~'></td>
+			</tr>
+			<tr>
+				<td class="label">Subnet Mask:</td>
+				<td><input type='text' name='wifi_ap_msk' maxlength='31' value='~wifi_ap_msk~'></td>
+				<td class="label">AutoReConnect:</td>
+				<td><input name='wifi_st_arec' title='Reconnect Count 1..255.' maxlength='4' value='~wifi_st_arec~'></td>
+			</tr>
+			<tr>
+				<td class="label">Gateway:</td>
+				<td><input name='wifi_ap_gw' maxlength='31' value='~wifi_ap_gw~'></td>
+				<td class="label">ReConnectPause:</td>
+				<td><input name='wifi_st_rect' title='Reconnect pause 1..255 sec.' maxlength='4' value='~wifi_st_rect~'></td>
+			</tr>
+			<tr>
+				<td class="label">MAC:</td>
+				<td><input name='wifi_ap_mac' maxlength='17' value='~wifi_ap_mac~'></td>
+				<td class="label">MAC:</td>
+				<td><input name='wifi_st_mac' maxlength='17' value='~wifi_st_mac~'></td>
+			</tr>
+			<tr>
+				<td class="label">DHCP:</td>
+				<td>
+					<input type='hidden' name='wifi_ap_dhcp' value='0'>
+					<input type='checkbox' name='wifi_ap_dhcp' value='1'>
+				</td>
+				<td class="label">DHCP:</td>
+				<td><select name='wifi_st_dhcp'>
+					<option value='0'>DHCP Off</option>
+					<option value='1'>DHCP On</option>
+					<option value='2'>Static IP</option>
+					<option value='3'>Auto fix</option>
+				</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="label">Country Code:</td>
+				<td><input name='wifi_country' maxlength='10' value='~wifi_country~'></td>
+				<td class="label">RSSI:</td>
+				<td>~wifi_st_rssi~ dB</td>
+			</tr>
+			<tr>
+   			<td class="label">RF Tx Power:</td>
+   			    <td><select name='wifi_txpow'>
+   				<option value='0'>100%</option>
+   				<option value='1'>75%</option>
+   				<option value='2'>50%</option>
+   				<option value='3'>25%</option>
+   				<option value='4'>12.5%</option>
+   			    </select></td>
+				<td class="label">Sleep Mode:</td>
+				<td><select name='wifi_sleep'>
+   				<option value='0'>Off</option>
+   				<option value='1'>On</option>
+   				</select></td>
+			</tr>
+			<tr>
+				<td class="label">Max connections:</td>
+				<td><input title='1..3, Default: 3.' name='wifi_ap_mcns' maxlength='1' value='~wifi_ap_mcns~'></td>
+				<td class="label">Beacon (ms):</td>
+				<td><input title='100...60000' name='wifi_ap_bint' maxlength='5' value='~wifi_ap_bint~'></td>
+			</tr>
+			<tr>
+				<td class="label">AP Host Name:</td>
+				<td><input title='DHCP, NetBIOS name' name='wifi_ap_hostname' maxlength='16' value='~wifi_ap_hostname~'></td>
+				<td class="label">ST Host Name:</td>
+				<td><input title='DHCP, NetBIOS name' name='wifi_st_hostname' maxlength='16' value='~wifi_st_hostname~'></td>
+			</tr>
+		</table>
+		<p class="center">
+			<input type='submit' value='Set Config' class="button">
+			<input type='hidden' name='wifi_newcfg' value='0xffff'>
+		</p>
+		</form>
+	</div>
+~inc:footer.inc~
+<script type="text/javascript">
+var chlnum = document.forms[0].wifi_ap_chl;
+for (var i=1; i < 14; i++) {
+	chlnum.options[i] = new Option(((i<10)?'0':'')+i,i);
+}
+var cfg = {
+	wifi_ap_chl:"~wifi_ap_chl~",
+	wifi_ap_auth:"~wifi_ap_auth~",
+	wifi_phy:"~wifi_bgn~",
+	wifi_mode:"~wifi_mode~",
+	wifi_sleep:"~wifi_sleep~",
+	wifi_st_autn:"~wifi_st_auth~",
+	wifi_st_sbss:"~wifi_st_sbss~",
+	wifi_ap_hssid:"~wifi_ap_hssid~",
+	wifi_ap_dhcp:"~wifi_ap_dhcp~",
+	wifi_txpow:"~wifi_txpow~",
+	wifi_st_dhcp:"~wifi_st_dhcp~"
+}
+setFormValues(document.forms[0], cfg);
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>RTL871X</title>
+	<link rel="stylesheet" href="/style.css">
+	<script src="/site.js"></script>
+</head>
+<body onload="allowAJAX=true;" onunload="allowAJAX=false;">
+	~inc:menu.inc~
+	<div class="content">
+		<h2 class="title">Test DeepSleep</h2>
+		<table class="form">
+			</tr>
+				<td class="label">DeepSleep Time(ms):</td>
+				<td><input type="text" id="ds_time" size="12" maxlength="10" value="3000"></td>
+			</tr>
+			<tr>
+				<td class="label">DeepSleep Mode:</td>
+				<td class="left"><input type="button" onclick="DeepSleep()" value="Go" class="button"></td>
+			</tr>
+		  </form>
+		</table>
+		<p class="center">
+		Reset event = ~sys_res_event~ (1-power, 2-reset, 3-software, 4-wdt)<br>
+		</p>
+	</div>
+~inc:footer.inc~
+</body>
+</html>
+

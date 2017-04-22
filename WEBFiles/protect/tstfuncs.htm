@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html><head>
+	<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+	<title>RTL871X Download bin</title>
+	<link rel="stylesheet" href="../style.css">
+	<script src="/scripts.js"></script>
+</head><body>
+~inc:menu.inc~
+	<div class="content">
+   		<h2 class="title">Download bin</h2>
+		<form method="post"><table class="scan">
+			<tr>
+				<td>ROM-BIOS:</td>
+				<td><a href='ram.bin?start=0x00000000&stop=0x00080000'>0x00000000..0x00080000</a></td>
+				<td>512 kbytes</td>
+			</tr>
+			<tr>
+				<td>SRAM:</td>
+				<td><a href='ram.bin?start=0x10000000&stop=0x10070000'>0x10000000..0x10070000</a></td>
+				<td>448 kbytes</td>
+			</tr>
+			<tr>
+				<td>TCM-RAM:</td>
+				<td><a href='ram.bin?start=0x1FFF0000&stop=0x20000000'>0x1FFF0000..0x20000000</a></td>
+				<td>64 kbytes</td>
+			</tr>
+			<tr>
+				<td>SDRAM:</td>
+				<td><a href='ram.bin?start=0x30000000&stop=0x30200000'>0x30000000..0x30200000</a></td>
+				<td>2048 kbytes</td>
+			</tr>
+			<tr>
+				<td>FLASH Bus:</td>
+				<td><a href='ram.bin?start=0x98000000&stop=0x98100000'>0x98000000..0x98100000</a></td>
+				<td>1024 kbytes</td>
+			</tr>
+			<tr>
+				<td>I/O SoC:</td>
+				<td><a href='ram.bin?start=0x40000000&stop=0x40080000'>0x40000000..0x40080000</a></td>
+				<td>.. kbytes</td>
+			</tr>
+			<tr>
+				<td>ARM:</td>
+				<td><a href='ram.bin?start=0xEF000000&stop=0xEFFFFFFF'>0xEF000000..0xEFFFFFFF</a></td>
+				<td>.. kbytes</td>
+			</tr>
+		</table>
+
+		<table class="form">
+			<tr>
+				<td class="label">Start addr</td>
+				<td><input type="text" id="rams" size=12 maxlength=10 value="0x3FF00000"></td>
+			</tr>
+			<tr>
+				<td class="label">End addr</td>
+				<td><input type="text" id="rame" size=12 maxlength=10 value="0x40800000"></td>
+			</tr>
+		</table>
+		<p class="center"><input type="button" onClick="NewCookie()" value="Download ram.bin" class="button"></p>
+	</div>
+~inc:footer.inc~
+<script type="text/javascript">
+function getCookie(name){
+ var prefix = name + "=";
+ var cookieStartIndex = document.cookie.indexOf(prefix);
+ if (cookieStartIndex == -1) return null;
+ var cookieEndIndex = document.cookie.indexOf(";", cookieStartIndex + prefix.length);
+ if (cookieEndIndex == -1) cookieEndIndex = document.cookie.length;
+ return unescape(document.cookie.substring(cookieStartIndex + prefix.length, cookieEndIndex));
+}
+function setCookie(name, value){
+ document.cookie = name + "=" + escape(value) + "; path=/";
+}
+function setCookieElem(name, defv){
+ var value = getCookie(name);
+ if(value == null) {
+  value = defv;
+  setCookie(name,value);
+ }
+ document.getElementById(name).value=value;
+}
+function NewCookie(){
+ setCookie('rams',document.getElementById('rams').value);
+ setCookie('raml',document.getElementById('rame').value);
+ window.location.href='ram.bin?start='+document.getElementById('rams').value+'&stop='+document.getElementById('rame').value;
+}
+setCookieElem('rams','0x10000000');
+setCookieElem('rame','0x10070000');
+</script>
+</body>
+</html>
