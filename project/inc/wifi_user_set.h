@@ -21,9 +21,9 @@
 	| BID_WIFI_AP_CFG \
 	| BID_WIFI_ST_CFG \
 	| BID_AP_DHCP_CFG \
-	| BID_ST_DHCP_CFG \
-	| BID_WIFI_CFG \
-)
+	| BID_ST_DHCP_CFG )//\
+//	| BID_WIFI_CFG \
+//)
 #define DEF_SAVE_CFG ( 0 \
 	| BID_WIFI_AP_CFG \
 	| BID_WIFI_ST_CFG \
@@ -34,7 +34,12 @@
 //==== Interface 0 - wlan0 = AP ===========
 #define DEF_AP_SSID			"RTL871X"
 #define DEF_AP_PASSWORD		"0123456789"
-#define DEF_AP_SECURITY		RTW_SECURITY_WPA2_AES_PSK // or RTW_SECURITY_OPEN
+/*		 RTW_SECURITY_OPEN - Open Security
+		 RTW_SECURITY_WPA_TKIP_PSK   - WPA Security
+		 RTW_SECURITY_WPA2_AES_PSK   - WPA2 Security using AES cipher
+		 RTW_SECURITY_WPA2_MIXED_PSK - WPA2 Security using AES and/or TKIP ciphers
+		 WEP security is NOT IMPLEMENTED. It is NOT SECURE! */
+#define DEF_AP_SECURITY		RTW_SECURITY_WPA2_AES_PSK
 #define DEF_AP_BEACON		100 // 100...6000 ms
 #define DEF_AP_CHANNEL		1	// 1..14
 #define DEF_AP_CHANNEL		1	// 1..14

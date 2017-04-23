@@ -259,7 +259,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     		  else os_memset(wifi_st_cfg.password, 0, sizeof(wifi_st_cfg.password));
     		  os_memcpy(wifi_st_cfg.password, pvar, len);
           }
-          else ifcmp("auth") 	wifi_st_cfg.security_type = translate_val_to_rtw_security(val);
+          else ifcmp("auth") 	wifi_st_cfg.security_type = idx_to_rtw_security(val);
           else ifcmp("bssid") 	strtomac(pvar, wifi_st_cfg.bssid);
           else ifcmp("sbss") 	wifi_st_cfg.flg = val;
 #if LWIP_NETIF_HOSTNAME

@@ -19,6 +19,7 @@
 #include "webfs/webfs.h"
 #include "rtl8195a/rtl_libc.h"
 #include "user/sys_cfg.h"
+#include "wifi_conf.h"
 #include "wifi_api.h"
 #include "sys_api.h"
 #include "esp_comp.h"
@@ -54,6 +55,71 @@
 #define ifcmp(a)  if(rom_xstrcmp(cstr, a))
 
 extern struct netif xnetif[NET_IF_NUM]; /* network interface structure */
+
+#if 0
+/******************************************************************************
+ * FunctionName : WiFi scan
+ * Description  : Processing scan network
+ * Parameters   : none (Calback)
+ * Returns      : none
+*******************************************************************************/
+#define scan_channels 14
+volatile uint8_t scan_end;
+
+/* --------  WiFi Scan ------------------------------- */
+LOCAL rtw_result_t _scan_result_handler( rtw_scan_handler_result_t* malloced_scan_result )
+{
+	if (malloced_scan_result->scan_complete != RTW_TRUE) {
+		rtw_scan_result_t* record = &malloced_scan_result->ap_details;
+		record->SSID.val[record->SSID.len] = 0; /* Ensure the SSID is null terminated */
+		if(scan_end == 1) {
+			printf("\nScan networks:\n\n");
+			printf("N\tType\tMAC\t\t\tSignal\tCh\tWPS\tSecyrity\tSSID\n\n");
+		};
+		printf("%d\t", scan_end++);
+	    printf("%s\t", (record->bss_type == RTW_BSS_TYPE_ADHOC)? "Adhoc": "Infra");
+	    printf(MAC_FMT, MAC_ARG(record->BSSID.octet));
+	    printf("\t%d\t", record->signal_strength);
+	    printf("%d\t", record->channel);
+	    printf("%d\t", record->wps_type);
+	    int i = 0;
+	    for(; record->security != tab_code_rtw_secyrity[i] && tab_code_rtw_secyrity[i] != RTW_SECURITY_UNKNOWN; i++);
+	    printf("%s \t", tab_txt_rtw_secyrity[i]);
+	    printf("%s\n", record->SSID.val);
+	} else {
+		scan_end = 0;
+		printf("\n");
+	}
+	return RTW_SUCCESS;
+}
+/* --------  WiFi Scan ------------------------------- */
+void web_wifi_scan(void) {
+	int i;
+	u8 *channel_list = (u8*)pvPortMalloc(scan_channels*2);
+	if(channel_list) {
+		scan_end = 1;
+		u8 * pscan_config = &channel_list[scan_channels];
+		//parse command channel list
+		for(i = 1; i <= scan_channels; i++){
+			*(channel_list + i - 1) = i;
+			*(pscan_config + i - 1) = PSCAN_ENABLE;
+		};
+		if(wifi_set_pscan_chan(channel_list, pscan_config, scan_channels) < 0){
+		    printf("ERROR: wifi set partial scan channel fail\n");
+		} else if(wifi_scan_networks(_scan_result_handler, NULL ) != RTW_SUCCESS){
+			printf("ERROR: wifi scan failed\n");
+		} else {
+			i = 300;
+			while(i-- && scan_end) {
+				vTaskDelay(10);
+			};
+		};
+		vPortFree(channel_list);
+	} else {
+		printf("ERROR: Can't malloc memory for channel list\n");
+	};
+}
+#endif
 
 //#define TEST_SEND_WAVE
 
@@ -580,7 +646,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 #if LWIP_NETIF_HOSTNAME
               else ifcmp("hostname") tcp_strcpy(lwip_host_name[WLAN_ST_NETIF_NUM]);
 #endif
-              else ifcmp("auth") 	tcp_puts("%u", translate_rtw_security_to_val(wifi_st_cfg.security_type));
+              else ifcmp("auth") 	tcp_puts("%u", rtw_security_to_idx(wifi_st_cfg.security_type));
               else ifcmp("dhcp") 	tcp_puts("%u", wifi_st_dhcp.mode);
         	  else ifcmp("ip") 		tcp_puts(IPSTR, IP2STR(&wifi_st_dhcp.ip));
               else ifcmp("gw") 		tcp_puts(IPSTR, IP2STR(&wifi_st_dhcp.gw));
