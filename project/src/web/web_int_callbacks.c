@@ -24,11 +24,11 @@
 #include "esp_comp.h"
 
 #ifdef USE_NETBIOS
-#include "netbios.h"
+#include "netbios/netbios.h"
 #endif
 
 #ifdef USE_SNTP
-#include "sntp.h"
+#include "sntp/sntp.h"
 #endif
 
 #ifdef USE_CAPTDNS
@@ -534,13 +534,13 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
               else ifcmp("auth") 	tcp_put((wifi_ap_cfg.security_type == RTW_SECURITY_OPEN) ? '0' : '1');
               else ifcmp("hssid") 	tcp_put((wifi_ap_cfg.ssid_hidden & 1) + '0');
               else ifcmp("bint") 	tcp_puts("%u", wifi_ap_cfg.beacon_interval);
-              else ifcmp("mac") 	tcp_puts(MACSTR, MAC2STR(xnetif[wlan_ap_netifn].hwaddr));
-              else ifcmp("hostname") tcp_strcpy(lwip_host_name[wlan_ap_netifn]);
+              else ifcmp("mac") 	tcp_puts(MACSTR, MAC2STR(xnetif[WLAN_AP_NETIF_NUM].hwaddr));
+              else ifcmp("hostname") tcp_strcpy(lwip_host_name[WLAN_AP_NETIF_NUM]);
               else ifcmp("dhcp")	tcp_puts("%u", wifi_ap_dhcp.mode);
               else ifcmp("ip") 		tcp_puts(IPSTR, IP2STR(&wifi_ap_dhcp.ip));
               else ifcmp("gw") 		tcp_puts(IPSTR, IP2STR(&wifi_ap_dhcp.gw));
               else ifcmp("msk") 	tcp_puts(IPSTR, IP2STR(&wifi_ap_dhcp.mask));
-              else ifcmp("cip") 	tcp_puts(IPSTR, IP2STR(&xnetif[wlan_st_netifn].ip_addr.addr));
+              else ifcmp("cip") 	tcp_puts(IPSTR, IP2STR(&xnetif[WLAN_ST_NETIF_NUM].ip_addr.addr));
 
     //        else ifcmp("mac") 	strtomac(pvar, wifi_ap_cfg.macaddr);
     //    	  else ifcmp("sip") 	tcp_puts(IPSTR, IP2STR(&wifi_ap_dhcp.start_ip));
@@ -574,13 +574,13 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
         		  os_memcpy((char *)&web_conn->msgbuf[web_conn->msgbuflen], wifi_st_cfg.password, len);
         		  web_conn->msgbuflen += len;
               }
-              else ifcmp("mac") 	tcp_puts(MACSTR, MAC2STR(xnetif[wlan_st_netifn].hwaddr));
+              else ifcmp("mac") 	tcp_puts(MACSTR, MAC2STR(xnetif[WLAN_ST_NETIF_NUM].hwaddr));
               else ifcmp("bssid") 	tcp_puts(MACSTR, MAC2STR(wifi_st_cfg.bssid));
               else ifcmp("sbss") 	tcp_puts("%u", wifi_st_cfg.flg);
 #if LWIP_NETIF_HOSTNAME
-              else ifcmp("hostname") tcp_strcpy(lwip_host_name[wlan_st_netifn]);
+              else ifcmp("hostname") tcp_strcpy(lwip_host_name[WLAN_ST_NETIF_NUM]);
 #endif
-              else ifcmp("auth") 	tcp_puts("%u", wifi_st_cfg.security_type);
+              else ifcmp("auth") 	tcp_puts("%u", translate_rtw_security_to_val(wifi_st_cfg.security_type));
               else ifcmp("dhcp") 	tcp_puts("%u", wifi_st_dhcp.mode);
         	  else ifcmp("ip") 		tcp_puts(IPSTR, IP2STR(&wifi_st_dhcp.ip));
               else ifcmp("gw") 		tcp_puts(IPSTR, IP2STR(&wifi_st_dhcp.gw));
@@ -673,7 +673,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 #ifdef USE_SNTP
 		else ifcmp("sntp_") {
 			cstr += 5;
-			ifcmp("time") tcp_puts("%u", get_sntp_time());
+			ifcmp("time") tcp_puts("%u", sntp_gen_system_time(0)); // get_sntp_time
 			else tcp_put('?');
 		}
 #endif

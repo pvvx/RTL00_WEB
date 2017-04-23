@@ -124,7 +124,7 @@ const char HTTPresponse_200_head[] ICACHE_RODATA_ATTR = "OK";
 const char HTTPresponse_302_head[] ICACHE_RODATA_ATTR = "Found";
 const char HTTPresponse_304_head[] ICACHE_RODATA_ATTR = "Not Modified";
 const char HTTPresponse_400_head[] ICACHE_RODATA_ATTR = "Bad Request";
-const char HTTPresponse_401_head[] ICACHE_RODATA_ATTR = "Unauthorized\r\nWWW-Authenticate: Basic realm=\"Protected\"";
+const char HTTPresponse_401_head[] ICACHE_RODATA_ATTR = "Unauthorized\r\nWWW-Authenticate: Basic realm=\"Protected%u\"";
 const char HTTPresponse_404_head[] ICACHE_RODATA_ATTR = "Not found";
 const char HTTPresponse_411_head[] ICACHE_RODATA_ATTR = "Length Required";
 const char HTTPresponse_413_head[] ICACHE_RODATA_ATTR = "Request Entity Too Large";
@@ -304,7 +304,7 @@ LOCAL WEB_SRV_CONN * ICACHE_FLASH_ATTR ReNew_web_conn(TCP_SERV_CONN *ts_conn)
 // /ssl/crypto/ssl_crypto_misc.c:
 // EXP_FUNC int STDCALL base64_decode(const uint8 *in,  int len, uint8_t *out, int *outlen);
 // Username and password are combined into a string "username:password"
-LOCAL bool ICACHE_FLASH_ATTR CheckAuthorization(uint8* base64str)
+LOCAL uint8 ICACHE_FLASH_ATTR CheckAuthorization(uint8* base64str)
 {
 	uint8 *pcmp = base64str;
 	int len = 0;
@@ -315,23 +315,41 @@ LOCAL bool ICACHE_FLASH_ATTR CheckAuthorization(uint8* base64str)
 	if((len >= 4)&&(len <= 128)
 	&&(base64decode(base64str, len, pbuf, &declen))) {
 		pbuf[declen]='\0';
-		uint8 ppsw[32+64+1];
-		cmpcpystr(ppsw, wifi_ap_cfg.ssid, '\0','\0', 32);
-		len = rtl_strlen((char*)ppsw);
-		ppsw[len++] = ':';
-		cmpcpystr(&ppsw[len], wifi_ap_cfg.password, '\0','\0', 64);
 #if DEBUGSOO > 1
 		os_printf("'%s' ", pbuf);
 #endif
-#if DEBUGSOO > 2
-		os_printf("<%s>[%u] ", ppsw, declen);
-#endif
-		if(os_strncmp(pbuf, (char *)ppsw , declen) == 0) return true;
+		return UserAuthorization(pbuf, declen);
 	};
-	return false;
+	return 0;
 }
 //=============================================================================
-
+#define web_parse_cookie(CurHTTP, ts_conn) web_parse_vars(ts_conn, (CurHTTP)->pcookie, (CurHTTP)->cookie_len, '\0', ';')
+#define web_parse_uri_vars(CurHTTP, ts_conn) web_parse_vars(ts_conn, (CurHTTP)->puri, (CurHTTP)->uri_len, '?', '&')
+#define web_parse_content(CurHTTP, ts_conn) web_parse_vars(ts_conn, (CurHTTP)->pcontent, (CurHTTP)->content_len, '\0', '&')
+LOCAL void ICACHE_FLASH_ATTR web_parse_vars(TCP_SERV_CONN *ts_conn, uint8 *vars, uint32 vars_len, uint8 start_char, uint8 end_char)
+{
+	if(vars == NULL || vars_len == 0) return;
+	uint8 *pcmp;
+	if(start_char) {
+		pcmp = cmpcpystr(NULL, vars, '\0', start_char, vars_len); // find start_char if available
+		start_char = '\0';
+	} else pcmp = vars - 1;
+	while(pcmp != NULL) {
+		uint16 len = vars_len - (pcmp - vars);
+		uint8 *pcmd = pcmp;
+		pcmp = cmpcpystr(pcmp, pcmp + 1, start_char, '=', len); // skip spaces before variable name
+		if(pcmp == NULL) break;
+		urldecode(pcmd, pcmd, len, len);
+		len = vars_len - (pcmp - vars);
+		uint8 *pvar = pcmp;
+		pcmp = cmpcpystr(pcmp, pcmp + 1, '\0', end_char, len);
+		if(pcmd[0] != '\0') {
+			urldecode(pvar, pvar, len, len);
+			web_int_vars(ts_conn, pcmd, pvar);
+	    }
+	}
+}
+/*
 //=============================================================================
 LOCAL void ICACHE_FLASH_ATTR
 web_parse_cookie(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
@@ -394,6 +412,7 @@ web_parse_content(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
 	    }
 	} while(pcmp != NULL);
 }
+*/
 //=============================================================================
 // Разбор имени файла и перевод в вид относительного URI.
 // (выкидывание HTTP://Host)
@@ -411,7 +430,7 @@ web_parse_fname(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
         uint8 cbuf[FileNameSize+16];
         uint8 *pcbuf = cbuf;
         urldecode(pcbuf, CurHTTP->puri, sizeof(cbuf) - 1, CurHTTP->uri_len);
-    	if((os_strncmp((char *)pcbuf, "HTTP://", 7) == 0)||(os_strncmp((char *)pcbuf, "http://", 7) == 0)) {
+    	if(rom_xstrcmp((char *)pcbuf, "HTTP://")||(rom_xstrcmp((char *)pcbuf, "http://"))) {
     		pcbuf += 7;
     		uint8 *pcmp = os_strchr((char *)pcbuf, '/');
     		if(pcmp != NULL) pcbuf = pcmp;
@@ -422,6 +441,9 @@ web_parse_fname(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
     	uint8 *pcmp = web_strnstr(CurHTTP->pFilename, ProtectedFilesName, os_strlen(CurHTTP->pFilename));
         if(pcmp != NULL) {
         	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
+#if USE_WEB_AUTH_LEVEL
+        	web_conn->auth_realm = WEB_AUTH_LEVEL_USER;
+#endif
         	SetSCB(SCB_AUTH);
         }
     };
@@ -598,7 +620,17 @@ parse_header(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
         if(os_strncmp(pstr, "Basic", 5) == 0) { // The authorization method and a space i.e. "Basic" is then put before the encoded string.
         	pstr += 5;
         	while(*pstr == ' ') pstr++;
-        	if(CheckAuthorization(pstr)) ClrSCB(SCB_AUTH);
+#if USE_WEB_AUTH_LEVEL
+        	web_conn->auth_level = CheckAuthorization(pstr);
+#if DEBUGSOO > 1
+        	os_printf("%u?%u ", web_conn->auth_level, web_conn->auth_realm);
+#endif
+        	if(web_conn->auth_level >= web_conn->auth_realm)
+        		ClrSCB(SCB_AUTH);
+#else
+        	if(CheckAuthorization(pstr))
+        		ClrSCB(SCB_AUTH);
+#endif
             else {
     	   		CurHTTP->httpStatus = 401; // 401 Unauthorized
     	   		return false;
@@ -821,6 +853,9 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 				return true;
 			}
 			else if(rom_xstrcmp(pstr, fsupload_fname)) {
+#if USE_WEB_AUTH_LEVEL
+				web_conn->auth_realm = WEB_AUTH_LEVEL_WEBFS;
+#endif
 				SetSCB(SCB_AUTH);
 				web_inc_fp(web_conn, WEBFS_UPLOAD_HANDLE);
 				web_conn->content_len = sizeHTTPfsupload;
@@ -1075,7 +1110,8 @@ web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
           CurResp++;
         };
         tcp_puts_fd("HTTP/1.1 %u ", CurResp->status);
-        tcp_strcpy(CurResp->headers);
+        if(CurResp->status == 401) tcp_puts_fd(CurResp->headers, web_conn->auth_realm);
+        else tcp_strcpy(CurResp->headers);
         tcp_strcpy_fd("\r\nServer: " WEB_NAME_VERSION "\r\nConnection: close\r\n");
         if(CheckSCB(SCB_REDIR)) {
         	tcp_puts_fd("Location: %s\r\n\r\n", CurHTTP->pFilename);
@@ -1990,7 +2026,7 @@ err_t ICACHE_FLASH_ATTR webserver_init(uint16 portn)
 			if (p != NULL) {
 				// изменим конфиг на наше усмотрение:
 				if(syscfg.cfg.b.web_time_wait_delete) p->flag.pcb_time_wait_free = 1; // пусть убивает, для теста и проксей
-				p->max_conn = 256; // сработает по heap_size
+				p->max_conn = 99; // сработает по heap_size
 #if DEBUGSOO > 3
 				os_printf("Max connection %d, time waits %d & %d, min heap size %d\n",
 						p->max_conn, p->time_wait_rec, p->time_wait_cls, p->min_heap);

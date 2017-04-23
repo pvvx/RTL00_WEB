@@ -113,6 +113,7 @@ SRC_C += sdk/component/common/api/wifi/wifi_promisc.c
 SRC_C += sdk/component/common/api/wifi/wifi_simple_config.c
 SRC_C += sdk/component/common/api/wifi/wifi_util.c
 SRC_C += sdk/component/common/api/lwip_netconf.c
+SRC_C += sdk/component/common/api/wifi_api.c 
 
 #network - app
 #SRC_C += sdk/component/common/utilities/ssl_client.c
@@ -121,8 +122,8 @@ SRC_C += sdk/component/common/api/lwip_netconf.c
 #SRC_C += sdk/component/common/utilities/uart_ymodem.c
 #SRC_C += sdk/component/common/utilities/update.c
 #SRC_C += sdk/component/common/application/uart_adapter/uart_adapter.c
-SRC_C += sdk/component/common/api/network/src/wlan_network.c
-SRC_C += sdk/component/common/api/wifi_interactive_mode.c
+#SRC_C += sdk/component/common/api/network/src/wlan_network.c
+#SRC_C += sdk/component/common/api/wifi_interactive_mode.c
 #SRC_C += sdk/component/common/api/network/src/ping_test.c
 
 #network - lwip
@@ -397,7 +398,6 @@ ADD_SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/c_stdio
 #ADD_SRC_C += sdk/component/common/drivers/sdio/realtek/sdio_host/src/sdio_host.c 
 #ADD_SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_sdio_host.c
 #ADD_SRC_C += sdk/component/common/file_system/fatfs/disk_if/src/sdcard.c
-ADD_SRC_C += sdk/component/common/api/wifi_api.c 
 #=============================================
 # PROGECT
 #=============================================
@@ -419,6 +419,7 @@ ADD_SRC_C += project/src/web/web_websocket.c
 ADD_SRC_C += project/src/web/websock.c
 ADD_SRC_C += project/src/web/web_int_callbacks.c
 ADD_SRC_C += project/src/web/web_int_vars.c
+ADD_SRC_C += project/src/web/web_auth.c
 
 #CFLAGS += -DDEFAULT_BAUDRATE=1562500
 #if CONFIG_ENABLE_P2P and ...:

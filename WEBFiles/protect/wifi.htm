@@ -57,16 +57,14 @@
 				<td><select name='wifi_st_auth'>
 					<option value='0'>OPEN</option>
 					<option value='1'>WEP_PSK</option>
-					<option value='32769'>WEP_SHAREDK</option>
-					<option value='2097154'>WPA_TKIP_PSK</option>
-					<option value='2097156'>WPA_AES_PSK</option>
-					<option value='4194306'>WPA2_TKIP_PSK</option>
-					<option value='4194308'>WPA2_AES_PSK</option>
-					<option value='4194310'>WPA2_MIXED_PSK</option>
-					<option value='6291456'>WPA_WPA2_MIXED</option>
-					<option value='268435456'>WPS_OPEN</option>
-					<option value='268435460'>WPS_SECURE</option>
-					<option value='2147483647'>UNKNOWN</option>
+					<option value='2'>WEP_SHAREDK</option>
+					<option value='3'>WPA_TKIP_PSK</option>
+					<option value='4'>WPA_AES_PSK</option>
+					<option value='5'>WPA2_TKIP_PSK</option>
+					<option value='6'>WPA2_AES_PSK</option>
+					<option value='7'>WPA2_MIXED_PSK</option>
+					<option value='8'>WPA_WPA2_MIXED</option>
+					<option value='9'>UNKNOWN</option>
 				</select></td>
 			</tr>
 			<tr>
@@ -179,7 +177,7 @@ var cfg = {
 	wifi_phy:"~wifi_bgn~",
 	wifi_mode:"~wifi_mode~",
 	wifi_sleep:"~wifi_sleep~",
-	wifi_st_autn:"~wifi_st_auth~",
+	wifi_st_auth:"~wifi_st_auth~",
 	wifi_st_sbss:"~wifi_st_sbss~",
 	wifi_ap_hssid:"~wifi_ap_hssid~",
 	wifi_ap_dhcp:"~wifi_ap_dhcp~",

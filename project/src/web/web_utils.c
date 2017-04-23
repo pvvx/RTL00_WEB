@@ -46,10 +46,7 @@ int ICACHE_RAM_ATTR rom_xstrcpy(char * pd, const char * ps)
 	}
 #else
 	int len = 0;
-	while(*ps) {
-		*pd++ = *ps++;
-		len++;
-	}
+	while((*pd++ = *ps++) != 0) len++;
 	return len;
 #endif
 }

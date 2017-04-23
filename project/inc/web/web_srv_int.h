@@ -13,12 +13,10 @@
 
 #define WEB_NAME_VERSION "PVs/0.2"
 
-// #define WEBSOCKET_ENA 1
-
 // lifetime (sec) of static responses as string 60*60*24*14=1209600"
 #define FILE_CACHE_MAX_AGE_SEC  3600 // время для кеша файлов, ставить 0 пока тест!
 
-#define MAX_HTTP_HEAD_BUF 3070 // максимальный размер HTTP запроса (GET)
+#define MAX_HTTP_HEAD_BUF TCP_SRV_SERVER_MAX_RXBUF // максимальный размер HTTP запроса (GET)
 
 #define RESCHKS_SEND_SIZE 16
 #define RESCHKE_SEND_SIZE 8
@@ -45,5 +43,6 @@ bool web_inc_fclose(WEB_SRV_CONN *web_conn);
 bool web_trim_bufi(TCP_SERV_CONN *ts_conn, uint8 *pdata, uint32 data_len);
 bool web_feee_bufi(TCP_SERV_CONN *ts_conn);
 //uint8 * head_find_ctr(HTTP_CONN *CurHTTP, const uint8 * c, int clen, int dlen);
+uint8 UserAuthorization(uint8 *pbuf, size_t declen);
 
 #endif /* _INCLUDE_WEB_SRV_INT_H_ */

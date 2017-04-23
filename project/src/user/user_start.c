@@ -11,12 +11,20 @@
 #include "task.h"
 #include "diag.h"
 #include "netbios/netbios.h"
+#include "sntp/sntp.h"
 #include "user/sys_cfg.h"
 #include "web/web_srv.h"
 #include "webfs/webfs.h"
 
 struct SystemCfg syscfg = {
-		.cfg.w = SYS_CFG_DEBUG_ENA | SYS_CFG_NETBIOS_ENA,
+		.cfg.w = SYS_CFG_DEBUG_ENA
+#if defined(USE_NETBIOS) && USE_NETBIOS
+		 | SYS_CFG_NETBIOS_ENA
+#endif
+#if defined(USE_SNTP) && USE_SNTP
+		 | SYS_CFG_SNTP_ENA
+#endif
+		 ,
 #if defined(USE_WEB)
 		.web_port = USE_WEB,
 #else
@@ -63,9 +71,12 @@ void user_init_thrd(void) {
 
 	/* Load cfg, init WiFi + LwIP init, WiFi start if wifi_cfg.mode !=  RTW_MODE_NONE */
 	wifi_init();
-
+#if defined(USE_NETBIOS)
 	if(syscfg.cfg.b.netbios_ena) netbios_init();
-
+#endif
+#if defined(USE_SNTP)
+	if(syscfg.cfg.b.sntp_ena) sntp_init();
+#endif
 	// webstuff_init(); // httpd_init();
 	webserver_init(syscfg.web_port);
 

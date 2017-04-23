@@ -15,11 +15,20 @@
 
 #define WEB_SVERSION "0.2.0"
 #define DEFAULT_WEB_PORT USE_WEB // 80
+#define USE_WEB_AUTH_LEVEL 1
 
 /****************************************************************************
-  Section:
-        Commands and Server Responses
   ***************************************************************************/
+
+typedef enum
+{
+	WEB_AUTH_NONE = 0,
+	WEB_AUTH_LEVEL_USER,
+	WEB_AUTH_LEVEL_USER1,
+	WEB_AUTH_LEVEL_WEBFS,
+	WEB_AUTH_LEVEL_OTA,
+	WEB_AUTH_LEVEL_SUPERVISOR
+} WEB_AUTH_LEVEL_TYPE;
 
 // File type definitions
 typedef enum
@@ -90,6 +99,10 @@ typedef struct
 	uint32 web_disc_par; // параметры функции вызываемой по закрытию соединения
 #ifdef WEBSOCKET_ENA
 	WS_FRSTAT ws;	// параметры websoc
+#endif
+#if USE_WEB_AUTH_LEVEL
+	uint8 auth_level;   // Уровень авторизации по паролю
+	uint8 auth_realm; 	// Требуемый уровень авторизации (минимальный уровень)
 #endif
 	uint8 fileType;     // File type to return with Content-Type (if SCB_FCALBACK)
 } WEB_SRV_CONN;

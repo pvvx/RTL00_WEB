@@ -25,11 +25,11 @@
 #include "esp_comp.h"
 
 #ifdef USE_NETBIOS
-#include "netbios.h"
+#include "netbios/netbios.h"
 #endif
 
 #ifdef USE_SNTP
-#include "sntp.h"
+#include "sntp/sntp.h"
 #endif
 
 #ifdef USE_LWIP_PING
@@ -133,7 +133,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 			else os_printf(" - none!\n");
 #endif
 		}
-		else ifcmp("pinclr") 	syscfg.cfg.b.pin_clear_cfg_enable = (val)? 1 : 0;
+		else ifcmp("pinclr") syscfg.cfg.b.pin_clear_cfg_enable = (val)? 1 : 0;
 		else ifcmp("debug") {
 			syscfg.cfg.b.debug_print_enable = val;
 			print_off = (!val) & 1; // rtl_print on/off
@@ -152,8 +152,8 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #ifdef USE_SNTP
 		else ifcmp("sntp") {
 			syscfg.cfg.b.sntp_ena = (val)? 1 : 0;
-			if(syscfg.cfg.b.sntp_ena) sntp_inits();
-			else sntp_close();
+			if(syscfg.cfg.b.sntp_ena) sntp_init();
+			else sntp_stop();
 		}
 #endif
 #ifdef USE_CAPTDNS
@@ -198,7 +198,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
         		  else os_memset(wifi_ap_cfg.ssid, 0, sizeof(wifi_ap_cfg.ssid));
         		  os_memcpy(wifi_ap_cfg.ssid, pvar, len);
 #ifdef USE_NETBIOS
-        		  netbios_set_name(wifi_ap_cfg.ssid);
+//        		  netbios_set_name(wlan_ap_netifn, wifi_ap_cfg.ssid);
 #endif
         	  }
           }
@@ -212,7 +212,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
           }
           else ifcmp("chl") 	wifi_ap_cfg.channel = val;
           else ifcmp("mcns") 	wifi_ap_cfg.max_sta = val;
-          else ifcmp("auth") 	wifi_ap_cfg.security_type = (val)? RTW_SECURITY_WEP_PSK : RTW_SECURITY_OPEN;
+          else ifcmp("auth") 	wifi_ap_cfg.security_type = (val != 0);
           else ifcmp("hssid") 	wifi_ap_cfg.ssid_hidden = val;
           else ifcmp("bint") 	wifi_ap_cfg.beacon_interval = val;
 #if LWIP_NETIF_HOSTNAME
@@ -259,7 +259,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     		  else os_memset(wifi_st_cfg.password, 0, sizeof(wifi_st_cfg.password));
     		  os_memcpy(wifi_st_cfg.password, pvar, len);
           }
-          else ifcmp("auth") 	wifi_st_cfg.security_type = val;
+          else ifcmp("auth") 	wifi_st_cfg.security_type = translate_val_to_rtw_security(val);
           else ifcmp("bssid") 	strtomac(pvar, wifi_st_cfg.bssid);
           else ifcmp("sbss") 	wifi_st_cfg.flg = val;
 #if LWIP_NETIF_HOSTNAME

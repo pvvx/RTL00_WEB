@@ -31,13 +31,14 @@ LOCAL void fATPN(int argc, char *argv[]){
 		}
 		else {
 			strncpy(wifi_st_cfg.ssid, argv[1], NDIS_802_11_LENGTH_SSID);
+			int pswlen;
 			if(argc > 2) {
+				pswlen = strlen(wifi_st_cfg.password);
 				strncpy(wifi_st_cfg.password, argv[2], NDIS_802_11_LENGTH_SSID);
-				int i = strlen(wifi_st_cfg.password);
-				if(i > 7) {
+				if(pswlen > 7) {
 					wifi_st_cfg.security_type = RTW_SECURITY_WPA2_AES_PSK;
 				}
-				else if(!i) {
+				else if(!pswlen) {
 					wifi_st_cfg.security_type = RTW_SECURITY_OPEN;
 				}
 				else {
@@ -46,18 +47,25 @@ LOCAL void fATPN(int argc, char *argv[]){
 				}
 			}
 			else {
+				// default
 				wifi_st_cfg.password[0] = 0;
 				wifi_st_cfg.security_type = RTW_SECURITY_OPEN;
 			}
 			if(argc > 3) {
-				wifi_ap_cfg.security_type = translate_rtw_security(atoi(argv[3]));
+				if(pswlen > 7) {
+					wifi_st_cfg.security_type = translate_val_to_rtw_security(atoi(argv[3]));
+				}
+				else {
+					printf("password len < 8!\n");
+					wifi_st_cfg.security_type = RTW_SECURITY_OPEN;
+				}
 			}
 			if(argc > 4) {
-				wifi_st_cfg.autoreconnect = atoi(argv[3]);
+				wifi_st_cfg.autoreconnect = atoi(argv[4]);
 			}
 			else wifi_st_cfg.autoreconnect = 0;
 			if(argc > 5) {
-				wifi_st_cfg.reconnect_pause = atoi(argv[3]);
+				wifi_st_cfg.reconnect_pause = atoi(argv[5]);
 			}
 			else wifi_st_cfg.reconnect_pause = 5;
 			show_wifi_st_cfg();
@@ -93,8 +101,7 @@ LOCAL void fATPA(int argc, char *argv[]){
 				wifi_ap_cfg.security_type = RTW_SECURITY_OPEN;
 			}
 			if(argc > 3) {
-				if(argv[3][0]=='0') wifi_st_cfg.security_type = RTW_SECURITY_OPEN;
-				else wifi_st_cfg.security_type = RTW_SECURITY_WEP_PSK;
+				wifi_ap_cfg.security_type = (argv[3][0] == '0')? RTW_SECURITY_OPEN : RTW_SECURITY_WPA2_AES_PSK;
 			}
 			if(argc > 4) {
 				wifi_ap_cfg.channel = atoi(argv[4]);
