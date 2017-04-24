@@ -212,7 +212,7 @@ LOCAL void fATSF(int argc, char *argv[])
 	uint64_t tsf = get_tsf();
 	printf("\nTSF: %08x%08x\n", (uint32_t)(tsf>>32), (uint32_t)(tsf));
 }
-
+#if 0
 /* --------  WiFi Scan ------------------------------- */
 volatile uint8_t scan_end;
 /* --------  WiFi Scan ------------------------------- */
@@ -245,8 +245,11 @@ LOCAL rtw_result_t _scan_result_handler( rtw_scan_handler_result_t* malloced_sca
 }
 /* --------  WiFi Scan ------------------------------- */
 #define scan_channels 14
+#endif
+void api_wifi_scan(void);
 LOCAL void fATSN(int argc, char *argv[])
 {
+#if 0
 	int i;
 	u8 *channel_list = (u8*)pvPortMalloc(scan_channels*2);
 	if(channel_list) {
@@ -271,6 +274,9 @@ LOCAL void fATSN(int argc, char *argv[])
 	} else {
 		printf("ERROR: Can't malloc memory for channel list\n");
 	};
+#else
+	api_wifi_scan();
+#endif
 }
 
 #if defined(CONFIG_ENABLE_WPS_AP) && CONFIG_ENABLE_WPS_AP

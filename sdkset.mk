@@ -114,6 +114,7 @@ SRC_C += sdk/component/common/api/wifi/wifi_simple_config.c
 SRC_C += sdk/component/common/api/wifi/wifi_util.c
 SRC_C += sdk/component/common/api/lwip_netconf.c
 SRC_C += sdk/component/common/api/wifi_api.c 
+SRC_C += sdk/component/common/api/wifi_api_scan.c 
 
 #network - app
 #SRC_C += sdk/component/common/utilities/ssl_client.c
