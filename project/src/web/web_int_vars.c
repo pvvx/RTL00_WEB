@@ -7,6 +7,7 @@
 #ifdef USE_WEB
 #include "autoconf.h"
 #include "FreeRTOS.h"
+#include "freertos_pmu.h"
 #include "task.h"
 #include "diag.h"
 #include "lwip/ip.h"
@@ -82,6 +83,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #endif
 	ifcmp("start") 		web_conn->udata_start = val;
 	else ifcmp("stop") 	web_conn->udata_stop = val;
+#if WEB_DEBUG_FUNCTIONS
 	else ifcmp("sys_") {
 		cstr+=4;
 		ifcmp("restart") {
@@ -89,6 +91,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 		}
 		else ifcmp("ram") { uint32 *ptr = (uint32 *)(ahextoul(cstr+3)&(~3)); str_array(pvar, ptr, 32); }
 		else ifcmp("debug") print_off = (!val) & 1; // rtl_print on/off
+		else ifcmp("dsleep") deepsleep_ex(DSLEEP_WAKEUP_BY_TIMER, val);
 #ifdef USE_LWIP_PING
 		else ifcmp("ping") {
 //			struct ping_option *pingopt = (struct ping_option *)UartDev.rcv_buff.pRcvMsgBuff;
@@ -100,6 +103,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 		}
 #endif
     }
+#endif // #if WEB_DEBUG_FUNCTIONS
 	else ifcmp("cfg_") {
 		cstr += 4;
 		ifcmp("web_") {
@@ -134,6 +138,11 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #endif
 		}
 		else ifcmp("pinclr") syscfg.cfg.b.pin_clear_cfg_enable = (val)? 1 : 0;
+		else ifcmp("sleep") {
+			syscfg.cfg.b.powersave_enable = (val)? 1 : 0;
+			if(val) release_wakelock(~WAKELOCK_WLAN);
+			else acquire_wakelock(~WAKELOCK_WLAN);
+		}
 		else ifcmp("debug") {
 			syscfg.cfg.b.debug_print_enable = val;
 			print_off = (!val) & 1; // rtl_print on/off
@@ -170,7 +179,8 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	}
     else ifcmp("wifi_") {
       cstr+=5;
-      ifcmp("rdcfg") web_conn->udata_stop = read_wifi_cfg(val);
+      ifcmp("scan") api_wifi_scan(NULL);
+      else ifcmp("rdcfg") web_conn->udata_stop = read_wifi_cfg(val);
       else ifcmp("newcfg") {
     	  web_conn->web_disc_cb = (web_func_disc_cb)wifi_run;
     	  web_conn->web_disc_par = wifi_cfg.mode;
@@ -179,8 +189,8 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
       else ifcmp("bgn")  	wifi_cfg.bgn = val;
       else ifcmp("lflg") 	wifi_cfg.load_flg = val;
       else ifcmp("sflg") 	wifi_cfg.save_flg = val;
-      else ifcmp("sleep") 	wifi_cfg.sleep = val;
       else ifcmp("txpow") 	wifi_cfg.tx_pwr = val;
+      else ifcmp("adpt")  	wifi_cfg.adaptivity = val;
       else ifcmp("country") wifi_cfg.country_code = val;
 //      else ifcmp("scan") {
 //    	  web_conn->web_disc_par = val;
@@ -192,10 +202,10 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
           ifcmp("ssid") {
         	  if(pvar[0]!='\0') {
         		  int len = os_strlen(pvar);
-        		  if(len > sizeof(wifi_ap_cfg.ssid)) {
-        			  len = sizeof(wifi_ap_cfg.ssid);
+        		  if(len > NDIS_802_11_LENGTH_SSID) {
+        			  len = NDIS_802_11_LENGTH_SSID;
         		  }
-        		  else os_memset(wifi_ap_cfg.ssid, 0, sizeof(wifi_ap_cfg.ssid));
+        		  os_memset(wifi_ap_cfg.ssid, 0, sizeof(wifi_ap_cfg.ssid));
         		  os_memcpy(wifi_ap_cfg.ssid, pvar, len);
 #ifdef USE_NETBIOS
 //        		  netbios_set_name(wlan_ap_netifn, wifi_ap_cfg.ssid);
@@ -204,15 +214,15 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
           }
           else ifcmp("psw") {
     		  int len = os_strlen(pvar);
-    		  if(len > sizeof(wifi_ap_cfg.password)) {
-    			  len = sizeof(wifi_ap_cfg.password);
+    		  if(len > IW_PASSPHRASE_MAX_SIZE) {
+    			  len = IW_PASSPHRASE_MAX_SIZE;
     		  }
-    		  else os_memset(wifi_ap_cfg.password, 0, sizeof(wifi_ap_cfg.password));
+    		  os_memset(wifi_ap_cfg.password, 0, sizeof(wifi_ap_cfg.password));
     		  os_memcpy(wifi_ap_cfg.password, pvar, len);
           }
           else ifcmp("chl") 	wifi_ap_cfg.channel = val;
           else ifcmp("mcns") 	wifi_ap_cfg.max_sta = val;
-          else ifcmp("auth") 	wifi_ap_cfg.security_type = (val != 0);
+          else ifcmp("auth") 	wifi_ap_cfg.security = val; // =1 IDX_SECURITY_WPA2_AES_PSK, =0 IDX_SECURITY_OPEN
           else ifcmp("hssid") 	wifi_ap_cfg.ssid_hidden = val;
           else ifcmp("bint") 	wifi_ap_cfg.beacon_interval = val;
 #if LWIP_NETIF_HOSTNAME
@@ -221,9 +231,11 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
        		  if(len >= LWIP_NETIF_HOSTNAME_SIZE) {
        			  len = LWIP_NETIF_HOSTNAME_SIZE-1;
        		  }
-       		  os_memcpy(lwip_host_name[wlan_ap_netifn], pvar, len);
-       		  lwip_host_name[wlan_ap_netifn][len] = 0;
-       		  netbios_set_name(wlan_ap_netifn, pvar);
+       		  if(len) {
+       			  os_memset(lwip_host_name[1], 0, LWIP_NETIF_HOSTNAME_SIZE);
+       			  os_memcpy(lwip_host_name[1], pvar, len);
+       		  }
+       		  netbios_set_name(WLAN_AP_NETIF_NUM, lwip_host_name[1]);
           }
 #endif
           else ifcmp("dhcp")	wifi_ap_dhcp.mode = val;
@@ -244,33 +256,37 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
           else ifcmp("ssid") {
         	  if(pvar[0]!='\0') {
            		  int len = os_strlen(pvar);
-           		  if(len > sizeof(wifi_st_cfg.ssid)) {
-           			  len = sizeof(wifi_st_cfg.ssid);
+           		  if(len > NDIS_802_11_LENGTH_SSID) {
+           			  len = NDIS_802_11_LENGTH_SSID;
            		  }
-           		  else os_memset(wifi_st_cfg.ssid, 0, sizeof(wifi_st_cfg.ssid));
+           		  os_memset(wifi_st_cfg.ssid, 0, sizeof(wifi_st_cfg.ssid));
            		  os_memcpy(wifi_st_cfg.ssid, pvar, len);
         	  }
           }
           else ifcmp("psw") {
     		  int len = os_strlen(pvar);
-    		  if(len > sizeof(wifi_st_cfg.password)) {
-    			  len = sizeof(wifi_st_cfg.password);
+    		  if(len > IW_PASSPHRASE_MAX_SIZE) {
+    			  len = IW_PASSPHRASE_MAX_SIZE;
     		  }
-    		  else os_memset(wifi_st_cfg.password, 0, sizeof(wifi_st_cfg.password));
+    		  os_memset(wifi_st_cfg.password, 0, sizeof(wifi_st_cfg.password));
     		  os_memcpy(wifi_st_cfg.password, pvar, len);
           }
-          else ifcmp("auth") 	wifi_st_cfg.security_type = idx_to_rtw_security(val);
+          else ifcmp("auth") 	wifi_st_cfg.security = val;
           else ifcmp("bssid") 	strtomac(pvar, wifi_st_cfg.bssid);
           else ifcmp("sbss") 	wifi_st_cfg.flg = val;
+          else ifcmp("sleep") 	wifi_st_cfg.sleep = val;
+          else ifcmp("dtim") 	wifi_st_cfg.dtim = val;
 #if LWIP_NETIF_HOSTNAME
           else ifcmp("hostname") {
        		  int len = os_strlen(pvar);
        		  if(len >= LWIP_NETIF_HOSTNAME_SIZE) {
        			  len = LWIP_NETIF_HOSTNAME_SIZE-1;
        		  }
-       		  os_memcpy(lwip_host_name[wlan_st_netifn], pvar, len);
-       		  lwip_host_name[wlan_st_netifn][len] = 0;
-       		  netbios_set_name(wlan_st_netifn, pvar);
+       		  if(len) {
+       			  os_memset(lwip_host_name[0], 0, LWIP_NETIF_HOSTNAME_SIZE);
+       			  os_memcpy(lwip_host_name[0], pvar, len);
+       			  netbios_set_name(WLAN_ST_NETIF_NUM, lwip_host_name[0]);
+       		  }
           }
 #endif
           else ifcmp("dhcp") 	wifi_st_dhcp.mode = val;
@@ -287,6 +303,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
       else os_printf(" - none!\n");
 #endif
     }
+#if WEB_DEBUG_FUNCTIONS
     else if(web_conn->bffiles[0]==WEBFS_WEBCGI_HANDLE && CheckSCB(SCB_GET)) {
     	ifcmp("hexdmp") {
 #if DEBUGSOO > 5
@@ -348,6 +365,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     	else os_printf(" - none! ");
 #endif
     }
+#endif // #if WEB_DEBUG_FUNCTIONS
 #if DEBUGSOO > 5
     else os_printf(" - none! ");
 #endif

@@ -19,7 +19,6 @@
 #include "webfs/webfs.h"
 #include "rtl8195a/rtl_libc.h"
 #include "user/sys_cfg.h"
-#include "wifi_conf.h"
 #include "wifi_api.h"
 #include "sys_api.h"
 #include "esp_comp.h"
@@ -56,72 +55,10 @@
 
 extern struct netif xnetif[NET_IF_NUM]; /* network interface structure */
 
-#if 0
-/******************************************************************************
- * FunctionName : WiFi scan
- * Description  : Processing scan network
- * Parameters   : none (Calback)
- * Returns      : none
-*******************************************************************************/
-#define scan_channels 14
-volatile uint8_t scan_end;
 
-/* --------  WiFi Scan ------------------------------- */
-LOCAL rtw_result_t _scan_result_handler( rtw_scan_handler_result_t* malloced_scan_result )
-{
-	if (malloced_scan_result->scan_complete != RTW_TRUE) {
-		rtw_scan_result_t* record = &malloced_scan_result->ap_details;
-		record->SSID.val[record->SSID.len] = 0; /* Ensure the SSID is null terminated */
-		if(scan_end == 1) {
-			printf("\nScan networks:\n\n");
-			printf("N\tType\tMAC\t\t\tSignal\tCh\tWPS\tSecyrity\tSSID\n\n");
-		};
-		printf("%d\t", scan_end++);
-	    printf("%s\t", (record->bss_type == RTW_BSS_TYPE_ADHOC)? "Adhoc": "Infra");
-	    printf(MAC_FMT, MAC_ARG(record->BSSID.octet));
-	    printf("\t%d\t", record->signal_strength);
-	    printf("%d\t", record->channel);
-	    printf("%d\t", record->wps_type);
-	    int i = 0;
-	    for(; record->security != tab_code_rtw_secyrity[i] && tab_code_rtw_secyrity[i] != RTW_SECURITY_UNKNOWN; i++);
-	    printf("%s \t", tab_txt_rtw_secyrity[i]);
-	    printf("%s\n", record->SSID.val);
-	} else {
-		scan_end = 0;
-		printf("\n");
-	}
-	return RTW_SUCCESS;
-}
-/* --------  WiFi Scan ------------------------------- */
-void web_wifi_scan(void) {
-	int i;
-	u8 *channel_list = (u8*)pvPortMalloc(scan_channels*2);
-	if(channel_list) {
-		scan_end = 1;
-		u8 * pscan_config = &channel_list[scan_channels];
-		//parse command channel list
-		for(i = 1; i <= scan_channels; i++){
-			*(channel_list + i - 1) = i;
-			*(pscan_config + i - 1) = PSCAN_ENABLE;
-		};
-		if(wifi_set_pscan_chan(channel_list, pscan_config, scan_channels) < 0){
-		    printf("ERROR: wifi set partial scan channel fail\n");
-		} else if(wifi_scan_networks(_scan_result_handler, NULL ) != RTW_SUCCESS){
-			printf("ERROR: wifi scan failed\n");
-		} else {
-			i = 300;
-			while(i-- && scan_end) {
-				vTaskDelay(10);
-			};
-		};
-		vPortFree(channel_list);
-	} else {
-		printf("ERROR: Can't malloc memory for channel list\n");
-	};
-}
-#endif
-
+#if WEB_DEBUG_FUNCTIONS
 //#define TEST_SEND_WAVE
+#endif // #if WEB_DEBUG_FUNCTIONS
 
 #ifdef TEST_SEND_WAVE
 //-------------------------------------------------------------------------------
@@ -181,84 +118,52 @@ void ICACHE_FLASH_ATTR web_test_adc(TCP_SERV_CONN *ts_conn)
     SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
 }
 #endif // TEST_SEND_WAVE
-#if 0
-//===============================================================================
-// WiFi Saved Aps XML
-//-------------------------------------------------------------------------------
-void ICACHE_FLASH_ATTR wifi_aps_xml(TCP_SERV_CONN *ts_conn)
-{
-	struct buf_html_string {
-		uint8 ssid[32*6 + 1];
-		uint8 psw[64*6 + 1];
-	};
-	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *) ts_conn->linkd;
-	struct station_config config[5];
-	struct buf_html_string * buf = (struct buf_html_string *)os_malloc(sizeof(struct buf_html_string));
-	if(buf == NULL) return;
-	int total_aps = wifi_station_get_ap_info(config);
-    // Check if this is a first round call
-    if(CheckSCB(SCB_RETRYCB)==0) {
-    	tcp_puts_fd("<total>%u</total><cur>%u</cur>", total_aps, wifi_station_get_current_ap_id());
-    	if(total_aps == 0) return;
-    	web_conn->udata_start = 0;
-    }
-	while(web_conn->msgbuflen + 74 + 32 <= web_conn->msgbufsize) {
-	    if(web_conn->udata_start < total_aps) {
-	    	struct station_config *p = (struct station_config *)&config[web_conn->udata_start];
-	    	if(web_conn->msgbuflen + 74 + htmlcode(buf->ssid, p->ssid, 32*6, 32) + htmlcode(buf->psw, p->password, 64*6, 64) > web_conn->msgbufsize) break;
-			tcp_puts_fd("<aps id=\"%u\"><ss>%s</ss><ps>%s</ps><bs>" MACSTR "</bs><bt>%d</bt></aps>",
-					web_conn->udata_start, buf->ssid, buf->psw, MAC2STR(p->bssid), p->bssid_set);
-	   		web_conn->udata_start++;
-	    	if(web_conn->udata_start >= total_aps) {
-			    ClrSCB(SCB_RETRYCB);
-			    os_free(buf);
-			    return;
-	    	}
-	    }
-	    else {
-		    ClrSCB(SCB_RETRYCB);
-		    os_free(buf);
-		    return;
-	    }
-	}
-	// repeat in the next call ...
-    SetSCB(SCB_RETRYCB);
-    SetNextFunSCB(wifi_aps_xml);
-    os_free(buf);
-    return;
-}
+
 //===============================================================================
 // WiFi Scan XML
 //-------------------------------------------------------------------------------
-void ICACHE_FLASH_ATTR web_wscan_xml(TCP_SERV_CONN *ts_conn)
+LOCAL void ICACHE_FLASH_ATTR web_wscan_xml(TCP_SERV_CONN *ts_conn)
 {
-	struct bss_scan_info si;
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *) ts_conn->linkd;
+	web_scan_handler_t * pwscn_rec = &web_scan_handler_ptr;
     // Check if this is a first round call
     if(CheckSCB(SCB_RETRYCB)==0) {
-    	tcp_puts_fd("<total>%d</total>", total_scan_infos);
-    	if(total_scan_infos == 0) return;
-    	web_conn->udata_start = 0;
+    	int i = 0;
+		web_conn->udata_start = 0;
+    	if(pwscn_rec->flg == 2) {
+    		i = pwscn_rec->ap_count;
+    		wifi_set_timer_scan(7000);
+    	} else if(pwscn_rec->flg == 0) api_wifi_scan(NULL);
+		tcp_puts_fd("<total>%d</total>", i);
+		if(i == 0) return;
     }
-	while(web_conn->msgbuflen + 96 + 32 <= web_conn->msgbufsize) {
-	    if(web_conn->udata_start < total_scan_infos) {
-	    	struct bss_scan_info *p = (struct bss_scan_info *)buf_scan_infos;
-	    	p += web_conn->udata_start;
-	    	ets_memcpy(&si, p, sizeof(si));
-/*
-	    	uint8 ssid[33];
-	    	ssid[32] = '\0';
-	    	ets_memcpy(ssid, si.ssid, 32); */
+	while(web_conn->msgbuflen + 96 + 10 + 32 <= web_conn->msgbufsize) {
+	    if(pwscn_rec->flg && web_conn->udata_start < pwscn_rec->ap_count) {
+	    	rtw_scan_result_t *si = &pwscn_rec->ap_details[web_conn->udata_start];
 	    	uint8 ssid[32*6 + 1];
-	    	if(web_conn->msgbuflen + 96 + htmlcode(ssid, si.ssid, 32*6, 32) > web_conn->msgbufsize) break;
-			tcp_puts_fd("<ap id=\"%d\"><ch>%d</ch><au>%d</au><bs>" MACSTR "</bs><ss>%s</ss><rs>%d</rs><hd>%d</hd></ap>", web_conn->udata_start, si.channel, si.authmode, MAC2STR(si.bssid), ssid, si.rssi, si.is_hidden);
+	    	int len = si->SSID.len;
+	    	if(len > 32) len = 32;
+	    	si->SSID.val[len] = '\0';
+	    	if(web_conn->msgbuflen + 96 + 10 + htmlcode(ssid, si->SSID.val, 32*6, 32) > web_conn->msgbufsize) break;
+			tcp_puts_fd("<ap id=\"%d\"><ch>%d</ch><au>%d</au><bs>" MACSTR "</bs><ss>%s</ss><rs>%d</rs><hd>%d</hd><wp>%d</wp></ap>",
+					web_conn->udata_start,
+					si->channel,
+					rtw_security_to_idx(si->security),
+					MAC2STR(si->BSSID.octet),
+					ssid,
+					si->signal_strength,
+//					si->band,	// rtw_802_11_band_t
+					si->bss_type & 3, // rtw_bss_type_t
+					si->wps_type); // rtw_wps_type_t
 	   		web_conn->udata_start++;
-	    	if(web_conn->udata_start >= total_scan_infos) {
+	    	if(web_conn->udata_start >= pwscn_rec->ap_count) {
+	    		wifi_close_scan();
 			    ClrSCB(SCB_RETRYCB);
 			    return;
 	    	}
 	    }
 	    else {
+    		wifi_close_scan();
 		    ClrSCB(SCB_RETRYCB);
 		    return;
 	    }
@@ -268,46 +173,6 @@ void ICACHE_FLASH_ATTR web_wscan_xml(TCP_SERV_CONN *ts_conn)
     SetNextFunSCB(web_wscan_xml);
     return;
 }
-//===============================================================================
-// WiFi Probe Request XML
-//-------------------------------------------------------------------------------
-void ICACHE_FLASH_ATTR web_ProbeRequest_xml(TCP_SERV_CONN *ts_conn)
-{
-	struct s_probe_requests pr;
-	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *) ts_conn->linkd;
-    // Check if this is a first round call
-	uint32 cnt = (probe_requests_count < MAX_COUNT_BUF_PROBEREQS)? probe_requests_count : MAX_COUNT_BUF_PROBEREQS;
-    if(CheckSCB(SCB_RETRYCB)==0) {
-    	if(cnt == 0) {
-    		tcp_strcpy_fd("<total>0</total>");
-    		return;
-    	}
-    	web_conn->udata_start = 0;
-    }
-	while(web_conn->msgbuflen + 92 <= web_conn->msgbufsize) {
-	    if(web_conn->udata_start < cnt) {
-	    	struct s_probe_requests *p = (struct s_probe_requests *)&buf_probe_requests;
-	    	p += web_conn->udata_start;
-	    	ets_memcpy(&pr, p, sizeof(struct s_probe_requests));
-			tcp_puts_fd("<pr id=\"%u\"><mac>" MACSTR "</mac><min>%d</min><max>%d</max></pr>", web_conn->udata_start, MAC2STR(pr.mac), pr.rssi_min, pr.rssi_max);
-	   		web_conn->udata_start++;
-	    	if(web_conn->udata_start >= cnt) {
-	    		tcp_puts_fd("<total>%d</total>", cnt);
-			    ClrSCB(SCB_RETRYCB);
-			    return;
-	    	}
-	    }
-	    else {
-		    ClrSCB(SCB_RETRYCB);
-		    return;
-	    }
-	}
-	// repeat in the next call ...
-    SetSCB(SCB_RETRYCB);
-    SetNextFunSCB(web_ProbeRequest_xml);
-    return;
-}
-#endif
 #ifdef USE_MODBUS
 //===============================================================================
 // Mdb XML
@@ -495,14 +360,18 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
         else ifcmp("stop") tcp_puts("0x%08x", web_conn->udata_stop);
         else ifcmp("xml_") {
             cstr+=4;
-            web_conn->udata_start&=~3;
-            ifcmp("ram") tcp_puts("0x%08x", *((uint32*)web_conn->udata_start));
-            else tcp_put('?');
-            web_conn->udata_start += 4;
+            ifcmp("scan") web_wscan_xml(ts_conn);
+            else {
+            	web_conn->udata_start&=~3;
+            	ifcmp("ram") tcp_puts("0x%08x", *((uint32*)web_conn->udata_start));
+            	else tcp_put('?');
+            	web_conn->udata_start += 4;
+            }
         }
         else ifcmp("sys_") {
           cstr+=4;
-          ifcmp("cid") tcp_puts("%08x", HalGetChipId());
+          ifcmp("url") tcp_strcpy(get_new_hostname());
+          else ifcmp("cid") tcp_puts("%08x", HalGetChipId());
           else ifcmp("fid") tcp_puts("%08x", spi_flash_get_id());
           else ifcmp("fsize") tcp_puts("%u", spi_flash_real_size()); // flashchip->chip_size
           else ifcmp("sdkver") tcp_strcpy_fd(SDK_VERSION);
@@ -524,9 +393,11 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
           }
           else ifcmp("clkcpu") tcp_puts("%u", HalGetCpuClk());
           else ifcmp("debug") tcp_put('1' - (print_off & 1)); // rtl_print on/off
+#if WEB_DEBUG_FUNCTIONS
           else ifcmp("restart") web_conn->web_disc_cb = (web_func_disc_cb)sys_reset;
           else ifcmp("ram") tcp_puts("0x%08x", *((uint32 *)(ahextoul(cstr+3)&(~3))));
           else ifcmp("rdec") tcp_puts("%d", *((uint32 *)(ahextoul(cstr+4)&(~3))));
+#endif // #if WEB_DEBUG_FUNCTIONS
           else ifcmp("ip") {
         	  uint32 cur_ip;
         	  if(netif_default != NULL) cur_ip = netif_default->ip_addr.addr;
@@ -549,6 +420,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 				else ifcmp("twd") tcp_put((syscfg.cfg.b.web_time_wait_delete)? '1' : '0');
 				else tcp_put('?');
 			}
+			else ifcmp("sleep") tcp_put((syscfg.cfg.b.powersave_enable)? '1' : '0');
 			else ifcmp("pinclr") tcp_put((syscfg.cfg.b.pin_clear_cfg_enable)? '1' : '0');
 			else ifcmp("debug") tcp_put((syscfg.cfg.b.debug_print_enable)? '1' : '0');
 #ifdef USE_NETBIOS
@@ -572,36 +444,28 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
           else ifcmp("cmode") tcp_puts("%d", wifi_mode);
           else ifcmp("mode") tcp_puts("%d", wifi_cfg.mode);
           else ifcmp("bgn") tcp_puts("%d", wifi_cfg.bgn);
-          else ifcmp("sleep") tcp_puts("%d", wifi_cfg.sleep);
           else ifcmp("txpow") tcp_puts("%u", wifi_cfg.tx_pwr);
           else ifcmp("lflg") tcp_puts("%u", wifi_cfg.load_flg);
           else ifcmp("sflg") tcp_puts("%u", wifi_cfg.save_flg);
+          else ifcmp("adpt") tcp_puts("%u", wifi_cfg.adaptivity);
           else ifcmp("country") tcp_puts("%u", wifi_cfg.country_code);
           else ifcmp("ap_") {
         	  cstr+=3;
               ifcmp("ssid") {
-            		  int len = os_strlen(wifi_ap_cfg.ssid);
-            		  if(len > sizeof(wifi_ap_cfg.ssid)) {
-            			  len = sizeof(wifi_ap_cfg.ssid);
-            		  }
-            		  os_memcpy((char *)&web_conn->msgbuf[web_conn->msgbuflen], wifi_ap_cfg.ssid, len);
-            		  web_conn->msgbuflen += len;
+            	  wifi_ap_cfg.ssid[NDIS_802_11_LENGTH_SSID] = '\0';
+            	  tcp_strcpy(wifi_ap_cfg.ssid);
            	  }
               else ifcmp("psw") {
-        		  int len = os_strlen(wifi_ap_cfg.password);
-        		  if(len > sizeof(wifi_ap_cfg.password)) {
-        			  len = sizeof(wifi_ap_cfg.password);
-        		  }
-        		  os_memcpy((char *)&web_conn->msgbuf[web_conn->msgbuflen], wifi_ap_cfg.password, len);
-        		  web_conn->msgbuflen += len;
+            	  wifi_ap_cfg.password[IW_PASSPHRASE_MAX_SIZE] = '\0';
+            	  tcp_strcpy(wifi_ap_cfg.password);
               }
               else ifcmp("chl") 	tcp_puts("%u", wifi_ap_cfg.channel);
               else ifcmp("mcns") 	tcp_puts("%u", wifi_ap_cfg.max_sta);
-              else ifcmp("auth") 	tcp_put((wifi_ap_cfg.security_type == RTW_SECURITY_OPEN) ? '0' : '1');
+              else ifcmp("auth") 	tcp_put((wifi_ap_cfg.security) ? '1' : '0');
               else ifcmp("hssid") 	tcp_put((wifi_ap_cfg.ssid_hidden & 1) + '0');
               else ifcmp("bint") 	tcp_puts("%u", wifi_ap_cfg.beacon_interval);
               else ifcmp("mac") 	tcp_puts(MACSTR, MAC2STR(xnetif[WLAN_AP_NETIF_NUM].hwaddr));
-              else ifcmp("hostname") tcp_strcpy(lwip_host_name[WLAN_AP_NETIF_NUM]);
+              else ifcmp("hostname") tcp_strcpy(lwip_host_name[1]);
               else ifcmp("dhcp")	tcp_puts("%u", wifi_ap_dhcp.mode);
               else ifcmp("ip") 		tcp_puts(IPSTR, IP2STR(&wifi_ap_dhcp.ip));
               else ifcmp("gw") 		tcp_puts(IPSTR, IP2STR(&wifi_ap_dhcp.gw));
@@ -622,31 +486,26 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
             	  wifi_get_rssi(&rssi);
             	  tcp_puts("%d", rssi);
               }
+              else ifcmp("status") 	tcp_puts("%u", wifi_st_status);
               else ifcmp("arec") 	tcp_puts("%u", wifi_st_cfg.autoreconnect);
               else ifcmp("rect") 	tcp_puts("%u", wifi_st_cfg.reconnect_pause);
-              else ifcmp("ssid") {
-        		  int len = os_strlen(wifi_st_cfg.ssid);
-        		  if(len > sizeof(wifi_st_cfg.ssid)) {
-        			  len = sizeof(wifi_st_cfg.ssid);
-        		  }
-        		  os_memcpy((char *)&web_conn->msgbuf[web_conn->msgbuflen], wifi_st_cfg.ssid, len);
-        		  web_conn->msgbuflen += len;
-              }
+              ifcmp("ssid") {
+            	  wifi_st_cfg.ssid[NDIS_802_11_LENGTH_SSID] = '\0';
+            	  tcp_strcpy(wifi_st_cfg.ssid);
+           	  }
               else ifcmp("psw") {
-        		  int len = os_strlen(wifi_st_cfg.password);
-        		  if(len > sizeof(wifi_st_cfg.password)) {
-        			  len = sizeof(wifi_st_cfg.password);
-        		  }
-        		  os_memcpy((char *)&web_conn->msgbuf[web_conn->msgbuflen], wifi_st_cfg.password, len);
-        		  web_conn->msgbuflen += len;
+            	  wifi_st_cfg.password[IW_PASSPHRASE_MAX_SIZE] = '\0';
+            	  tcp_strcpy(wifi_st_cfg.password);
               }
               else ifcmp("mac") 	tcp_puts(MACSTR, MAC2STR(xnetif[WLAN_ST_NETIF_NUM].hwaddr));
               else ifcmp("bssid") 	tcp_puts(MACSTR, MAC2STR(wifi_st_cfg.bssid));
               else ifcmp("sbss") 	tcp_puts("%u", wifi_st_cfg.flg);
+              else ifcmp("sleep") 	tcp_puts("%d", wifi_st_cfg.sleep);
+              else ifcmp("dtim") 	tcp_puts("%u", wifi_st_cfg.dtim);
 #if LWIP_NETIF_HOSTNAME
-              else ifcmp("hostname") tcp_strcpy(lwip_host_name[WLAN_ST_NETIF_NUM]);
+              else ifcmp("hostname") tcp_strcpy(lwip_host_name[0]);
 #endif
-              else ifcmp("auth") 	tcp_puts("%u", rtw_security_to_idx(wifi_st_cfg.security_type));
+              else ifcmp("auth") 	tcp_puts("%u", wifi_st_cfg.security);
               else ifcmp("dhcp") 	tcp_puts("%u", wifi_st_dhcp.mode);
         	  else ifcmp("ip") 		tcp_puts(IPSTR, IP2STR(&wifi_st_dhcp.ip));
               else ifcmp("gw") 		tcp_puts(IPSTR, IP2STR(&wifi_st_dhcp.gw));
@@ -665,6 +524,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
         		cstr+=5;
         		if(*cstr == '_') {
         			cstr++;
+#if WEB_DEBUG_FUNCTIONS
             		ifcmp("all") {
             	    	web_conn->udata_start = 0;
             	    	web_conn->udata_stop = spi_flash_real_size();
@@ -675,7 +535,9 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
             			web_conn->udata_stop = web_conn->udata_start + FLASH_SECTOR_SIZE;
             			web_get_flash(ts_conn);
             		}
-            		else ifcmp("disk") {
+            		else
+#endif // #if WEB_DEBUG_FUNCTIONS
+            		ifcmp("disk") {
             			web_conn->udata_start = WEBFS_base_addr();
             			web_conn->udata_stop = web_conn->udata_start + WEBFS_curent_size();
             			web_get_flash(ts_conn);
@@ -684,14 +546,18 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
         		}
         		else web_get_flash(ts_conn);
         	}
+#if WEB_DEBUG_FUNCTIONS
         	else ifcmp("ram") web_get_ram(ts_conn);
+#endif // #if WEB_DEBUG_FUNCTIONS
         	else tcp_put('?');
         }
+#if WEB_DEBUG_FUNCTIONS
         else ifcmp("hexdmp") {
         	if(cstr[6]=='d') ts_conn->flag.user_option1 = 1;
         	else ts_conn->flag.user_option1 = 0;
         	web_hexdump(ts_conn);
         }
+#endif // #if WEB_DEBUG_FUNCTIONS
         else ifcmp("web_") {
         	cstr+=4;
         	ifcmp("port") tcp_puts("%u", ts_conn->pcfg->port);

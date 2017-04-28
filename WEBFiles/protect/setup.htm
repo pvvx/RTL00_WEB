@@ -24,6 +24,13 @@
 					<td><input title='1...65535 sec, 0 - not limited' name='cfg_web_twcls' maxlength='5' value='~cfg_web_twcls~'></td>
 				</tr>
 				<tr>
+					<td class="label">PowerSave Enable:</td>
+					<td>
+						<input type="hidden" name='cfg_sleep' value='0'>
+						<input title='If On - LogUART input disable' type='checkbox' name='cfg_sleep' value='1'>
+					</td>
+				</tr>
+				<tr>
 					<td class="label">LogUART Printf() enable:</td>
 					<td>
 						<input type="hidden" name='cfg_debug' value='0'>
@@ -76,6 +83,7 @@
 ~inc:footer.inc~
 <script type="text/javascript">
 var cfg = {
+	cfg_sleep:"~cfg_sleep~",
 	cfg_debug:"~cfg_debug~",
 	cfg_web_twd:"~cfg_web_twd~",
 	cfg_pinclr:"~cfg_pinclr~",

@@ -6,7 +6,14 @@
  */
 #include <platform_opts.h>
 #include "rtl8195a.h"
-#include "drv_types.h"
+#if 1
+#include "drv_types.h" // or #include "wlan_lib.h"
+#else
+#include "wifi_constants.h"
+#include "wifi_structures.h"
+#include "wlan_lib.h" // or #include "drv_types.h"
+#endif
+
 //#include "section_config.h"
 //#include "hal_diag.h"
 #include "rtl8195a/rtl_libc.h"

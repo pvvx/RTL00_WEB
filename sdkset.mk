@@ -408,7 +408,8 @@ ADD_SRC_C += project/src/user/user_start.c
 # components
 ADD_SRC_C += project/src/console/atcmd_user.c
 ADD_SRC_C += project/src/console/wifi_console.c
-ADD_SRC_C += project/src/console/pwm_tst.c
+#ADD_SRC_C += project/src/console/pwm_tst.c
+#ADD_SRC_C += project/src/console/wlan_tst.c
 
 #Web-свалка
 INCLUDES += project/inc/web

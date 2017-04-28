@@ -8,6 +8,7 @@
 #include "platform_autoconf.h"
 #include "autoconf.h"
 #include "FreeRTOS.h"
+#include "freertos_pmu.h"
 #include "task.h"
 #include "diag.h"
 #include "netbios/netbios.h"
@@ -71,6 +72,7 @@ void user_init_thrd(void) {
 
 	/* Load cfg, init WiFi + LwIP init, WiFi start if wifi_cfg.mode !=  RTW_MODE_NONE */
 	wifi_init();
+
 #if defined(USE_NETBIOS)
 	if(syscfg.cfg.b.netbios_ena) netbios_init();
 #endif
@@ -79,6 +81,10 @@ void user_init_thrd(void) {
 #endif
 	// webstuff_init(); // httpd_init();
 	webserver_init(syscfg.web_port);
+
+	if(syscfg.cfg.b.powersave_enable) {
+		release_wakelock(~WAKELOCK_WLAN);
+	}
 
 	//	xTaskCreate(x_init_thrd, "wifi_init", 1024, NULL, tskIDLE_PRIORITY + 1 + PRIORITIE_OFFSET, NULL);
 

@@ -26,13 +26,14 @@
 					<td class="label">BSSID:</td>
 					<td><input name='wifi_st_bssid' maxlength='31' value='~wifi_st_bssid~' id='inputbsid'></td>
 					<td class="label">AutoConnect:</td>
-					<td><input type='hidden' name='wifi_st_aucn' value='0'>
-						<input type='checkbox' name='wifi_st_aucn' value='1'></td>
+					<td><input type='hidden' id='wifi_mode' name='wifi_mode' value='3'>
+						<input type='hidden' id='wifi_st_auth' name='wifi_st_auth' value='6'>
+						<input type='checkbox' id='wifi_st_aucn' name='wifi_st_aucn' value='1' onChange="newMode(this);"></td>
 				</tr>
 			</table>
 			<p class="center">
 				<input type='submit' value='Set Config' class="button">
-				<input type='hidden' name='wifi_newcfg' value='0xfff'>
+				<input type='hidden' name='wifi_newcfg' value='0x1a'>
 			</p>
 		</form>
 		<div id="connection"></div>
@@ -43,22 +44,45 @@
 <script src="/scripts.js"></script>
 <script type="text/javascript">
 var AUTH = {
-0: "OPEN",
-1: "WEP",
-2: "WPA-PSK",
-3: "WPA2-PSK",
-4: "WPA-WPA2-PSK",
-5: "MAX"};
-var cfg = { wifi_st_aucn: "~wifi_st_aucn~" };
+0:"OPEN",
+1:"WEP PSK",
+2:"WEP Shared",
+3:"WPA TKIP",
+4:"WPA AES",
+5:"WPA2 TKIP",
+6:"WPA2 AES",
+7:"WPA2 Mixed",
+8:"WPA2/WPA AES",
+9:"UNKNOWN"};
+var WPST = {
+0:"DEFAULT",
+1:"USER",
+2:"MACHINE",
+3:"REKEY",
+4:"PUSHBUTTON",
+5:"REGISTRAR",
+6:"NONE"};
+var BSST = {
+0:"INFRA",
+1:"ADHOC",
+2:"ANY",
+3:"UNKNOWN"};
+var cfg = { 
+wifi_st_aucn: "~wifi_mode~" & 1,
+wifi_mode: "~wifi_mode~" };
 setFormValues(document.forms[0], cfg);
 var startTime = new Date();
 newAJAXCommand('/web.cgi?wifi_scan=1');
-setTimeout("newAJAXCommand('scan.xml', updateScan)", 2500);
+setTimeout("newAJAXCommand('scan.xml', updateScan)", 1600);
+function newMode(Obj) {
+	if (Obj.checked) $("wifi_mode").value = ~wifi_mode~ | 1;
+	else $("wifi_mode").value = ~wifi_mode~;
+}
 function updateScan(xmlData) {
 	if(!xmlData) return;
 	var total = getXMLValue(xmlData, 'total');
 	if (total==0) {
-		if((new Date()-startTime)>10000) {
+		if((new Date()-startTime)>7000) {
 			startTime = new Date();
 			$('scanResult').innerHTML="Scan failed. Try again.";
 			newAJAXCommand('/web.cgi?wifi_scan=1');
@@ -75,19 +99,21 @@ function updateScan(xmlData) {
 		var ssid=getXMLValue(ap, 'ss');
 		var rs=getXMLValue(ap, 'rs');
 		var hd=getXMLValue(ap, 'hd');
+		var ws=getXMLValue(ap, 'ws');
 		r=document.all.aps.insertRow();
-		c=r.insertCell(0);c.innerHTML="<a href=# >"+ssid+"</a>";c.ssid=ssid;c.bsid=bsid;c.onclick=onApClick;
-		c=r.insertCell(1);c.innerHTML="<a href=# >"+bsid+"</a>";c.ssid=ssid;c.bsid=bsid;c.onclick=onApClick;c.ondblclick=onInfo;c.title='DoubleClick = MF info';
+		c=r.insertCell(0);c.innerHTML="<a href=# >"+ssid+"</a>";c.ssid=ssid;c.bsid=bsid;c.au=au;c.onclick=onApClick;
+		c=r.insertCell(1);c.innerHTML="<a href=# >"+bsid+"</a>";c.ssid=ssid;c.bsid=bsid;c.au=au;c.onclick=onApClick;c.ondblclick=onInfo;c.title='DoubleClick = MF info';
 		(r.insertCell(2)).innerHTML=AUTH[au];
 		(r.insertCell(3)).innerText=ch;
 		(r.insertCell(4)).innerText=rs;
-		(r.insertCell(5)).innerText=hd;
+		(r.insertCell(5)).innerHTML=BSST[hd];
 	}
 	$('stform').style.display='';
 }
 function onApClick() {
 	$('inputssid').value=this.ssid;
 	$('inputbsid').value=this.bsid;
+	$('wifi_st_auth').value=this.au;
 }
 function onInfo() {
 	s = this.bsid;

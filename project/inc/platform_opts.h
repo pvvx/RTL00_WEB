@@ -67,8 +67,8 @@
 //on/off relative commands in log service
 #define CONFIG_SSL_CLIENT	0
 #define CONFIG_WEBSERVER	0
-#define CONFIG_OTA_UPDATE	0
-#define CONFIG_BSD_TCP		0	//NOTE : Enable CONFIG_BSD_TCP will increase about 11KB code size
+#define CONFIG_OTA_UPDATE	1
+#define CONFIG_BSD_TCP		1	//NOTE : Enable CONFIG_BSD_TCP will increase about 11KB code size
 #define CONFIG_AIRKISS		0	//on or off tencent airkiss
 #define CONFIG_UART_SOCKET	0 	// Set: CONFIG_UART_EN, CONFIG_UART_SOCKET
 #define CONFIG_UART_XMODEM	0	//support uart xmodem upgrade or not
@@ -156,7 +156,7 @@
 //#define CONFIG_EXAMPLE_UART_ADAPTER 1
 //#define CONFIG_EXAMPLE_MDNS
 #define USE_FLASH_EEP 1
-#define CONFIG_WLAN_CONNECT_CB 1
+#define CONFIG_WLAN_CONNECT_CB 0
 
 //#define CONFIG_FATFS_EN	1 // FatFs & SD
 #ifdef CONFIG_FATFS_EN
