@@ -14,11 +14,13 @@
 #include "netbios/netbios.h"
 #include "sntp/sntp.h"
 #include "user/sys_cfg.h"
+#include "wifi_api.h"
 #include "web/web_srv.h"
 #include "webfs/webfs.h"
 
 struct SystemCfg syscfg = {
 		.cfg.w = SYS_CFG_DEBUG_ENA
+		 | SYS_CFG_PIN_CLR_ENA
 #if defined(USE_NETBIOS) && USE_NETBIOS
 		 | SYS_CFG_NETBIOS_ENA
 #endif
@@ -59,7 +61,11 @@ void sys_write_cfg(void)
 
 void user_init_thrd(void) {
 
-	flash_read_cfg(&syscfg, FEEP_ID_SYS_CFG, sizeof(syscfg));
+	if(syscfg.cfg.b.pin_clear_cfg_enable
+		&& 0) {  // user_test_clear_pin()
+		wifi_cfg.load_flg = 0;
+	}
+	else flash_read_cfg(&syscfg, FEEP_ID_SYS_CFG, sizeof(syscfg));
 
 	if(!syscfg.cfg.b.debug_print_enable) print_off = 1;
 

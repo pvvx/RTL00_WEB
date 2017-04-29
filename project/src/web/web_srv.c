@@ -442,7 +442,10 @@ web_parse_fname(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
         if(pcmp != NULL) {
         	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *)ts_conn->linkd;
 #if USE_WEB_AUTH_LEVEL
-        	web_conn->auth_realm = WEB_AUTH_LEVEL_USER;
+        	pcmp += sizeof(ProtectedFilesName) - 1;
+        	web_conn->auth_realm = atoi(pcmp) + 1;
+        	printf("[%s] ar%d ", pcmp, web_conn->auth_realm);
+//        	web_conn->auth_realm = WEB_AUTH_LEVEL_USER;
 #endif
         	SetSCB(SCB_AUTH);
         }
@@ -846,6 +849,10 @@ LOCAL bool ICACHE_FLASH_ATTR webserver_open_file(HTTP_CONN *CurHTTP, TCP_SERV_CO
 			if(rom_xstrcmp(pstr, web_cgi_fname)) {
 				web_inc_fp(web_conn, WEBFS_WEBCGI_HANDLE);
 				web_conn->content_len = sizeHTTPdefault;
+#if USE_WEB_AUTH_LEVEL
+//				web_conn->auth_realm = WEB_AUTH_LEVEL_USER;
+//				SetSCB(SCB_AUTH);
+#endif
 				CurHTTP->fileType = HTTP_HTML;
 #if DEBUGSOO > 1
 				os_printf("of%d[%s] ", web_conn->webfile, CurHTTP->pFilename);

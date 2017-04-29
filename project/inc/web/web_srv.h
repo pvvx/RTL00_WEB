@@ -101,8 +101,8 @@ typedef struct
 	WS_FRSTAT ws;	// параметры websoc
 #endif
 #if USE_WEB_AUTH_LEVEL
-	uint8 auth_level;   // Уровень авторизации по паролю
-	uint8 auth_realm; 	// Требуемый уровень авторизации (минимальный уровень)
+	uint8 auth_level;   // Уровень авторизации пользователя по паролю WEB_AUTH_LEVEL_TYPE
+	uint8 auth_realm; 	// Требуемый уровень авторизации (минимальный уровень) WEB_AUTH_LEVEL_TYPE
 #endif
 	uint8 fileType;     // File type to return with Content-Type (if SCB_FCALBACK)
 } WEB_SRV_CONN;

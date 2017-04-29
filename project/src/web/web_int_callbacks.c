@@ -358,15 +358,24 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 #endif
         ifcmp("start") tcp_puts("0x%08x", web_conn->udata_start);
         else ifcmp("stop") tcp_puts("0x%08x", web_conn->udata_stop);
+#if USE_WEB_AUTH_LEVEL
+        else ifcmp("realm") tcp_puts("%u", web_conn->auth_realm);
+        else ifcmp("auth") tcp_puts("%u", web_conn->auth_level);
+#endif
         else ifcmp("xml_") {
             cstr+=4;
             ifcmp("scan") web_wscan_xml(ts_conn);
+#if WEB_DEBUG_FUNCTIONS
+#if USE_WEB_AUTH_LEVEL
+            if(web_conn->auth_level < WEB_AUTH_LEVEL_USER) return;
+#endif
             else {
             	web_conn->udata_start&=~3;
             	ifcmp("ram") tcp_puts("0x%08x", *((uint32*)web_conn->udata_start));
             	else tcp_put('?');
             	web_conn->udata_start += 4;
             }
+#endif
         }
         else ifcmp("sys_") {
           cstr+=4;
@@ -394,7 +403,12 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
           else ifcmp("clkcpu") tcp_puts("%u", HalGetCpuClk());
           else ifcmp("debug") tcp_put('1' - (print_off & 1)); // rtl_print on/off
 #if WEB_DEBUG_FUNCTIONS
-          else ifcmp("restart") web_conn->web_disc_cb = (web_func_disc_cb)sys_reset;
+          else ifcmp("restart") {
+#if USE_WEB_AUTH_LEVEL
+        	  if(web_conn->auth_level < WEB_AUTH_LEVEL_USER) return;
+#endif
+        	  web_conn->web_disc_cb = (web_func_disc_cb)sys_reset;
+          }
           else ifcmp("ram") tcp_puts("0x%08x", *((uint32 *)(ahextoul(cstr+3)&(~3))));
           else ifcmp("rdec") tcp_puts("%d", *((uint32 *)(ahextoul(cstr+4)&(~3))));
 #endif // #if WEB_DEBUG_FUNCTIONS
@@ -519,6 +533,9 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 #endif
         }
         else ifcmp("bin_") {
+#if USE_WEB_AUTH_LEVEL
+   			if(web_conn->auth_level < WEB_AUTH_LEVEL_USER) return;
+#endif
         	cstr+=4;
         	ifcmp("flash") {
         		cstr+=5;
@@ -553,6 +570,9 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
         }
 #if WEB_DEBUG_FUNCTIONS
         else ifcmp("hexdmp") {
+#if USE_WEB_AUTH_LEVEL
+   			if(web_conn->auth_level < WEB_AUTH_LEVEL_USER) return;
+#endif
         	if(cstr[6]=='d') ts_conn->flag.user_option1 = 1;
         	else ts_conn->flag.user_option1 = 0;
         	web_hexdump(ts_conn);

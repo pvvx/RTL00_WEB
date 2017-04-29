@@ -83,6 +83,14 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 #endif
 	ifcmp("start") 		web_conn->udata_start = val;
 	else ifcmp("stop") 	web_conn->udata_stop = val;
+#if USE_WEB_AUTH_LEVEL
+	else ifcmp("user") web_conn->auth_level = UserAuthorization(pvar, strlen(pvar));
+	else if(web_conn->auth_level < WEB_AUTH_LEVEL_USER) {
+		if(!web_conn->auth_realm) web_conn->auth_realm = WEB_AUTH_LEVEL_USER;
+		SetSCB(SCB_AUTH);
+		return;
+	}
+#endif
 #if WEB_DEBUG_FUNCTIONS
 	else ifcmp("sys_") {
 		cstr+=4;
@@ -236,6 +244,12 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
        			  os_memcpy(lwip_host_name[1], pvar, len);
        		  }
        		  netbios_set_name(WLAN_AP_NETIF_NUM, lwip_host_name[1]);
+       		  if(wifi_cfg.save_flg & BID_AP_HOSTNAME) {
+       			  WEB_SRV_QFNK x;
+       			  x.fnk = write_wifi_cfg;
+       			  x.param = BID_AP_HOSTNAME;
+       			  xQueueSendToBack(xQueueWebSrv, &x, 0);
+       		  }
           }
 #endif
           else ifcmp("dhcp")	wifi_ap_dhcp.mode = val;
@@ -286,6 +300,12 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
        			  os_memset(lwip_host_name[0], 0, LWIP_NETIF_HOSTNAME_SIZE);
        			  os_memcpy(lwip_host_name[0], pvar, len);
        			  netbios_set_name(WLAN_ST_NETIF_NUM, lwip_host_name[0]);
+       		  }
+       		  if(wifi_cfg.save_flg & BID_ST_HOSTNAME) {
+       			  WEB_SRV_QFNK x;
+       			  x.fnk = write_wifi_cfg;
+       			  x.param = BID_ST_HOSTNAME;
+       			  xQueueSendToBack(xQueueWebSrv, &x, 0);
        		  }
           }
 #endif
