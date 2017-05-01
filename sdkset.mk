@@ -74,7 +74,8 @@ INCLUDES += sdk/component/soc/realtek/8195a/fwlib/ram_lib/usb_otg/include
 #INCLUDES += sdk/component/common/media/codec
 #INCLUDES += sdk/component/common/drivers/usb_class/host/uvc/inc
 #INCLUDES += sdk/component/common/drivers/usb_class/device
-#INCLUDES += sdk/component/common/drivers/usb_class/device/class sdk/component/common/file_system/fatfs
+#INCLUDES += sdk/component/common/drivers/usb_class/device/class 
+#INCLUDES += sdk/component/common/file_system/fatfs
 INCLUDES += sdk/component/common/file_system/fatfs/r0.10c/include
 INCLUDES += sdk/component/common/drivers/sdio/realtek/sdio_host/inc
 INCLUDES += sdk/component/common/audio 
@@ -355,6 +356,7 @@ SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/diskio.c
 SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/ff.c
 SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/option/ccsbcs.c
 SRC_C += sdk/component/common/file_system/fatfs/disk_if/src/sdcard.c
+INCLUDES += sdk/component/common/file_system/fatfs
 endif
 
 #utilities - xmodem update

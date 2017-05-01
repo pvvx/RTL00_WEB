@@ -636,5 +636,4 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 		else tcp_put('?');
 }
 
-
 #endif // USE_WEB

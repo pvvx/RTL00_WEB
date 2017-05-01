@@ -64,7 +64,7 @@ enum srvconn_state {
 #define TCP_SRV_CLOSE_WAIT 5 // 5 сек
 
 // минимальный размер heap по умолчанию, при открытии нового соединения, при = 0 заменяется на это:
-#define TCP_SRV_MIN_HEAP_SIZE 14528  // самый минимум от 6Kb
+#define TCP_SRV_MIN_HEAP_SIZE 32768  // самый минимум от 6Kb
 
 // максимальный размер выделяемого буфера в heap для приема порции
 #ifndef TCP_SRV_SERVER_MAX_RXBUF
