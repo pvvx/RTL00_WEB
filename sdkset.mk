@@ -1,5 +1,6 @@
 #USE_FATFS = 1
 #USE_POLARSSL = 1
+#USE_P2P_WPS = 1
 
 # FLAGS
 # -------------------------------------------------------------------
@@ -14,7 +15,7 @@ LFLAGS += -Wl,--gc-sections -Wl,--cref -Wl,--entry=Reset_Handler -Wl,--no-enum-s
 # LIBS
 # -------------------------------------------------------------------
 LIBS =
-all: LIBS +=_platform_new _wlan _wps _p2p _websocket _sdcard _xmodem 
+all: LIBS +=_platform_new _wlan _p2p _wps _websocket _sdcard _xmodem 
 # _mdns m c nosys gcc _wps _p2p _websocket _sdcard _xmodem 
 mp: LIBS +=_platform_new _wlan_mp _wps _p2p _websocket _sdcard _xmodem 
 PATHLIBS = sdk/component/soc/realtek/8195a/misc/bsp/lib/common/gcc
@@ -106,8 +107,11 @@ SRC_C += sdk/component/soc/realtek/8195a/misc/driver/rtl_console_new.c
 #SRC_C += sdk/component/soc/realtek/8195a/misc/driver/rtl_consol.c
 
 #network - api
-SRC_C += sdk/component/common/api/wifi/rtw_wpa_supplicant/wpa_supplicant/wifi_eap_config.c
+ifdef USE_P2P_WPS
 SRC_C += sdk/component/common/api/wifi/rtw_wpa_supplicant/wpa_supplicant/wifi_p2p_config.c
+SRC_C += sdk/component/common/api/wifi/rtw_wpa_supplicant/wpa_supplicant/wifi_wps_config.c
+endif
+SRC_C += sdk/component/common/api/wifi/rtw_wpa_supplicant/wpa_supplicant/wifi_eap_config.c
 SRC_C += sdk/component/common/api/wifi/wifi_conf.c
 SRC_C += sdk/component/common/api/wifi/wifi_ind.c
 SRC_C += sdk/component/common/api/wifi/wifi_promisc.c
@@ -261,7 +265,6 @@ SRC_C += sdk/component/soc/realtek/8195a/fwlib/rtl8195a/src/rtl8195a_uart.c
 ifdef USE_POLARSSL
 INCLUDES += sdk/component/common/network/ssl/polarssl-1.3.8/include
 
-SRC_C += sdk/component/common/api/wifi/rtw_wpa_supplicant/wpa_supplicant/wifi_wps_config.c
 SRC_C += sdk/component/common/network/ssl/polarssl-1.3.8/library/bignum.c
 
 DRAM_C += sdk/component/common/network/ssl/ssl_ram_map/rom/rom_ssl_ram_map.c
@@ -412,6 +415,9 @@ ADD_SRC_C += project/src/console/atcmd_user.c
 ADD_SRC_C += project/src/console/wifi_console.c
 #ADD_SRC_C += project/src/console/pwm_tst.c
 #ADD_SRC_C += project/src/console/wlan_tst.c
+#ADD_SRC_C += project/src/ina219/ina219drv.c
+##ADD_SRC_C += project/src/driver/i2c_drv.c
+##ADD_SRC_C += project/src/ina219/ina219buf.c
 
 #Web-свалка
 INCLUDES += project/inc/web

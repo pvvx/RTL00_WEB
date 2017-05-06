@@ -685,6 +685,9 @@ static err_t TCP_SRV_CODE_ATTR tcpsrv_poll(void *arg, struct tcp_pcb *pcb) {
 		else tcpsrv_server_close(ts_conn);
 	}
 	else tcpsrv_server_close(ts_conn);
+#ifdef SRV_WDGREFESH_IN_POOL
+	WDGRefresh();
+#endif
 	return ERR_OK;
 }
 /******************************************************************************

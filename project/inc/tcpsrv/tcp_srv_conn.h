@@ -43,11 +43,8 @@ enum srvconn_state {
  #define TCP_SRV_SERVER_PORT 80
 #endif
 
-/* уровень вывода отладочной инфы по умолчанию
-#ifndef DEBUGSOO
- #define DEBUGSOO 2
-#endif
-*/
+
+#define SRV_WDGREFESH_IN_POOL // использовать WDGRefresh() в tcpsrv_poll()
 
 // время (сек), по умолчанию, ожидания запроса (передачи пакета) от клиента, до авто-закрытия соединения,
 // при = 0 заменяется на эти 5 сек.
