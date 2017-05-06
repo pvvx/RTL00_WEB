@@ -264,7 +264,7 @@ void _i2c_ic_off(i2c_drv_t *pi2c)
 		i2c_disable(pi2c);
 		uint32 mask = BIT_PERI_I2C0_EN << pi2c->idx;
 		HAL_PERI_ON_WRITE32(REG_SOC_PERI_FUNC0_EN,
-				HAL_PERI_ON_READ32(REG_SOC_PERI_FUNC0_EN) | mask);
+				HAL_PERI_ON_READ32(REG_SOC_PERI_FUNC0_EN) & (~mask));
 		HalPinCtrlRtl8195A(I2C0 + pi2c->idx, pi2c->io_sel, 0);
 #ifdef CONFIG_SOC_PS_MODULE
 		REG_POWER_STATE i2cPwrState;
