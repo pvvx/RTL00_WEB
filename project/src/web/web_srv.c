@@ -2004,6 +2004,7 @@ void qfnk_task(void)
 #if DEBUGSOO > 2
 				os_printf("qfn: %p(%p)\n", qfn.fnk, qfn.param);
 #endif
+				vTaskDelay(200); // Timeout + WDT
 				qfn.fnk(qfn.param);
 			}
 //			else {
@@ -2081,6 +2082,7 @@ err_t ICACHE_FLASH_ATTR webserver_close(uint16 portn)
 	if(xQueueWebSrv) {
 		WEB_SRV_QFNK qfn;
 		qfn.fnk = vTaskDelete;
+		qfn.fnk = NULL;
 		qfn.param = NULL;
 		if(xQueueSendToBack(xQueueWebSrv, &qfn, 1000) == pdPASS) {
 			while(uxQueueMessagesWaiting(xQueueWebSrv)) {
