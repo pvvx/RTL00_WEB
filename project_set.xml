@@ -10,8 +10,8 @@
 <includepath workspace_path="true">/${ProjName}/project/src/include</includepath>
 <includepath workspace_path="true">/${ProjSDK}/component/soc/realtek/common/bsp</includepath>
 <includepath workspace_path="true">/${ProjSDK}/component/os/freertos</includepath>
-<includepath workspace_path="true">/${ProjSDK}/component/os/freertos/freertos_v8.1.2/Source/include</includepath>
-<includepath workspace_path="true">/${ProjSDK}/component/os/freertos/freertos_v8.1.2/Source/portable/GCC/ARM_CM3</includepath>
+<includepath workspace_path="true">/${ProjSDK}/component/os/freertos/freertos_v9.0.0/Source/include</includepath>
+<includepath workspace_path="true">/${ProjSDK}/component/os/freertos/freertos_v9.0.0/Source/portable/GCC/ARM_CM3</includepath>
 <includepath workspace_path="true">/${ProjSDK}/component/os/os_dep/include</includepath>
 <includepath workspace_path="true">/${ProjSDK}/component/soc/realtek/8195a/misc/driver</includepath>
 <includepath workspace_path="true">/${ProjSDK}/component/common/api/network/include</includepath>
@@ -71,8 +71,8 @@
 <includepath workspace_path="true">/${ProjName}/project/src/include</includepath>
 <includepath workspace_path="true">/${ProjSDK}/component/soc/realtek/common/bsp</includepath>
 <includepath workspace_path="true">/${ProjSDK}/component/os/freertos</includepath>
-<includepath workspace_path="true">/${ProjSDK}/component/os/freertos/freertos_v8.1.2/Source/include</includepath>
-<includepath workspace_path="true">/${ProjSDK}/component/os/freertos/freertos_v8.1.2/Source/portable/GCC/ARM_CM3</includepath>
+<includepath workspace_path="true">/${ProjSDK}/component/os/freertos/freertos_v9.0.0/Source/include</includepath>
+<includepath workspace_path="true">/${ProjSDK}/component/os/freertos/freertos_v9.0.0/Source/portable/GCC/ARM_CM3</includepath>
 <includepath workspace_path="true">/${ProjSDK}/component/os/os_dep/include</includepath>
 <includepath workspace_path="true">/${ProjSDK}/component/soc/realtek/8195a/misc/driver</includepath>
 <includepath workspace_path="true">/${ProjSDK}/component/common/api/network/include</includepath>

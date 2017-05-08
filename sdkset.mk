@@ -1,6 +1,17 @@
+#USE_AT = 1
 #USE_FATFS = 1
+#USE_SDIOH = 1
 #USE_POLARSSL = 1
 #USE_P2P_WPS = 1
+ifndef USE_AT
+USE_NEWCONSOLE = 1
+USE_WIFI_API = 1
+endif
+USE_MBED = 1
+
+#RTOSDIR=freertos_v8.1.2
+RTOSDIR=freertos_v9.0.0
+LWIPDIR=lwip_v1.4.1
 
 # FLAGS
 # -------------------------------------------------------------------
@@ -15,9 +26,9 @@ LFLAGS += -Wl,--gc-sections -Wl,--cref -Wl,--entry=Reset_Handler -Wl,--no-enum-s
 # LIBS
 # -------------------------------------------------------------------
 LIBS =
-all: LIBS +=_platform_new _wlan _p2p _wps _websocket _sdcard _xmodem 
-# _mdns m c nosys gcc _wps _p2p _websocket _sdcard _xmodem 
-mp: LIBS +=_platform_new _wlan_mp _wps _p2p _websocket _sdcard _xmodem 
+all: LIBS +=_platform_new _wlan _p2p _wps _websocket _sdcard _xmodem _mdns
+# m c nosys gcc
+mp: LIBS +=_platform_new _wlan_mp _wps _p2p _websocket _sdcard _xmodem _mdns
 PATHLIBS = sdk/component/soc/realtek/8195a/misc/bsp/lib/common/gcc
 LDFILE = rlx8195A-symbol-v04-img2.ld
 BOOTS = sdk/component/soc/realtek/8195a/misc/bsp/image
@@ -28,30 +39,20 @@ INCLUDES = ../inc
 INCLUDES += project/inc
 INCLUDES += sdk/component/soc/realtek/common/bsp
 INCLUDES += sdk/component/os/freertos
-INCLUDES += sdk/component/os/freertos/freertos_v8.1.2/Source/include
-INCLUDES += sdk/component/os/freertos/freertos_v8.1.2/Source/portable/GCC/ARM_CM3
+INCLUDES += sdk/component/os/freertos/$(RTOSDIR)/Source/include
+INCLUDES += sdk/component/os/freertos/$(RTOSDIR)/Source/portable/GCC/ARM_CM3
 INCLUDES += sdk/component/os/os_dep/include sdk/component/soc/realtek/8195a/misc/driver
 INCLUDES += sdk/component/common/api/network/include
 INCLUDES += sdk/component/common/api 
 INCLUDES += sdk/component/common/api/platform
 INCLUDES += sdk/component/common/api/wifi
 INCLUDES += sdk/component/common/api/wifi/rtw_wpa_supplicant/src
-INCLUDES += sdk/component/common/application
-#INCLUDES += sdk/component/common/application/iotdemokit
-#INCLUDES += sdk/component/common/application/google
-#INCLUDES += sdk/component/common/media/framework
-#INCLUDES += sdk/component/common/example
-#INCLUDES += sdk/component/common/example/wlan_fast_connect
-INCLUDES += sdk/component/common/mbed/api
-INCLUDES += sdk/component/common/mbed/hal
-INCLUDES += sdk/component/common/mbed/hal_ext
-INCLUDES += sdk/component/common/mbed/targets/hal/rtl8195a
 INCLUDES += sdk/component/common/network
-INCLUDES += sdk/component/common/network/lwip/lwip_v1.4.1/port/realtek/freertos
-INCLUDES += sdk/component/common/network/lwip/lwip_v1.4.1/src/include
-INCLUDES += sdk/component/common/network/lwip/lwip_v1.4.1/src/include/lwip
-INCLUDES += sdk/component/common/network/lwip/lwip_v1.4.1/src/include/ipv4
-INCLUDES += sdk/component/common/network/lwip/lwip_v1.4.1/port/realtek
+INCLUDES += sdk/component/common/network/lwip/$(LWIPDIR)/port/realtek/freertos
+INCLUDES += sdk/component/common/network/lwip/$(LWIPDIR)/src/include
+INCLUDES += sdk/component/common/network/lwip/$(LWIPDIR)/src/include/lwip
+INCLUDES += sdk/component/common/network/lwip/$(LWIPDIR)/src/include/ipv4
+INCLUDES += sdk/component/common/network/lwip/$(LWIPDIR)/port/realtek
 INCLUDES += sdk/component/common/test
 INCLUDES += sdk/component/soc/realtek/8195a/cmsis
 INCLUDES += sdk/component/soc/realtek/8195a/cmsis/device
@@ -66,21 +67,14 @@ INCLUDES += sdk/component/common/drivers/wlan/realtek/src/osdep
 INCLUDES += sdk/component/common/drivers/wlan/realtek/src/hci
 INCLUDES += sdk/component/common/drivers/wlan/realtek/src/hal
 INCLUDES += sdk/component/common/drivers/wlan/realtek/src/hal/OUTSRC
+INCLUDES += sdk/component/common/drivers/sdio/realtek/sdio_host/inc
 INCLUDES += sdk/component/soc/realtek/8195a/fwlib/ram_lib/wlan/realtek/wlan_ram_map/rom
 INCLUDES += sdk/component/common/network/ssl/ssl_ram_map/rom
-INCLUDES += sdk/component/common/utilities
-INCLUDES += sdk/component/common/application/apple/WACServer/External/Curve25519
-INCLUDES += sdk/component/common/application/apple/WACServer/External/GladmanAES
-INCLUDES += sdk/component/soc/realtek/8195a/fwlib/ram_lib/usb_otg/include
 #INCLUDES += sdk/component/common/media/codec
 #INCLUDES += sdk/component/common/drivers/usb_class/host/uvc/inc
 #INCLUDES += sdk/component/common/drivers/usb_class/device
 #INCLUDES += sdk/component/common/drivers/usb_class/device/class 
-#INCLUDES += sdk/component/common/file_system/fatfs
-INCLUDES += sdk/component/common/file_system/fatfs/r0.10c/include
-INCLUDES += sdk/component/common/drivers/sdio/realtek/sdio_host/inc
-INCLUDES += sdk/component/common/audio 
-INCLUDES += sdk/component/common/application/xmodem
+#INCLUDES += sdk/component/soc/realtek/8195a/fwlib/ram_lib/usb_otg/include
 
 # Source file list
 # -------------------------------------------------------------------
@@ -95,16 +89,20 @@ BOOT_C += sdk/component/soc/realtek/8195a/fwlib/ram_lib/rtl_boot.c
 #cmsis
 SRC_C += sdk/component/soc/realtek/8195a/cmsis/device/system_8195a.c
 
-#console
-#DRAM_C += sdk/component/common/api/at_cmd/atcmd_ethernet.c
-#DRAM_C += sdk/component/common/api/at_cmd/atcmd_lwip.c
-#DRAM_C += sdk/component/common/api/at_cmd/atcmd_sys.c
-#DRAM_C += sdk/component/common/api/at_cmd/atcmd_wifi.c
-#SRC_C += sdk/component/common/api/at_cmd/log_service.c
-#SRC_C += sdk/component/soc/realtek/8195a/misc/driver/low_level_io.c
 #console new/old
+ifdef USE_NEWCONSOLE
 SRC_C += sdk/component/soc/realtek/8195a/misc/driver/rtl_console_new.c
-#SRC_C += sdk/component/soc/realtek/8195a/misc/driver/rtl_consol.c
+else
+SRC_C += sdk/component/common/api/at_cmd/log_service.c
+SRC_C += sdk/component/soc/realtek/8195a/misc/driver/rtl_consol.c
+endif
+ifdef USE_AT
+DRAM_C += sdk/component/common/api/at_cmd/atcmd_ethernet.c
+DRAM_C += sdk/component/common/api/at_cmd/atcmd_lwip.c
+DRAM_C += sdk/component/common/api/at_cmd/atcmd_sys.c
+DRAM_C += sdk/component/common/api/at_cmd/atcmd_wifi.c
+endif
+#SRC_C += sdk/component/soc/realtek/8195a/misc/driver/low_level_io.c
 
 #network - api
 ifdef USE_P2P_WPS
@@ -118,57 +116,48 @@ SRC_C += sdk/component/common/api/wifi/wifi_promisc.c
 SRC_C += sdk/component/common/api/wifi/wifi_simple_config.c
 SRC_C += sdk/component/common/api/wifi/wifi_util.c
 SRC_C += sdk/component/common/api/lwip_netconf.c
+ifdef USE_WIFI_API
 SRC_C += sdk/component/common/api/wifi_api.c 
 SRC_C += sdk/component/common/api/wifi_api_scan.c 
-
-#network - app
-#SRC_C += sdk/component/common/utilities/ssl_client.c
-#SRC_C += sdk/component/common/utilities/ssl_client_ext.c
-#SRC_C += sdk/component/common/utilities/tcptest.c
-#SRC_C += sdk/component/common/utilities/uart_ymodem.c
-#SRC_C += sdk/component/common/utilities/update.c
-#SRC_C += sdk/component/common/application/uart_adapter/uart_adapter.c
-#SRC_C += sdk/component/common/api/network/src/wlan_network.c
-#SRC_C += sdk/component/common/api/wifi_interactive_mode.c
-#SRC_C += sdk/component/common/api/network/src/ping_test.c
+endif
 
 #network - lwip
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/api/api_lib.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/api/api_msg.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/api/err.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/api/netbuf.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/api/netdb.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/api/netifapi.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/api/sockets.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/api/tcpip.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/ipv4/autoip.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/ipv4/icmp.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/ipv4/igmp.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/ipv4/inet.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/ipv4/inet_chksum.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/ipv4/ip.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/ipv4/ip_addr.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/ipv4/ip_frag.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/def.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/dhcp.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/dns.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/init.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/lwip_timers.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/mem.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/memp.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/netif.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/pbuf.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/raw.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/stats.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/sys.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/tcp.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/tcp_in.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/tcp_out.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/core/udp.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/src/netif/etharp.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/port/realtek/freertos/ethernetif.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/api/api_lib.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/api/api_msg.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/api/err.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/api/netbuf.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/api/netdb.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/api/netifapi.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/api/sockets.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/api/tcpip.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/ipv4/autoip.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/ipv4/icmp.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/ipv4/igmp.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/ipv4/inet.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/ipv4/inet_chksum.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/ipv4/ip.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/ipv4/ip_addr.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/ipv4/ip_frag.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/def.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/dhcp.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/dns.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/init.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/lwip_timers.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/mem.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/memp.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/netif.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/pbuf.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/raw.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/stats.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/sys.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/tcp.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/tcp_in.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/tcp_out.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/core/udp.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/src/netif/etharp.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/port/realtek/freertos/ethernetif.c
 SRC_C += sdk/component/common/drivers/wlan/realtek/src/osdep/lwip_intf.c
-SRC_C += sdk/component/common/network/lwip/lwip_v1.4.1/port/realtek/freertos/sys_arch.c
+SRC_C += sdk/component/common/network/lwip/$(LWIPDIR)/port/realtek/freertos/sys_arch.c
 SRC_C += sdk/component/common/network/dhcp/dhcps.c
 SRC_C += sdk/component/common/network/sntp/sntp.c
 SRC_C += sdk/component/common/network/netbios/netbios.c 
@@ -177,15 +166,15 @@ SRC_C += sdk/component/common/network/netbios/netbios.c
 #SRC_C += sdk/component/common/network/mDNS/mDNSPlatform.c
 
 #os - freertos
-SRC_C += sdk/component/os/freertos/freertos_v8.1.2/Source/portable/MemMang/heap_5.c
-SRC_C += sdk/component/os/freertos/freertos_v8.1.2/Source/portable/GCC/ARM_CM3/port.c
+SRC_C += sdk/component/os/freertos/$(RTOSDIR)/Source/portable/MemMang/heap_5.c
+SRC_C += sdk/component/os/freertos/$(RTOSDIR)/Source/portable/GCC/ARM_CM3/port.c
 SRC_C += sdk/component/os/freertos/cmsis_os.c
-SRC_C += sdk/component/os/freertos/freertos_v8.1.2/Source/croutine.c
-SRC_C += sdk/component/os/freertos/freertos_v8.1.2/Source/event_groups.c
-SRC_C += sdk/component/os/freertos/freertos_v8.1.2/Source/list.c
-SRC_C += sdk/component/os/freertos/freertos_v8.1.2/Source/queue.c
-SRC_C += sdk/component/os/freertos/freertos_v8.1.2/Source/tasks.c
-SRC_C += sdk/component/os/freertos/freertos_v8.1.2/Source/timers.c
+SRC_C += sdk/component/os/freertos/$(RTOSDIR)/Source/croutine.c
+SRC_C += sdk/component/os/freertos/$(RTOSDIR)/Source/event_groups.c
+SRC_C += sdk/component/os/freertos/$(RTOSDIR)/Source/list.c
+SRC_C += sdk/component/os/freertos/$(RTOSDIR)/Source/queue.c
+SRC_C += sdk/component/os/freertos/$(RTOSDIR)/Source/tasks.c
+SRC_C += sdk/component/os/freertos/$(RTOSDIR)/Source/timers.c
 
 #os - osdep
 SRC_C += sdk/component/os/os_dep/device_lock.c
@@ -195,7 +184,12 @@ SRC_C += sdk/component/os/os_dep/osdep_api.c
 SRC_C += sdk/component/os/os_dep/osdep_service.c
 SRC_C += sdk/component/os/os_dep/tcm_heap.c
 
+ifdef USE_MBED
 #peripheral - api
+INCLUDES += sdk/component/common/mbed/api
+INCLUDES += sdk/component/common/mbed/hal
+INCLUDES += sdk/component/common/mbed/hal_ext
+INCLUDES += sdk/component/common/mbed/targets/hal/rtl8195a
 SRC_C += sdk/component/common/mbed/targets/hal/rtl8195a/analogin_api.c
 SRC_C += sdk/component/common/mbed/targets/hal/rtl8195a/dma_api.c
 SRC_C += sdk/component/common/mbed/targets/hal/rtl8195a/efuse_api.c
@@ -223,6 +217,8 @@ SRC_C += sdk/component/common/mbed/targets/hal/rtl8195a/us_ticker.c
 SRC_C += sdk/component/common/mbed/common/us_ticker_api.c
 SRC_C += sdk/component/common/mbed/common/wait_api.c
 SRC_C += sdk/component/common/mbed/targets/hal/rtl8195a/wdt_api.c
+SRC_C += sdk/component/common/mbed/targets/hal/rtl8195a/flash_eep.c 
+endif
 
 #peripheral - hal
 SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_32k.c
@@ -239,6 +235,11 @@ SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_sdr_controller.c
 SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_ssi.c
 SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_timer.c
 SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_uart.c
+ifdef USE_SDIOH
+SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_sdio_host.c
+SRC_C += sdk/component/common/drivers/sdio/realtek/sdio_host/src/sd.c 
+SRC_C += sdk/component/common/drivers/sdio/realtek/sdio_host/src/sdio_host.c 
+endif
 
 #peripheral - osdep
 SRC_C += sdk/component/os/freertos/freertos_pmu.c
@@ -339,71 +340,90 @@ DRAM_C += sdk/component/common/network/ssl/polarssl-1.3.8/library/x509write_csr.
 DRAM_C += sdk/component/common/network/ssl/polarssl-1.3.8/library/xtea.c
 endif
 
+#utilities - FatFS
+ifdef USE_FATFS
+INCLUDES += sdk/component/common/file_system/fatfs
+INCLUDES += sdk/component/common/file_system/fatfs/r0.10c/include
+SRC_C += sdk/component/common/file_system/fatfs/fatfs_ext/src/ff_driver.c
+SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/diskio.c
+SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/ff.c
+SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/option/ccsbcs.c
+ifdef USE_SDIOH
+SRC_C += sdk/component/common/file_system/fatfs/disk_if/src/sdcard.c
+endif
+endif
 
+# Reversed SDK component
+#ADD_SRC_C += sdk/component/soc/realtek/8195a/cmsis/device/app_start.c
+SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_dac.c
+SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_common.c
+SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_soc_ps_monitor.c
+SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_efuse.c
+SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_log_uart.c
+SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_pinmux.c
+SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_misc.c
+#ADD_SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_spi_flash_ram.c
+# Component clib, ...
+SRC_C += sdk/component/soc/realtek/8195a/fwlib/ram_lib/startup.c 
+SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/ram_libc.c 
+SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/ram_libgloss_retarget.c
+SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/rtl_eabi_cast_ram.c
+SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/rtl_math_ram.c
+#if +- nostdlib..
+SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/ram_pvvx_libc.c 
+#if c_printf() float
+SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/c_stdio.c
+# -------------------------------------------------------------------
+# Add Source file list
+# -------------------------------------------------------------------
+ADD_SRC_C = 
+# -------------------------------------------------------------------
+# SAMPLES
+# -------------------------------------------------------------------
+ifdef USE_AT
+INCLUDES += sdk/component/common/utilities
+ADD_SRC_C += sdk/component/common/api/network/src/wlan_network.c
+ADD_SRC_C += sdk/component/common/api/wifi_interactive_mode.c
+ADD_SRC_C += sdk/component/common/api/network/src/ping_test.c
+ADD_SRC_C += sdk/component/common/utilities/webserver.c
+ADD_SRC_C += sdk/component/common/utilities/tcptest.c
+ADD_SRC_C += sdk/component/common/utilities/update.c
+INCLUDES += sdk/component/common/example
+INCLUDES += sdk/component/common/example/wlan_fast_connect
+ADD_SRC_C += sdk/component/common/example/wlan_fast_connect/example_wlan_fast_connect.c
+ADD_SRC_C += sdk/component/common/example/uart_atcmd/example_uart_atcmd.c
+ADD_SRC_C += sdk/component/common/example/example_entry.c
+ADD_SRC_C += sdk/component/common/application/xmodem/uart_fw_update.c
+endif
+#application
+#INCLUDES += sdk/component/common/application/apple/WACServer/External/Curve25519
+#INCLUDES += sdk/component/common/application/apple/WACServer/External/GladmanAES
+#INCLUDES += sdk/component/common/audio 
+#INCLUDES += sdk/component/common/application/xmodem
+#INCLUDES += sdk/component/common/application
+#INCLUDES += sdk/component/common/application/iotdemokit
+#INCLUDES += sdk/component/common/application/google
+#INCLUDES += sdk/component/common/media/framework
 #SDRAM - wigadget
 #DRAM_C += sdk/component/common/application/wigadget/cloud_link.c
 #DRAM_C += sdk/component/common/application/wigadget/shtc1.c
 #DRAM_C += sdk/component/common/application/wigadget/wigadget.c
 
 #utilities
-#SRC_C += sdk/component/common/utilities/cJSON.c
-#SRC_C += sdk/component/common/utilities/http_client.c
-#SRC_C += sdk/component/common/utilities/uart_socket.c
-#SRC_C += sdk/component/common/utilities/webserver.c
-#SRC_C += sdk/component/common/utilities/xml.c
-
-#utilities - FatFS
-ifdef USE_FATFS
-SRC_C += sdk/component/common/file_system/fatfs/fatfs_ext/src/ff_driver.c
-SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/diskio.c
-SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/ff.c
-SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/option/ccsbcs.c
-SRC_C += sdk/component/common/file_system/fatfs/disk_if/src/sdcard.c
-INCLUDES += sdk/component/common/file_system/fatfs
-endif
-
-#utilities - xmodem update
-#SRC_C += sdk/component/common/application/xmodem/uart_fw_update.c
-# -------------------------------------------------------------------
-# My Source file list
-# -------------------------------------------------------------------
-ADD_SRC_C = 
-# REVERSED 
-#ADD_SRC_C += sdk/component/soc/realtek/8195a/cmsis/device/app_start.c
-ADD_SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_dac.c
-ADD_SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_common.c
-ADD_SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_soc_ps_monitor.c
-ADD_SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_efuse.c
-ADD_SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_log_uart.c
-ADD_SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_pinmux.c
-ADD_SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_misc.c
-#ADD_SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_spi_flash_ram.c
-# COMPONENTS
-ADD_SRC_C += sdk/component/soc/realtek/8195a/fwlib/ram_lib/startup.c 
-ADD_SRC_C += sdk/component/common/mbed/targets/hal/rtl8195a/flash_eep.c 
-ADD_SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/ram_libc.c 
-ADD_SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/ram_libgloss_retarget.c
-ADD_SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/rtl_eabi_cast_ram.c
-ADD_SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/rtl_math_ram.c
-#if +- nostdlib..
-ADD_SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/ram_pvvx_libc.c 
-#if c_printf() float
-ADD_SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/c_stdio.c
-# -------------------------------------------------------------------
-# SAMPLES
-# -------------------------------------------------------------------
+#ADD_SRC_C += sdk/component/common/utilities/cJSON.c
+#ADD_SRC_C += sdk/component/common/utilities/http_client.c
+#ADD_SRC_C += sdk/component/common/utilities/uart_socket.c
+#ADD_SRC_C += sdk/component/common/utilities/xml.c
+#ADD_SRC_C += sdk/component/common/utilities/ssl_client.c
+#ADD_SRC_C += sdk/component/common/utilities/ssl_client_ext.c
+#ADD_SRC_C += sdk/component/common/utilities/uart_ymodem.c
+#ADD_SRC_C += sdk/component/common/application/uart_adapter/uart_adapter.c
 #ADD_SRC_C += sdk/component/common/example/cJSON/cJSON_example.c 
 #ADD_SRC_C += sdk/component/common/example/googlenest/example_google.c  
 #ADD_SRC_C += sdk/component/common/example/mdns/example_mdns.c
 #ADD_SRC_C += sdk/component/common/example/socket_select/example_socket_select.c
-#ADD_SRC_C += sdk/component/common/example/wlan_fast_connect/example_wlan_fast_connect.c
-#ADD_SRC_C += sdk/component/common/example/uart_atcmd/example_uart_atcmd.c
 #ADD_SRC_C += sdk/component/common/example/xml/example_xml.c
-#ADD_SRC_C += sdk/component/common/example/example_entry.c
-#ADD_SRC_C += sdk/component/common/drivers/sdio/realtek/sdio_host/src/sd.c 
-#ADD_SRC_C += sdk/component/common/drivers/sdio/realtek/sdio_host/src/sdio_host.c 
-#ADD_SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_sdio_host.c
-#ADD_SRC_C += sdk/component/common/file_system/fatfs/disk_if/src/sdcard.c
+
 #=============================================
 # PROGECT
 #=============================================
@@ -417,7 +437,7 @@ ADD_SRC_C += project/src/console/wifi_console.c
 #ADD_SRC_C += project/src/console/wlan_tst.c
 #ADD_SRC_C += project/src/ina219/ina219drv.c
 ##ADD_SRC_C += project/src/driver/i2c_drv.c
-##ADD_SRC_C += project/src/ina219/ina219buf.c
+##ADD_SRC_C += project/src/ina219/ina219drv.c
 
 #Web-свалка
 INCLUDES += project/inc/web
