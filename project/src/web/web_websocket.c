@@ -162,6 +162,7 @@ websock_rx_data(TCP_SERV_CONN *ts_conn)
 							}
 						}
 						else {
+							if(web_conn->msgbuf) os_free(web_conn->msgbuf);
 							web_conn->msgbuf = (uint8 *) os_malloc(web_conn->msgbufsize);
 							if (web_conn->msgbuf == NULL) {
 #if DEBUGSOO > 0
@@ -176,7 +177,7 @@ websock_rx_data(TCP_SERV_CONN *ts_conn)
 							if(CheckSCB(SCB_RETRYCB)) { // повторный callback? да
 								if(web_conn->func_web_cb != NULL) web_conn->func_web_cb(ts_conn);
 								if(!CheckSCB(SCB_RETRYCB)) {
-									ClrSCB(SCB_FCLOSE | SCB_DISCONNECT);
+//									ClrSCB(SCB_FCLOSE | SCB_DISCONNECT);
 									opcode = WS_OPCODE_CONTINUE | WS_FRAGMENT_FIN;
 								}
 								else opcode = WS_OPCODE_CONTINUE;
@@ -194,18 +195,18 @@ websock_rx_data(TCP_SERV_CONN *ts_conn)
 								}
 								if(CheckSCB(SCB_RETRYCB)) opcode = WS_OPCODE_TEXT;
 								else {
-									ClrSCB(SCB_FCLOSE | SCB_DISCONNECT);
+//									ClrSCB(SCB_FCLOSE | SCB_DISCONNECT);
 									opcode = WS_OPCODE_TEXT | WS_FRAGMENT_FIN;
 								}
 							}
 							if(web_conn->msgbuflen != 0) {
 								if(websock_tx_frame(ts_conn, opcode, web_conn->msgbuf, web_conn->msgbuflen) != ERR_OK) {
-									os_free(web_conn->msgbuf);
+									if(web_conn->msgbuf) os_free(web_conn->msgbuf);
 									web_conn->msgbuf = NULL;
 									return false; // не докачивать, ошибка или закрытие
 								}
 							}
-							os_free(web_conn->msgbuf);
+							if(web_conn->msgbuf) os_free(web_conn->msgbuf);
 							web_conn->msgbuf = NULL;
 							if(CheckSCB(SCB_RETRYCB)) return false;
 						}

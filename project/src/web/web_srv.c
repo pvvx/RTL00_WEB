@@ -1982,34 +1982,47 @@ LOCAL void ICACHE_FLASH_ATTR webserver_disconnect(TCP_SERV_CONN *ts_conn)
 	if(CheckSCB(SCB_SYSSAVE)) {
 		ClrSCB(SCB_SYSSAVE);
 		sys_write_cfg();
-	}
-	if(web_conn->web_disc_cb != NULL) {
-		if(xQueueSendToBack(xQueueWebSrv, &web_conn->web_disc_cb, 0) != pdPASS) {
-#if DEBUGSOO > 1
-			os_printf("\nWEB: Queue QFn full!\n");
-#endif
-		}
-//		web_conn->web_disc_cb(web_conn->web_disc_par);
 	};
 }
 
 /******************************************************************************
 ******************************************************************************/
+BaseType_t webserver_qfn(web_ex_func_cb fnc, void * param, uint16 pause_ms) {
+	WEB_SRV_QFNK qfn;
+	qfn.fnc = fnc;
+	qfn.param = param;
+	qfn.pause_ms = pause_ms;
+	return xQueueSendToBack(xQueueWebSrv, &qfn, 0);
+}
+/******************************************************************************
+ * todo: временная затычка, необходимо переделать...
+******************************************************************************/
 void qfnk_task(void)
 {
 	WEB_SRV_QFNK qfn;
+	WEB_SRV_QFNK qfnt;
+	TickType_t timetick;
 	while(1) {
-		if(xQueueReceive(xQueueWebSrv, &qfn, portMAX_DELAY ) == pdPASS) {
-			if(qfn.fnk) {
+		if(xQueueReceive(xQueueWebSrv, &qfn, 5) == pdPASS) { // portMAX_DELAY
+			if(qfn.fnc) {
 #if DEBUGSOO > 2
-				os_printf("qfn: %p(%p)\n", qfn.fnk, qfn.param);
+				os_printf("qfn: %p(%p),%d\n", qfn.fnc, qfn.param, qfn.pause_ms);
 #endif
-				vTaskDelay(200); // Timeout + WDT
-				qfn.fnk(qfn.param);
+				if(qfn.pause_ms) {
+					timetick = xTaskGetTickCount();
+					qfnt = qfn;
+				}
+				else qfn.fnc(qfn.param);
 			}
-//			else {
-//				vTaskDelete(NULL);
-//			}
+		}
+		else if(qfnt.fnc) {
+			if(xTaskGetTickCount() - timetick > qfnt.pause_ms) {
+#if DEBUGSOO > 3
+				os_printf("qfnt: %p(%p),%d\n", qfnt.fnc, qfnt.param, qfnt.pause_ms);
+#endif
+				qfnt.fnc(qfnt.param);
+				qfnt.fnc = NULL;
+			}
 		}
 	}
 }
@@ -2019,15 +2032,12 @@ void qfnk_task(void)
  * Parameters   : arg -- port N
  * Returns      : none
 *******************************************************************************/
-//TaskHandle_t xHandleQfn;
 err_t ICACHE_FLASH_ATTR webserver_init(uint16 portn)
 {
 //	WEBFSInit(); // файловая система
-
 	err_t err = ERR_MEM;
 	xQueueWebSrv = xQueueCreate(5, sizeof( WEB_SRV_QFNK )); // Create a queue...
 	if(xQueueWebSrv) {
-//		if(xTaskCreate(qfnk_task, "web_qfn", 1024, NULL, tskIDLE_PRIORITY + 1 + PRIORITIE_OFFSET, &xHandleQfn) == pdPASS)
 		if(xTaskCreate(qfnk_task, "web_qfn", 1024, NULL, tskIDLE_PRIORITY + 1 + PRIORITIE_OFFSET, NULL) == pdPASS)
 		{
 			TCP_SERV_CFG *p = tcpsrv_init(portn);
@@ -2065,7 +2075,6 @@ err_t ICACHE_FLASH_ATTR webserver_init(uint16 portn)
 //	else err = ERR_MEM;
 	return err;
 }
-
 /******************************************************************************
  * FunctionName : webserver_close
  * Description  : закрытие сервера
@@ -2081,21 +2090,14 @@ err_t ICACHE_FLASH_ATTR webserver_close(uint16 portn)
 #endif
 	if(xQueueWebSrv) {
 		WEB_SRV_QFNK qfn;
-		qfn.fnk = vTaskDelete;
-		qfn.fnk = NULL;
+		qfn.fnc = vTaskDelete;
 		qfn.param = NULL;
+		qfn.pause_ms = 0;
 		if(xQueueSendToBack(xQueueWebSrv, &qfn, 1000) == pdPASS) {
 			while(uxQueueMessagesWaiting(xQueueWebSrv)) {
 				vTaskDelay(10);
 			};
 		}
-/*
-		else if(xHandleQfn) {
-			vTaskDelete(xHandleQfn);
-		}
-		vQueueDelete(xQueueWebSrv);
-		xHandleQfn = NULL;
-*/
 		xQueueWebSrv = NULL;
 	};
 	return err;

@@ -96,7 +96,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 	else ifcmp("sys_") {
 		cstr+=4;
 		ifcmp("restart") {
-			if(val == 12345) web_conn->web_disc_cb = (web_func_disc_cb)sys_reset;
+			if(val == 12345) webserver_qfn((web_ex_func_cb)sys_reset, NULL, 200);
 		}
 		else ifcmp("ram") { uint32 *ptr = (uint32 *)(ahextoul(cstr+3)&(~3)); str_array(pvar, ptr, 32); }
 		else ifcmp("debug") print_off = (!val) & 1; // rtl_print on/off
@@ -119,9 +119,8 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 			cstr += 4;
 			ifcmp("port") {
 				if(syscfg.web_port != val) {
-	        		web_conn->web_disc_par = syscfg.web_port; // ts_conn->pcfg->port
+					webserver_qfn((web_ex_func_cb)webserver_reinit, (void *)syscfg.web_port, 200);
 					syscfg.web_port = val;
-	    			web_conn->web_disc_cb = (web_func_disc_cb)webserver_reinit;
 				}
 			}
 			else ifcmp("twd") {
@@ -190,10 +189,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
       cstr+=5;
       ifcmp("scan") api_wifi_scan(NULL);
       else ifcmp("rdcfg") web_conn->udata_stop = read_wifi_cfg(val);
-      else ifcmp("newcfg") {
-    	  web_conn->web_disc_cb = (web_func_disc_cb)wifi_run;
-    	  web_conn->web_disc_par = wifi_cfg.mode;
-      }
+      else ifcmp("newcfg") webserver_qfn((web_ex_func_cb)wifi_run, (void *)wifi_cfg.mode, 200);
       else ifcmp("mode")	wifi_cfg.mode = val;
       else ifcmp("bgn")  	wifi_cfg.bgn = val;
       else ifcmp("lflg") 	wifi_cfg.load_flg = val;
@@ -247,7 +243,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
        		  netbios_set_name(WLAN_AP_NETIF_NUM, lwip_host_name[1]);
        		  if(wifi_cfg.save_flg & BID_AP_HOSTNAME) {
        			  WEB_SRV_QFNK x;
-       			  x.fnk = write_wifi_cfg;
+       			  x.fnc = write_wifi_cfg;
        			  x.param = BID_AP_HOSTNAME;
        			  xQueueSendToBack(xQueueWebSrv, &x, 0);
        		  }
@@ -304,8 +300,9 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
        		  }
        		  if(wifi_cfg.save_flg & BID_ST_HOSTNAME) {
        			  WEB_SRV_QFNK x;
-       			  x.fnk = write_wifi_cfg;
+       			  x.fnc = write_wifi_cfg;
        			  x.param = BID_ST_HOSTNAME;
+       			  x.pause_ms = 0;
        			  xQueueSendToBack(xQueueWebSrv, &x, 0);
        		  }
           }

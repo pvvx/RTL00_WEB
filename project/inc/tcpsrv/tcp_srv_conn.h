@@ -7,7 +7,7 @@
  ***********************************/
 #define __TCP_SERV_CONN_H__
 
-//#include "user_interface.h"
+#include "user_config.h"
 //#include "os_type.h"
 
 #include "lwip/err.h"

@@ -115,7 +115,7 @@ void ICACHE_FLASH_ATTR web_test_adc(TCP_SERV_CONN *ts_conn)
     	read_adcs((uint16 *)(web_conn->msgbuf + web_conn->msgbuflen), len, 0x0808);
     	web_conn->msgbuflen += len << 1;
     }
-    SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
+    if(!CheckSCB(SCB_WEBSOC)) SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
 }
 #endif // TEST_SEND_WAVE
 
@@ -245,14 +245,14 @@ void ICACHE_FLASH_ATTR web_hexdump(TCP_SERV_CONN *ts_conn)
 			tcp_puts("\r\n");
 			if((uint32)addr >= web_conn->udata_stop) {
 			    ClrSCB(SCB_RETRYCB);
-			    SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
+			    if(!CheckSCB(SCB_WEBSOC)) SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
 			    return;
 			}
 		}
 		else {
 			tcp_puts("%p = Bad address!\r\n", addr);
 		    ClrSCB(SCB_RETRYCB);
-		    SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
+		    if(!CheckSCB(SCB_WEBSOC)) SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
 		    return;
 		};
 	}
@@ -366,14 +366,16 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
             cstr+=4;
             ifcmp("scan") web_wscan_xml(ts_conn);
 #if WEB_DEBUG_FUNCTIONS
-#if USE_WEB_AUTH_LEVEL
-            if(web_conn->auth_level < WEB_AUTH_LEVEL_USER) return;
-#endif
             else {
-            	web_conn->udata_start&=~3;
-            	ifcmp("ram") tcp_puts("0x%08x", *((uint32*)web_conn->udata_start));
-            	else tcp_put('?');
-            	web_conn->udata_start += 4;
+#if USE_WEB_AUTH_LEVEL
+            	if(web_conn->auth_level < WEB_AUTH_LEVEL_USER) return;
+#endif
+            	else {
+            		web_conn->udata_start&=~3;
+            		ifcmp("ram") tcp_puts("0x%08x", *((uint32*)web_conn->udata_start));
+            		else tcp_put('?');
+            		web_conn->udata_start += 4;
+            	}
             }
 #endif
         }
@@ -403,11 +405,18 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
           else ifcmp("clkcpu") tcp_puts("%u", HalGetCpuClk());
           else ifcmp("debug") tcp_put('1' - (print_off & 1)); // rtl_print on/off
 #if WEB_DEBUG_FUNCTIONS
+#if 1 // WEB_INA219_DRV
+          else ifcmp("ina219") {
+        	  if(CheckSCB(SCB_WEBSOC)) {
+        		  ina219_ws(val);
+        	  }
+          }
+#endif
           else ifcmp("restart") {
 #if USE_WEB_AUTH_LEVEL
         	  if(web_conn->auth_level < WEB_AUTH_LEVEL_USER) return;
 #endif
-        	  web_conn->web_disc_cb = (web_func_disc_cb)sys_reset;
+        	  webserver_qfn((web_ex_func_cb)sys_reset, NULL, 200);
           }
           else ifcmp("ram") tcp_puts("0x%08x", *((uint32 *)(ahextoul(cstr+3)&(~3))));
           else ifcmp("rdec") tcp_puts("%d", *((uint32 *)(ahextoul(cstr+4)&(~3))));
@@ -451,10 +460,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
         else ifcmp("wifi_") {
           cstr+=5;
           ifcmp("rdcfg") read_wifi_cfg(-1);
-          else ifcmp("newcfg") {
-        	  web_conn->web_disc_cb = (web_func_disc_cb)wifi_run;
-        	  web_conn->web_disc_par = wifi_cfg.mode;
-          }
+          else ifcmp("newcfg") webserver_qfn((web_ex_func_cb)wifi_run, (void *)wifi_cfg.mode, 200);
           else ifcmp("cmode") tcp_puts("%d", wifi_mode);
           else ifcmp("mode") tcp_puts("%d", wifi_cfg.mode);
           else ifcmp("bgn") tcp_puts("%d", wifi_cfg.bgn);

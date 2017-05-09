@@ -76,12 +76,13 @@ typedef struct
 
 
 typedef void (* web_func_cb)(TCP_SERV_CONN *ts_conn);
-typedef uint32 (* web_func_disc_cb)(uint32 flg); // отложенная функция, когда соединение закрыто
+typedef uint32 (* web_ex_func_cb)(uint32 flg); // внешняя или отложенная функция
 
 typedef struct
 {
-	web_func_disc_cb fnk;
-	void * param;
+	web_ex_func_cb fnc;
+	void *	param;
+	uint16	pause_ms;
 } WEB_SRV_QFNK;
 
 typedef struct
@@ -95,8 +96,6 @@ typedef struct
 	uint16 msgbufsize;	// размер буфера
 	web_func_cb func_web_cb; // calback функция у httpd для обработки приема/передачи кусками
 	uint32 content_len; // размер файла для передачи (GET/POST) или приема, если принимается внешний файл (POST + SCB_RXDATA)
-	web_func_disc_cb web_disc_cb; // функция вызываемая по закрытию соединения
-	uint32 web_disc_par; // параметры функции вызываемой по закрытию соединения
 #ifdef WEBSOCKET_ENA
 	WS_FRSTAT ws;	// параметры websoc
 #endif
@@ -205,5 +204,7 @@ uint32 ahextoul(uint8 *s);
 err_t webserver_init(uint16 portn);
 err_t webserver_close(uint16 portn);
 err_t webserver_reinit(uint16 portn);
+
+BaseType_t webserver_qfn(web_ex_func_cb fnc, void * param, uint16	pause_ms); // вызов функции из task с low priority
 
 #endif /* _INCLUDE_WEB_SRV_H_ */
