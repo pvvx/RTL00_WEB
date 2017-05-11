@@ -11,6 +11,8 @@
 
 #define WEB_DEBUG_FUNCTIONS 1 // =1 - включить в WEB отладочные функции, =0 отключить (остается только конфигурация WiFi)
 
+#define WEB_INA219_DRV 1
+
 #endif // _user_config_h_
 
 

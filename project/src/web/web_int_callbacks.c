@@ -405,13 +405,6 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
           else ifcmp("clkcpu") tcp_puts("%u", HalGetCpuClk());
           else ifcmp("debug") tcp_put('1' - (print_off & 1)); // rtl_print on/off
 #if WEB_DEBUG_FUNCTIONS
-#if 1 // WEB_INA219_DRV
-          else ifcmp("ina219") {
-        	  if(CheckSCB(SCB_WEBSOC)) {
-        		  ina219_ws(val);
-        	  }
-          }
-#endif
           else ifcmp("restart") {
 #if USE_WEB_AUTH_LEVEL
         	  if(web_conn->auth_level < WEB_AUTH_LEVEL_USER) return;
@@ -433,6 +426,16 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 #endif
           else tcp_put('?');
         }
+#ifdef WEB_INA219_DRV
+        else ifcmp("ina219") {
+        	  if(CheckSCB(SCB_WEBSOC)) {
+extern int ina219_ws(TCP_SERV_CONN *ts_conn, char cmd);
+				  int x = ina219_ws(ts_conn, cstr[6]);
+        		  if(x < 0) SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
+        		  else tcp_puts("%d", x);
+        	  }
+        }
+#endif
         else ifcmp("cfg_") {
 			cstr += 4;
 			ifcmp("web_") {

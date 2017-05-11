@@ -155,6 +155,7 @@ websock_rx_data(TCP_SERV_CONN *ts_conn)
 							SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
 							return false;
 						}
+						web_conn->msgbufsize -= 16;
 						if(ws->frame_len == (sizeof(txt_wsping)-1) && rom_xstrcmp(pstr, txt_wsping) != 0){
 							copy_s4d1(pstr, (void *)txt_wspong, sizeof(txt_wspong) - 1);
 							if(websock_tx_frame(ts_conn, WS_OPCODE_TEXT | WS_FRAGMENT_FIN, pstr, sizeof(txt_wspong) - 1) != ERR_OK) {

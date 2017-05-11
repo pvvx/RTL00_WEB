@@ -1,3 +1,5 @@
+WEB_INA219_DRV = 1
+
 #USE_AT = 1
 #USE_FATFS = 1
 #USE_SDIOH = 1
@@ -436,8 +438,11 @@ ADD_SRC_C += project/src/console/wifi_console.c
 #ADD_SRC_C += project/src/console/pwm_tst.c
 #ADD_SRC_C += project/src/console/wlan_tst.c
 #ADD_SRC_C += project/src/ina219/ina219drv.c
-##ADD_SRC_C += project/src/driver/i2c_drv.c
-##ADD_SRC_C += project/src/ina219/ina219drv.c
+ifdef WEB_INA219_DRV
+ADD_SRC_C += project/src/driver/i2c_drv.c
+ADD_SRC_C += project/src/ina219/ina219drv.c
+CFLAGS += -DWEB_INA219_DRV=1
+endif
 
 #Web-свалка
 INCLUDES += project/inc/web
