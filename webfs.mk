@@ -1,4 +1,5 @@
-include paths.mk
+include userset.mk
+include $(SDK_PATH)paths.mk
 
 all:
 	@mkdir -p $(BIN_DIR)
