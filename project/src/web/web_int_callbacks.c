@@ -53,6 +53,10 @@
 #define mMIN(a, b)  ((a<b)?a:b)
 #define ifcmp(a)  if(rom_xstrcmp(cstr, a))
 
+#define OpenFlash() { device_mutex_lock(RT_DEV_LOCK_FLASH); flash_turnon(); }
+#define CloseFlash() { SpicDisableRtl8195A(); device_mutex_unlock(RT_DEV_LOCK_FLASH); }
+
+
 extern struct netif xnetif[NET_IF_NUM]; /* network interface structure */
 
 
@@ -230,15 +234,21 @@ void ICACHE_FLASH_ATTR web_hexdump(TCP_SERV_CONN *ts_conn)
 	int i;
 	web_conn->udata_stop &= 0xfffffff0;
 	while(web_conn->msgbuflen + (9+3*16+17+2) <= web_conn->msgbufsize) {
-		if((uint32)addr < 0x9A000000) {
+//		if((uint32)addr < 0x9A000000) {
+			if((uint32)addr >= 0x98000000 && (uint32)addr < 0x9A000000) {
+				OpenFlash();
+			}
 			tcp_puts("%08x", addr);
 			for(i=0 ; i < 4 ; i++) data.dw[i] = *addr++;
 			web_conn->udata_start = (uint32)addr;
-			if(ts_conn->flag.user_option1) {
+			if(ts_conn->flag.user_option1) { // dword or byte ?
 				for(i=0 ; i < 4 ; i++) tcp_puts(" %08x", data.dw[i]);
 			}
 			else {
 				for(i=0 ; i < 16 ; i++) tcp_puts(" %02x", data.b[i]);
+			}
+			if((uint32)addr >= 0x98000000 && (uint32)addr < 0x9A000000) {
+				CloseFlash();
 			}
 			tcp_put(' '); tcp_put(' ');
 			for(i=0 ; i < 16 ; i++) tcp_put((data.b[i] >=' ' && data.b[i] != 0x7F)? data.b[i] : '.');
@@ -248,13 +258,12 @@ void ICACHE_FLASH_ATTR web_hexdump(TCP_SERV_CONN *ts_conn)
 			    if(!CheckSCB(SCB_WEBSOC)) SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
 			    return;
 			}
-		}
-		else {
-			tcp_puts("%p = Bad address!\r\n", addr);
-		    ClrSCB(SCB_RETRYCB);
-		    if(!CheckSCB(SCB_WEBSOC)) SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
-		    return;
-		};
+//		} else {
+//			tcp_puts("%p = Bad address!\r\n", addr);
+//		    ClrSCB(SCB_RETRYCB);
+//		    if(!CheckSCB(SCB_WEBSOC)) SetSCB(SCB_FCLOSE | SCB_DISCONNECT); // connection close
+//		    return;
+//		};
 	}
 	// repeat in the next call ...
     SetSCB(SCB_RETRYCB);
@@ -283,18 +292,18 @@ void ICACHE_FLASH_ATTR web_get_flash(TCP_SERV_CONN *ts_conn)
 #if DEBUGSOO > 2
 	os_printf("%08x..%08x ",web_conn->udata_start, web_conn->udata_start + len );
 #endif
-//	device_mutex_lock(RT_DEV_LOCK_FLASH);
+	device_mutex_lock(RT_DEV_LOCK_FLASH);
     if(spi_flash_read(web_conn->udata_start, web_conn->msgbuf, len)) {
       web_conn->udata_start += len;
       web_conn->msgbuflen += len;
       if(web_conn->udata_start < web_conn->udata_stop) {
         SetNextFunSCB(web_get_flash);
-//   	    device_mutex_unlock(RT_DEV_LOCK_FLASH);
+   	    device_mutex_unlock(RT_DEV_LOCK_FLASH);
         SetSCB(SCB_RETRYCB);
         return;
       };
     };
-//    device_mutex_unlock(RT_DEV_LOCK_FLASH);
+    device_mutex_unlock(RT_DEV_LOCK_FLASH);
     ClrSCB(SCB_RETRYCB);
 //    SetSCB(SCB_FCLOSE | SCB_DISCONNECT);
     return;
@@ -320,7 +329,13 @@ void ICACHE_FLASH_ATTR web_get_ram(TCP_SERV_CONN *ts_conn)
 	}
     // Get/put as many bytes as possible
     uint32 len = mMIN(web_conn->msgbufsize - web_conn->msgbuflen, web_conn->udata_stop - web_conn->udata_start);
+	if((uint32)web_conn->udata_start >= 0x98000000 && (uint32)web_conn->udata_start < 0x9A000000) {
+		OpenFlash();
+	}
 	copy_align4(web_conn->msgbuf, (void *)(web_conn->udata_start), len);
+	if((uint32)web_conn->udata_start >= 0x98000000 && (uint32)web_conn->udata_start < 0x9A000000) {
+		CloseFlash();
+	}
 	web_conn->msgbuflen += len;
 	web_conn->udata_start += len;
 #if DEBUGSOO > 2

@@ -8,6 +8,21 @@
 #ifndef _INCLUDE_WEB_UTILS_H_
 #define _INCLUDE_WEB_UTILS_H_
 
+typedef enum {
+	SEG_ID_ROM = 0,
+	SEG_ID_SRAM,
+	SEG_ID_TCM,
+	SEG_ID_FLASH,
+	SEG_ID_SDRAM,
+	SEG_ID_SOC,
+	SEG_ID_CPU,
+	SEG_ID_ERR,
+	SEG_ID_MAX
+} SEG_ID;
+
+extern const uint32 tab_seg_def[];
+SEG_ID get_seg_id(uint32 addr, int32 size);
+
 int rom_atoi(const char *s);
 void copy_align4(void *ptrd, void *ptrs, uint32 len);
 uint32 hextoul(uint8 *s);

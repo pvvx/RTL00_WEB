@@ -95,6 +95,46 @@ int ICACHE_FLASH_ATTR rom_atoi(const char *s)
 		n = 10*n - (*s++ - '0');
 	return neg ? n : -n;
 }
+
+/******************************************************************************
+ * get_seg_id()
+*******************************************************************************/
+const char * const txt_tab_seg[] = {
+		"ROM"		// 0
+		"SRAM",		// 1
+		"TCM",		// 2
+		"FLASH",	// 3	// -> flash On
+		"SDRAM",	// 4	// -> Test ChipID or HAL_PERI_ON_WRITE32(REG_SOC_FUNC_EN, HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) | BIT(21)); // Flag SDRAM Off
+		"SOC",		// 5	// protected !
+		"CPU",		// 6	// protected !
+		"UNK",		// 7
+		};
+
+const uint32 tab_seg_def[] = {
+		0x00000000, 0x00050000,
+		0x10000000, 0x10070000,
+		0x1fff0000,	0x20000000,
+		0x98000000, 0xA0000000,
+		0x30000000, 0x30200000,
+		0x40000000, 0x40800000,
+		0xE0000000, 0xE0010000,
+		0x00000000, 0xFFFFFFFF
+};
+
+SEG_ID get_seg_id(uint32 addr, int32 size) {
+	SEG_ID ret = SEG_ID_ERR;
+	uint32 * ptr = &tab_seg_def;
+	if (size > 0) {
+		do {
+			ret++;
+			if (addr >= ptr[0] && addr + size <= ptr[1]) {
+				return ret;
+			};
+			ptr += 2;
+		} while (ret < SEG_ID_MAX);
+	};
+	return 0;
+}
 /******************************************************************************
  * copy_align4
  * копирует данные из области кеширования flash и т.д.

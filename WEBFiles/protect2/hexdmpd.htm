@@ -11,7 +11,7 @@
 		<table>
 			<tr>
 				<td>RAM Start addr&nbsp&nbsp&nbsp</td>
-				<td><input type="text" id="start" size="12" maxlength="10" value="0x1FFF0000"></td>
+				<td><input type="text" id="start" size="12" maxlength="10" value="0x10000000"></td>
 				<td><input type=button onClick="NewCookie(-256)" value="-0x100" class="button"></td>
 				<td><input type=button onClick="NewCookie(0)" value="Show" class="button"></td>
 				<td><input type=button onClick="NewCookie(+256)" value="+0x100" class="button"></td>
@@ -21,7 +21,7 @@
 		<table>
 			<tr>
 				<td>Write addr, value:</td>
-				<td><input type="text" id="set_ramaddr" size="12" maxlength="10" value="0x1FFF0000"></td>
+				<td><input type="text" id="set_ramaddr" size="12" maxlength="10" value="0x10000000"></td>
 				<td><input type="text" id="set_ramdata" size="12" maxlength="10" value="0x12345678"></td>
 				<td><input type="button" onClick="SendRamVal(0)" value="Write" class="button"></td>
 			</tr>
@@ -34,7 +34,6 @@
 		</table>
 	</div>
 	<div class="footer">
-		Protected area: 0x9A000000..0xFFFFFFFF !<br>
 		<a href='/protect2/hexdmpd.txt?start=0x98000000&stop=0x98100000'>HEX Dump Flash 1024k</a>
 	</div>
 	<script src="cookie.js"></script>

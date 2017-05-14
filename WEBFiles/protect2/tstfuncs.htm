@@ -34,26 +34,16 @@
 				<td><a href='ram.bin?start=0x98000000&stop=0x98100000'>0x98000000..0x98100000</a></td>
 				<td>1024 kbytes</td>
 			</tr>
-			<tr>
-				<td>I/O SoC:</td>
-				<td><a href='ram.bin?start=0x40000000&stop=0x40080000'>0x40000000..0x40080000</a></td>
-				<td>.. kbytes</td>
-			</tr>
-			<tr>
-				<td>ARM:</td>
-				<td><a href='ram.bin?start=0xEF000000&stop=0xEFFFFFFF'>0xEF000000..0xEFFFFFFF</a></td>
-				<td>.. kbytes</td>
-			</tr>
 		</table>
 
 		<table class="form">
 			<tr>
 				<td class="label">Start addr</td>
-				<td><input type="text" id="rams" size=12 maxlength=10 value="0x3FF00000"></td>
+				<td><input type="text" id="rams" size=12 maxlength=10 value="0x10000000"></td>
 			</tr>
 			<tr>
 				<td class="label">End addr</td>
-				<td><input type="text" id="rame" size=12 maxlength=10 value="0x40800000"></td>
+				<td><input type="text" id="rame" size=12 maxlength=10 value="0x10070000"></td>
 			</tr>
 		</table>
 		<p class="center"><input type="button" onClick="NewCookie()" value="Download ram.bin" class="button"></p>

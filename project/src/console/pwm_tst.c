@@ -44,16 +44,11 @@ LOCAL void fATPWM(int argc, char *argv[]) {
     };
 }
 
-LOCAL void fATWLED(int argc, char *argv[]) {
-	HalPinCtrlRtl8195A(WL_LED, 2, 1);
-	HalPinCtrlRtl8195A(EGTIM, ahextoul(argv[1]), 1);
-}
 //------------------------------------------------------------------------------
 // atpwm=34,1048575,524287
 // atpwm=34,122,61 (8.187kHz)
 // atsw 40000368 85001002 (8.187kHz)
 // atsd 40000360 6
-MON_RAM_TAB_SECTION COMMAND_TABLE console_commands_adc[] = {
-		{ "ATWLED", 0, fATWLED, ": WLED Test" },
+MON_RAM_TAB_SECTION COMMAND_TABLE console_commands_pwm[] = {
 		{ "ATPWM", 3, fATPWM, "=<pin>,<period>,<pulse>: PWM Test" }
 };

@@ -24,18 +24,18 @@ function setCookieElem(name, defv) {
 function NewCookie(add) {
 	var val = parseInt(document.getElementById('start').value, 16) & 0xFFFFFFF0;
 	if (val == NaN)
-		setCookieElem('start', '0x40000000');
+		setCookieElem('start', '0x10000000');
 	else {
 		val += add;
-		setCookie('start', '0x' + val.toString(16));
+		setCookie('start', '0x' + (val >>> 0).toString(16));
 		var nval = val + 256;
-		setCookie('stop', '0x' + nval.toString(16));
-		document.getElementById('start').value = '0x' + val.toString(16);
+		setCookie('stop', '0x' + (nval >>> 0).toString(16));
+		document.getElementById('start').value = '0x' + (val >>> 0).toString(16);
 		document.getElementById('pmem').contentWindow.location.reload();
 	}
 }
-setCookieElem('start', '0x40000000');
-setCookieElem('set_ramaddr', '0x3FFF0000');
+setCookieElem('start', '0x10000000');
+setCookieElem('set_ramaddr', '0x10000000');
 setCookieElem('set_ramdata', '0x12345678');
 function UpTxt(xD, n, v) {
 	var x = getXMLValue(xD, n, v);
@@ -55,16 +55,16 @@ function SendRamVal(x) {
 	var addr = parseInt(document.getElementById('set_ramaddr').value, 16);
 	var val = parseInt(document.getElementById('set_ramdata').value, 16);
 	if (addr != NaN && val != NaN) {
-		document.getElementById('set_ramaddr').value = '0x' + addr.toString(16);
-		setCookie('set_ramaddr','0x' + addr.toString(16));
-		document.getElementById('set_ramdata').value = '0x' + val.toString(16);
-		setCookie('set_ramdata','0x' + val.toString(16));
+		document.getElementById('set_ramaddr').value = '0x' + (addr >>> 0).toString(16);
+		setCookie('set_ramaddr','0x' + (addr >>> 0).toString(16));
+		document.getElementById('set_ramdata').value = '0x' + (val >>> 0).toString(16);
+		setCookie('set_ramdata','0x' + (val >>> 0).toString(16));
 		if (x != 0)
-			newAJAXCommand('chiprams.xml?start=0x' + addr.toString(16),
+			newAJAXCommand('chiprams.xml?start=0x' + (addr >>> 0).toString(16),
 					UpdateValuesRam, 0);
 		else
-			newAJAXCommand('chiprams.xml?sys_ram0x' + addr.toString(16) + '=0x'
-					+ val.toString(16) + '&start=0x' + addr.toString(16),
+			newAJAXCommand('chiprams.xml?sys_ram0x' + (addr >>> 0).toString(16) + '=0x'
+					+ val.toString(16) + '&start=0x' + (addr >>> 0).toString(16),
 					UpdateValuesRam, 0);
 	}
 }
