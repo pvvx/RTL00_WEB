@@ -85,7 +85,7 @@ extern uint32_t SystemCoreClock;
  * See http://www.freertos.org/a00110.html.
  *----------------------------------------------------------*/
 
-#define configUSE_STACK_TCM_HEAP		1 // RTL871xAx/RTL8195Ax Stack priority used TCM HEAP
+#define configUSE_STACK_TCM_HEAP		5 // RTL871xAx/RTL8195Ax Stack priority used TCM HEAP
 #define configUSE_PREEMPTION			1
 #define configUSE_IDLE_HOOK				1
 #define configUSE_TICK_HOOK				0

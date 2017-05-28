@@ -33,7 +33,7 @@ INA219DRV ina219drv = {
 		INA219_CONFIG_BVOLTAGERANGE_16V | // INA219_CONFIG_BVOLTAGERANGE_32V
 		INA219_CONFIG_GAIN_8_320MV | // INA219_CONFIG_GAIN_1_40MV |
 		INA219_CONFIG_BADCRES_12BIT |
-		INA219_CONFIG_SADCRES_12BIT_2S_1060US | // INA219_CONFIG_SADCRES_12BIT_128S_69MS |
+		INA219_CONFIG_SADCRES_12BIT_1S_532US | //INA219_CONFIG_SADCRES_12BIT_2S_1060US | // INA219_CONFIG_SADCRES_12BIT_1S_532US | //
 		INA219_CONFIG_MODE_SANDBVOLT_CONTINUOUS,
 		.calibration = 8192,	// при шунте 0.1 Ом
 		.buf_idx = 709,			// циклический буфер на 710 замеров (по 4 байт -> sizeof(INA219DATA))
@@ -227,7 +227,7 @@ int ina219_ws(TCP_SERV_CONN *ts_conn, char cmd)
 			};
 			_i2c_init(&p->i2c);
 		    gtimer_init(&p->timer, INA219_TIMER);
-		    gtimer_start_periodical(&p->timer, 1000, (void*)ina_tick_handler, (uint32_t)&ina219drv);
+		    gtimer_start_periodical(&p->timer, 532*2, (void*)ina_tick_handler, (uint32_t)&ina219drv);
 		    p->init = 1;
 //			return 0;
 		}
@@ -276,7 +276,7 @@ void ina219_init(void)
 	    // Tick every 0.000532 sec (N*532 μs)
 //	    uint32 tus = (1 << ((p->config >> 3) & 7));
 //	    tus *= 532;
-	    gtimer_start_periodical(&p->timer, 1000, (void*)ina_tick_handler, (uint32_t)&ina219drv);
+	    gtimer_start_periodical(&p->timer, 532*2, (void*)ina_tick_handler, (uint32_t)&ina219drv);
 	    rtl_printf("INA219 Timer Period = %u us\n", p->timer.hal_gtimer_adp.TimerLoadValueUs);
 	    p->init = 1;
 	}

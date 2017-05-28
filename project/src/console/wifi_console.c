@@ -12,6 +12,7 @@
 #include "wifi_conf.h"
 #include "rtl8195a/rtl_libc.h"
 #include "hal_platform.h"
+#include "freertos_pmu.h"
 
 #include "section_config.h"
 #include "hal_diag.h"
@@ -226,7 +227,7 @@ LOCAL void fATSF(int argc, char *argv[])
 
 LOCAL void fATWP(int argc, char *argv[]) {
 	if(argc > 1) {
-		release_wakelock(0xffff);
+		pmu_release_wakelock(0xffff);
 		wifi_set_power_mode(1, 1);
 		wifi_set_lps_dtim(atoi(argv[1]));
 	}
