@@ -197,6 +197,8 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
       else ifcmp("txpow") 	wifi_cfg.tx_pwr = val;
       else ifcmp("adpt")  	wifi_cfg.adaptivity = val;
       else ifcmp("country") wifi_cfg.country_code = val;
+      // .. mac wifi_set_mac_address()
+
 //      else ifcmp("scan") {
 //    	  web_conn->web_disc_par = val;
 //    	  web_conn->web_disc_cb = (web_func_disc_cb)wifi_start_scan;
