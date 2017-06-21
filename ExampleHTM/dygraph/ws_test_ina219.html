@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="dygraph.css">
+    <title>Get data INA219</title>
+    <script type="text/javascript" src="dygraph.js"></script>
+
+  </head>
+  <body>
+    <h3 style="width:800px; text-align: center;">Read regs U & I INA219</h3>
+    <div id="div_g" style="width:800px; height:400px;"></div>
+    <script type="text/javascript">
+var data = [];
+var g = new Dygraph(
+	document.getElementById("div_g"), 
+    data,
+	{
+		drawPoints: true,
+		showRoller: true,
+	labels: ['X', 'U', 'I']});
+	
+var oldblkid = 0;
+var rdnextflg = false;
+var cur_idx = 0;
+ws = new WebSocket('ws://rtl871x0/web.cgi');
+ws.binaryType = 'arraybuffer';
+ws.onopen = function(){ws.send('ina219')};
+ws.onmessage = function (event) {
+	if(event.data instanceof ArrayBuffer) {
+		var wordarray = new Int16Array(event.data);
+		if(wordarray.length > 2) {
+			var blksz = wordarray[0]; 
+			if(wordarray.length == blksz*2 + 2) {
+				var blkid = wordarray[1] & 0xFFFF;
+				if(rdnextflg) {
+					cur_idx += (blkid - oldblkid) & 0xFFFF;
+				} else rdnextflg = true;
+				oldblkid = blkid + blksz;
+				for (var i=2; i<wordarray.length; i+=2) {
+ 					if(cur_idx > 2000 ) data.shift();
+					data.push([cur_idx, wordarray[i], wordarray[i+1]*50]);
+					cur_idx++;
+				}
+	 	 	    g.updateOptions({'file':data});
+			}
+		}
+		ws.send("ina219");
+	}
+}
+</script>
+  </body>
+</html>
