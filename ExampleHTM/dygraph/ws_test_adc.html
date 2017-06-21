@@ -17,7 +17,7 @@ var rdnextflg = false;
 var cur_idx = 0;
 ws = new WebSocket('ws://rtl871x0/web.cgi');
 ws.binaryType = 'arraybuffer';
-ws.onopen = function(){ws.send('adc')};
+ws.onopen = function(){ws.send('adc');ws.send('adc')};
 ws.onmessage = function (event) {
 	if(event.data instanceof ArrayBuffer) {
 		var wordarray = new Uint16Array(event.data);
