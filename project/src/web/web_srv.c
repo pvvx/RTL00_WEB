@@ -349,70 +349,6 @@ LOCAL void ICACHE_FLASH_ATTR web_parse_vars(TCP_SERV_CONN *ts_conn, uint8 *vars,
 	    }
 	}
 }
-/*
-//=============================================================================
-LOCAL void ICACHE_FLASH_ATTR
-web_parse_cookie(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
-{
-	if((CurHTTP->pcookie == NULL)||(CurHTTP->cookie_len == 0)) return;
-	uint8 pcmd[CmdNameSize];
-	uint8 pvar[VarNameSize*3];
-	uint8 *pcmp = CurHTTP->pcookie - 1;
-	do {
-		pcmp = cmpcpystr(pvar, ++pcmp, '\0', '=', sizeof(pvar)-1);
-		if(pcmp == NULL) return;
-		urldecode(pcmd, pvar, CmdNameSize - 1, sizeof(pvar));
-		pcmp = cmpcpystr(pvar, pcmp, '=', ';', sizeof(pvar)-1);
-		if(pcmd[0]!='\0') {
-			urldecode(pvar, pvar, VarNameSize - 1, sizeof(pvar));
-			web_int_vars(ts_conn, pcmd, pvar);
-	    }
-	} while(pcmp != NULL);
-}
-//=============================================================================
-LOCAL void ICACHE_FLASH_ATTR
-web_parse_uri_vars(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
-{
-	if((CurHTTP->puri == NULL)||(CurHTTP->uri_len == 0)) return;
-	uint8 pcmd[CmdNameSize];
-	uint8 pvar[VarNameSize*3];
-	uint8 *pcmp = CurHTTP->puri;
-	uint8 c = '?';
-	pcmp = cmpcpystr(NULL, pcmp, '\0', c, CurHTTP->uri_len);
-	while(pcmp != NULL) {
-		pcmp = cmpcpystr(pvar, pcmp, c, '=', sizeof(pvar)-1);
-		if(pcmp == NULL) return;
-		urldecode(pcmd, pvar, CmdNameSize - 1, sizeof(pvar));
-		c = '&';
-		pcmp = cmpcpystr(pvar, pcmp, '=', c, sizeof(pvar)-1);
-		if(pcmd[0]!='\0') {
-			urldecode(pvar, pvar, VarNameSize - 1, sizeof(pvar));
-			web_int_vars(ts_conn, pcmd, pvar);
-	    }
-	};
-}
-//=============================================================================
-LOCAL void ICACHE_FLASH_ATTR
-web_parse_content(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn)
-{
-	if((CurHTTP->pcontent == NULL)||(CurHTTP->content_len == 0)) return;
-	uint8 pcmd[CmdNameSize];
-	uint8 pvar[VarNameSize*3];
-	uint8 *pcmp = CurHTTP->pcontent;
-	uint8 c = '\0';
-	do {
-		pcmp = cmpcpystr(pvar, pcmp, c, '=', sizeof(pvar)-1);
-		if(pcmp == NULL) return;
-		urldecode(pcmd, pvar, CmdNameSize - 1, sizeof(pvar));
-		c = '&';
-		pcmp = cmpcpystr(pvar, pcmp, '=', c, sizeof(pvar)-1);
-		if(pcmd[0]!='\0') {
-			urldecode(pvar, pvar, VarNameSize - 1, sizeof(pvar));
-			web_int_vars(ts_conn, pcmd, pvar);
-	    }
-	} while(pcmp != NULL);
-}
-*/
 //=============================================================================
 // Разбор имени файла и перевод в вид относительного URI.
 // (выкидывание HTTP://Host)
@@ -2049,8 +1985,8 @@ err_t ICACHE_FLASH_ATTR webserver_init(uint16 portn)
 				os_printf("Max connection %d, time waits %d & %d, min heap size %d\n",
 						p->max_conn, p->time_wait_rec, p->time_wait_cls, p->min_heap);
 #endif
-				p->time_wait_rec = syscfg.web_twrec; // =0 -> вечное ожидание
-				p->time_wait_cls = syscfg.web_twcls; // =0 -> вечное ожидание
+				p->time_wait_rec = syscfg.web_twrec; // if =0 -> вечное ожидание
+				p->time_wait_cls = syscfg.web_twcls; // if =0 -> вечное ожидание
 				// слинкуем с желаемыми процедурами:
 			 	p->func_discon_cb = webserver_disconnect;
 		//	 	p->func_listen = webserver_listen; // не требуется

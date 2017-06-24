@@ -1,20 +1,14 @@
 /******************************************************************************
  * FileName: tcp_srv_conn.c
  * TCP сервачек для ESP8266
- * PV` ver1.0 20/12/2014
+ * pvvx ver1.0 20/12/2014
+ * Перекинут на RTL871X pvvx 2017
  ******************************************************************************/
 #include "user_config.h"
 #include "autoconf.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "diag.h"
-//#include "bios.h"
-//#include "sdk/add_func.h"
-//#include "osapi.h"
-//#include "user_interface.h"
-//#include
-//#include "rtl8195a/rtl_common.h"
-//#include "rtl_lib.h"
 #include "lwip/tcp.h"
 #include "lwip/tcp_impl.h"
 #include "lwip/memp.h"
@@ -23,8 +17,6 @@
 #include "tcpsrv/tcp_srv_conn.h"
 #include "rtl8195a/rtl_libc.h"
 #include "esp_comp.h"
-//#include "web_iohw.h"
-//#include "wifi.h"
 
 #ifdef CONFIG_DEBUG_LOG
 #define DEBUGSOO 2	// уровень вывода отладочной инфы по умолчанию = 2, =1 только error
@@ -75,43 +67,30 @@ static err_t tcpsrv_client_connect(TCP_SERV_CONN * ts_conn) TCP_SRV_CODE_ATTR;
 static void tcpsrv_client_reconnect(TCP_SERV_CONN * ts_conn) TCP_SRV_CODE_ATTR;
 
 #ifndef LWIP_DEBUG
-//#if DEBUGSOO > 2
-static const char srvContenErr00[] TCP_SRV_RODATA_ATTR = "Ok";						// ERR_OK          0
-static const char srvContenErr01[] TCP_SRV_RODATA_ATTR = "Out of memory error";		// ERR_MEM        -1
-static const char srvContenErr02[] TCP_SRV_RODATA_ATTR = "Buffer error";			// ERR_BUF        -2
-static const char srvContenErr03[] TCP_SRV_RODATA_ATTR = "Timeout";					// ERR_TIMEOUT    -3
-static const char srvContenErr04[] TCP_SRV_RODATA_ATTR = "Routing problem";			// ERR_RTE        -4
-static const char srvContenErr05[] TCP_SRV_RODATA_ATTR = "Operation in progress";	// ERR_INPROGRESS -5
-static const char srvContenErr06[] TCP_SRV_RODATA_ATTR = "Illegal value";			// ERR_VAL        -6
-static const char srvContenErr07[] TCP_SRV_RODATA_ATTR = "Operation would block";	// ERR_WOULDBLOCK -7
-static const char srvContenErr08[] TCP_SRV_RODATA_ATTR = "Connection aborted";		// ERR_ABRT       -8
-static const char srvContenErr09[] TCP_SRV_RODATA_ATTR = "Connection reset";		// ERR_RST        -9
-static const char srvContenErr10[] TCP_SRV_RODATA_ATTR = "Connection closed";		// ERR_CLSD       -10
-static const char srvContenErr11[] TCP_SRV_RODATA_ATTR = "Not connected";			// ERR_CONN       -11
-static const char srvContenErr12[] TCP_SRV_RODATA_ATTR = "Illegal argument";		// ERR_ARG        -12
-static const char srvContenErr13[] TCP_SRV_RODATA_ATTR = "Address in use";			// ERR_USE        -13
-static const char srvContenErr14[] TCP_SRV_RODATA_ATTR = "Low-level netif error";	// ERR_IF         -14
-static const char srvContenErr15[] TCP_SRV_RODATA_ATTR = "Already connected";		// ERR_ISCONN     -15
-const char * srvContenErr[]  =  {
-	srvContenErr00,
-	srvContenErr01,
-	srvContenErr02,
-	srvContenErr03,
-	srvContenErr04,
-	srvContenErr05,
-	srvContenErr06,
-	srvContenErr07,
-	srvContenErr08,
-	srvContenErr09,
-	srvContenErr10,
-	srvContenErr11,
-	srvContenErr12,
-	srvContenErr13,
-	srvContenErr14,
-	srvContenErr15
+#include "lwip/init.h"
+#if (LWIP_VERSION != 0x010401ff)
+#error "Only LwIP version 1.4.1 !"
+#endif
+static const char *err_strerr[] = {
+           "Ok",                    /* ERR_OK          0  */
+           "Out of memory error",   /* ERR_MEM        -1  */
+           "Buffer error",          /* ERR_BUF        -2  */
+           "Timeout",               /* ERR_TIMEOUT    -3  */
+           "Routing problem",       /* ERR_RTE        -4  */
+           "Operation in progress", /* ERR_INPROGRESS -5  */
+           "Illegal value",         /* ERR_VAL        -6  */
+           "Operation would block", /* ERR_WOULDBLOCK -7  */
+           "Address in use",        /* ERR_USE        -8  */
+           "Already connected",     /* ERR_ISCONN     -9  */
+           "Connection aborted",    /* ERR_ABRT       -10 */
+           "Connection reset",      /* ERR_RST        -11 */
+           "Connection closed",     /* ERR_CLSD       -12 */
+           "Not connected",         /* ERR_CONN       -13 */
+           "Illegal argument",      /* ERR_ARG        -14 */
+           "Low-level netif error", /* ERR_IF         -15 */
 };
 #endif
-static const char srvContenErrX[] TCP_SRV_RODATA_ATTR = "?";
+static const char srvContenErrX[] = "?";
 /******************************************************************************
  * FunctionName : tspsrv_error_msg
  * Description  : строка ошибки по номеру
@@ -121,11 +100,7 @@ static const char srvContenErrX[] TCP_SRV_RODATA_ATTR = "?";
 char * tspsrv_error_msg(err_t err)
 {
 	if((err > -16) && (err < 1)) {
-#ifdef LWIP_DEBUG
 		return lwip_strerr(err);
-#else
-		return srvContenErr[-err];
-#endif
 	}
 	else return srvContenErrX;
 }
@@ -151,7 +126,6 @@ char * tspsrv_tcp_state_msg(enum tcp_state state)
 static char *msg_srvconn_state[] = {
       "NONE",
       "CLOSEWAIT",
-	  "CLIENT",
       "LISTEN",
       "CONNECT",
       "CLOSED"
@@ -536,10 +510,7 @@ void TCP_SRV_CODE_ATTR tcpsrv_unrecved_win(TCP_SERV_CONN *ts_conn) {
  ******************************************************************************/
 static void TCP_SRV_CODE_ATTR tcpsrv_disconnect_successful(TCP_SERV_CONN * ts_conn) {
 	ts_conn->pcb = NULL;
-	if(ts_conn->flag.client && ts_conn->flag.client_reconnect)
-		tcpsrv_client_reconnect(ts_conn);
-	else
-		tcpsrv_list_delete(ts_conn); // remove the node from the server's connection list
+	tcpsrv_list_delete(ts_conn); // remove the node from the server's connection list
 }
 /******************************************************************************
  * FunctionName : tcpsrv_server_close
@@ -607,7 +578,7 @@ static void TCP_SRV_CODE_ATTR tcpsrv_server_close(TCP_SERV_CONN * ts_conn) {
 				ts_printf("tcp_abandon!\n");
 #endif
 				tcp_poll(pcb, NULL, 0);
-///				tcp_err(pcb, NULL);
+//?/			tcp_err(pcb, NULL);
 				tcp_abandon(pcb, 0);
 //				ts_conn->pcb = NULL;
 				// remove the node from the server's active connection list
@@ -652,6 +623,7 @@ static err_t TCP_SRV_CODE_ATTR tcpsrv_poll(void *arg, struct tcp_pcb *pcb) {
 		ts_printf("poll, ts_conn = NULL! - abandon\n");
 #endif
 		tcp_poll(pcb, NULL, 0);
+		tcp_err(pcb, NULL);
 		tcp_abandon(pcb, 0);
 		return ERR_ABRT;
 	}
@@ -668,18 +640,7 @@ static err_t TCP_SRV_CODE_ATTR tcpsrv_poll(void *arg, struct tcp_pcb *pcb) {
 			|| (ts_conn->state == SRVCONN_CONNECT
 			&& (ts_conn->pcfg->time_wait_cls)
 			&& ts_conn->recv_check > ts_conn->pcfg->time_wait_cls)) {
-				if(ts_conn->flag.client) tcpsrv_client_reconnect(ts_conn);
-				else tcpsrv_server_close(ts_conn);
-			}
-//			else tcpsrv_server_close(ts_conn);
-		}
-		else if(ts_conn->state == SRVCONN_CLIENT) {
-			if(ts_conn->pcfg->time_wait_rec == 0) {
-				if(ts_conn->recv_check > TCP_CLIENT_MAX_CONNECT_RETRY)
-					tcpsrv_client_reconnect(ts_conn);
-			}
-			else if(ts_conn->recv_check > ts_conn->pcfg->time_wait_rec) {
-				tcpsrv_client_reconnect(ts_conn);
+				tcpsrv_server_close(ts_conn);
 			}
 		}
 		else tcpsrv_server_close(ts_conn);
@@ -733,54 +694,6 @@ static void TCP_SRV_CODE_ATTR tcpsrv_list_delete(TCP_SERV_CONN * ts_conn) {
 		tcpsrv_cmp = tcpsrv_cmp->next;
 	};
 }
-/******************************************************************************
- * FunctionName : tcpsrv_client_reconnect (client)
- * Description  : освобождение занимаемых ресурсов и
- * 	включение задержки до следующего tcpsrv_client_connect
- * Parameters   : ts_conn
- * Returns      : none
- *******************************************************************************/
-static void TCP_SRV_CODE_ATTR tcpsrv_client_reconnect(TCP_SERV_CONN * ts_conn)
-{
-	if (ts_conn != NULL) {
-		if(ts_conn->state != SRVCONN_CLIENT) { // не установка соединения (клиент)?
-#if DEBUGSOO > 3
-			ts_printf("Client free\n");
-#endif
-			if(ts_conn->state != SRVCONN_CLOSED) {
-				ts_conn->state = SRVCONN_CLOSED; // исключить повторное вхождение из запросов в func_discon_cb()
-				if (ts_conn->pcfg->func_discon_cb != NULL) ts_conn->pcfg->func_discon_cb(ts_conn);
-			}
-			if (ts_conn->linkd != NULL) {
-				os_free(ts_conn->linkd);
-				ts_conn->linkd = NULL;
-			}
-			if (ts_conn->pbufo != NULL) {
-				os_free(ts_conn->pbufo);
-				ts_conn->pbufo = NULL;
-			}
-			if (ts_conn->pbufi != NULL) {
-				os_free(ts_conn->pbufi);
-				ts_conn->pbufi = NULL;
-			}
-			ts_conn->cntri = 0;
-			ts_conn->cntro = 0;
-			ts_conn->sizei = 0;
-			ts_conn->sizeo = 0;
-			ts_conn->unrecved_bytes = 0;
-			ts_conn->ptrtx = NULL;
-			ts_conn->flag = ts_conn->pcfg->flag;
-		}
-		if(++ts_conn->pcfg->conn_count == 0) ts_conn->pcfg->conn_count = 0xffff;
-		if(ts_conn->pcfg->conn_count < ts_conn->pcfg->max_conn || ts_conn->pcfg->max_conn == 0) {
-#if DEBUGSOO > 1
-			ts_printf("Waiting next connection %u sec...\n", TCP_CLIENT_NEXT_CONNECT_S);
-#endif
-			tcpsrv_client_connect(ts_conn);
-		}
-		else tcpsrv_server_close(ts_conn); //tcpsrv_disconnect(ts_conn);
-	}
-}
 //-----------------------------------------------------------------------------
 static void tspsrv_delete_pcb(TCP_SERV_CONN * ts_conn)
 {
@@ -821,18 +734,7 @@ static void TCP_SRV_CODE_ATTR tcpsrv_error(void *arg, err_t err) {
 #endif
 #endif
 		if (ts_conn->state != SRVCONN_CLOSEWAIT) {
-			if(ts_conn->flag.client && // если данное соединение клиент
-			(ts_conn->flag.client_reconnect // вечный реконнект
-					|| (ts_conn->state == SRVCONN_CLIENT // установка соединения
-							&& (ts_conn->pcfg->max_conn == 0 // максимальное кол-во одновременных соединений
-									|| ts_conn->recv_check < ts_conn->pcfg->max_conn)))) {
-				ts_conn->recv_check++;
-#if DEBUGSOO > 3
-				ts_printf("go_reconnect\n");
-#endif
-				tcpsrv_client_reconnect(ts_conn);
-			}
-			else if(ts_conn->pcb != NULL) {
+			if(ts_conn->pcb != NULL) {
 //					&& ts_conn->state != SRVCONN_CLOSED) {
 //					&& (ts_conn->state != SRVCONN_CONNECT || ts_conn->state == SRVCONN_LISTEN)) {
 #if DEBUGSOO > 1
@@ -842,101 +744,6 @@ static void TCP_SRV_CODE_ATTR tcpsrv_error(void *arg, err_t err) {
 			};
 		};
 	}
-}
-/******************************************************************************
- * FunctionName : tcpsrv_client_connect
- * Returns      : err
- *******************************************************************************/
-static err_t TCP_SRV_CODE_ATTR tcpsrv_client_connect(TCP_SERV_CONN * ts_conn)
-{
-	err_t err = ERR_ARG;
-	if (ts_conn != NULL) {
-#if DEBUGSOO > 3
-		ts_printf("tcpsrv_client_connect()\n");
-#endif
-		struct tcp_pcb *pcb = ts_conn->pcb;
-		if(pcb != NULL) { // повторный?
-			pcb = find_tcp_pcb(ts_conn); // ещё жива pcb?
-			if(pcb != NULL) {
-				tcp_abandon(pcb, 0);
-//				ts_conn->pcb = NULL;
-			}
-		}
-		pcb = tcp_new();
-		if(pcb != NULL) {
-			ts_conn->pcb = pcb;
-			ts_conn->state = SRVCONN_CLIENT; // установка соединения (клиент)
-//			ts_conn->recv_check = 0;
-			err_t err = tcp_bind(pcb, IP_ADDR_ANY, 0); // Binds pcb to a local IP address and new port number. // &netif_default->ip_addr
-#if DEBUGSOO > 2
-			ts_printf("tcp_bind() = %s, port = %d\n", tspsrv_error_msg(err), ts_conn->pcb->local_port);
-#endif
-			if (err == ERR_OK) { // If another connection is bound to the same port, the function will return ERR_USE, otherwise ERR_OK is returned.
-				ts_conn->pcfg->port = ts_conn->pcb->local_port;
-				tcp_arg(pcb, ts_conn); // Allocate client-specific session structure, set as callback argument
-				// Set up the various callback functions
-				tcp_err(pcb, tcpsrv_error);
-				tcp_poll(pcb, tcpsrv_poll, 2); // every 1/2 seconds
-				err = tcp_connect(pcb, (ip_addr_t *)&ts_conn->remote_ip, ts_conn->remote_port, tcpsrv_connected);
-#if DEBUGSOO > 2
-				ts_printf("tcp_connect() = %s\n", tspsrv_error_msg(err));
-#endif
-				if(err == ERR_OK) {
-#if DEBUGSOO > 1
-					tcpsrv_print_remote_info(ts_conn);
-					ts_printf("start client - Ok\n");
-#endif
-					return err;
-				}
-			}
-			tcp_abandon(pcb, 0);
-		}
-		else err = ERR_MEM; // ERR_CONN;
-		ts_conn->pcb = NULL;
-#if DEBUGSOO > 1
-		tcpsrv_print_remote_info(ts_conn);
-		ts_printf("start client - error!\n");
-#endif
-	}
-	return err;
-}
-/******************************************************************************
- tcpsrv_connected_fn (client)
- *******************************************************************************/
-static err_t TCP_SRV_CODE_ATTR tcpsrv_connected(void *arg, struct tcp_pcb *tpcb, err_t err)
-{
-	TCP_SERV_CONN * ts_conn = arg;
-	err_t merr = ERR_OK;
-	if (ts_conn != NULL) {
-//		os_timer_disarm(&ts_conn->ptimer);
-		tcp_err(tpcb, tcpsrv_error);
-		ts_conn->state = SRVCONN_LISTEN;
-		ts_conn->recv_check = 0;
-		tcp_sent(tpcb, tcpsrv_server_sent);
-		tcp_recv(tpcb, tcpsrv_server_recv);
-		tcp_poll(tpcb, tcpsrv_poll, 2); // every 1/2 seconds
-		if(ts_conn->pcfg->func_listen != NULL) merr = ts_conn->pcfg->func_listen(ts_conn);
-		else {
-#if DEBUGSOO > 2
-				tcpsrv_print_remote_info(ts_conn);
-				char serr[24];
-				if((err > -16) && (err < 1)) {
-					os_memcpy(serr, srvContenErr[-err], 24);
-				}
-				else {
-					serr[0] = '?';
-					serr[1] = '\0';
-				}
-				ts_printf("error %d (%s)\n", err, serr);
-#elif DEBUGSOO > 1
-			tcpsrv_print_remote_info(ts_conn);
-			ts_printf("connected, error %d\n", err);
-#endif
-			// test
-			// tcpsrv_int_sent_data(ts_conn, wificonfig.st.config.password, os_strlen(wificonfig.st.config.password));
-		}
-	}
-	return merr;
 }
 /******************************************************************************
  * FunctionName : tcpsrv_tcp_accept
@@ -1021,30 +828,11 @@ static err_t TCP_SRV_CODE_ATTR tcpsrv_server_accept(void *arg, struct tcp_pcb *p
 TCP_SERV_CFG * TCP_SRV_CODE_ATTR tcpsrv_server_port2pcfg(uint16 portn) {
 	TCP_SERV_CFG * p;
 	for (p = phcfg; p != NULL; p = p->next)
-		if (p->port == portn
-		&& (!(p->flag.client)))
-			return p;
+		if (p->port == portn) return p;
 	return NULL;
 }
 /******************************************************************************
- * FunctionName : tcpsrv_client_ip_port2conn
- * Description  : поиск конфига clienta по ip + порту
- * Parameters   : номер порта
- * Returns      : указатель на TCP_SERV_CFG или NULL
- *******************************************************************************/
-TCP_SERV_CFG * TCP_SRV_CODE_ATTR tcpsrv_client_ip_port2conn(uint32 ip, uint16 portn) {
-	TCP_SERV_CFG * p;
-	for (p = phcfg; p != NULL; p = p->next)
-		if (p->flag.client
-		&& p->conn_links != NULL
-		&& p->conn_links->remote_ip.dw == ip
-		&& p->conn_links->remote_port == portn)
-				return p;
-	return NULL;
-}
-/******************************************************************************
- tcpsrv_init server or client.
- client -> port = 1 ?
+ tcpsrv_init server.
  *******************************************************************************/
 TCP_SERV_CFG * TCP_SRV_CODE_ATTR tcpsrv_init(uint16 portn) {
 	//	if (portn == 0)	portn = 80;
@@ -1073,17 +861,8 @@ TCP_SERV_CFG * TCP_SRV_CODE_ATTR tcpsrv_init(uint16 portn) {
 	// p->phcfg->conn_links = NULL; // zalloc
 	// p->pcb = NULL; // zalloc
 	// p->lnk = NULL; // zalloc
-	if(portn > ID_CLIENTS_PORT) {
-		p->max_conn = TCP_SRV_MAX_CONNECTIONS;
-		p->func_listen = tcpsrv_listen_default;
-	}
-	else {
-		p->max_conn = TCP_CLIENT_MAX_CONNECT_RETRY;
-		p->flag.client = 1; // данное соединение не сервер, а клиент!
-		// insert new tcpsrv_config
-		p->next = phcfg;
-		phcfg = p;
-	}
+	p->max_conn = TCP_SRV_MAX_CONNECTIONS;
+	p->func_listen = tcpsrv_listen_default;
 	p->func_discon_cb = tcpsrv_disconnect_calback_default;
 	p->func_sent_cb = tcpsrv_sent_callback_default;
 	p->func_recv = tcpsrv_received_data_default;
@@ -1138,55 +917,6 @@ err_t TCP_SRV_CODE_ATTR tcpsrv_start(TCP_SERV_CFG *p) {
 #if DEBUGSOO > 0
 		ts_printf("tcpsrv: not new tcp!\n");
 #endif
-	return err;
-}
-/******************************************************************************
- tcpsrv_start_client
- TCP_SERV_CFG * p = tcpsrv_init(ID_CLIENTS_PORT);
-			// insert new tcpsrv_config
-			p->next = phcfg;
-			phcfg = p;
- *******************************************************************************/
-err_t TCP_SRV_CODE_ATTR tcpsrv_client_start(TCP_SERV_CFG * p, uint32 remote_ip, uint16 remote_port) {
-	err_t err = ERR_ARG;
-	if (p == NULL) return err;
-	if (system_get_free_heap_size() >= p->min_heap) {
-		TCP_SERV_CONN * ts_conn = (TCP_SERV_CONN *) os_zalloc(sizeof(TCP_SERV_CONN));
-		if (ts_conn != NULL) {
-			ts_conn->flag = p->flag; // перенести флаги по умолчанию на данное соединение
-			ts_conn->pcfg = p;
-			ts_conn->state = SRVCONN_CLIENT; // установка соединения (клиент)
-			ts_conn->remote_port = remote_port;
-			ts_conn->remote_ip.dw = remote_ip;
-			err = tcpsrv_client_connect(ts_conn);
-//			if(ts_conn->pcb != NULL) {
-			if(err == ERR_OK) {
-				// Insert new ts_conn
-				ts_conn->next = p->conn_links;
-				p->conn_links = ts_conn;
-				p->conn_count++;
-//				err = ERR_OK;
-			} else {
-#if DEBUGSOO > 0
-				tcpsrv_print_remote_info(ts_conn);
-				ts_printf("tcpsrv: connect error = %s\n", tspsrv_error_msg(err));
-#endif
-				os_free(ts_conn);
-//				err = ERR_CONN;
-			};
-		}
-		else {
-#if DEBUGSOO > 0
-			ts_printf(txt_tcpsrv_out_of_mem);
-#endif
-			err = ERR_MEM;
-		};
-	} else {
-#if DEBUGSOO > 0
-		ts_printf("tcpsrv: low heap size!\n");
-#endif
-		err = ERR_MEM;
-	};
 	return err;
 }
 /******************************************************************************
