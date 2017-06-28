@@ -25,7 +25,7 @@
 <script type="text/javascript">
 function DeepSleep(){
 	var dstim = parseInt(document.getElementById('ds_time').value,10);
-	newAJAXCommand('/web.cgi?&sys_dsleep=0x' + dstim.toString(16), null, 0);
+	newAJAXCommand('/web.cgi?sys_dsleep=0x' + dstim.toString(16), null, 0);
 }
 </script>
 </body>

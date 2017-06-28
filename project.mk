@@ -32,6 +32,7 @@ ADD_SRC_C += project/src/user/user_start.c
 # components
 ADD_SRC_C += project/src/console/atcmd_user.c
 ADD_SRC_C += project/src/console/wifi_console.c
+ADD_SRC_C += project/src/console/wlan_tst.c
 #ADD_SRC_C += project/src/console/pwm_tst.c
 ifdef WEB_INA219_DRV
 ADD_SRC_C += project/src/driver/i2c_drv.c
@@ -55,5 +56,6 @@ ADD_SRC_C += project/src/web/websock.c
 ADD_SRC_C += project/src/web/web_int_callbacks.c
 ADD_SRC_C += project/src/web/web_int_vars.c
 ADD_SRC_C += project/src/web/web_auth.c
+
 
 

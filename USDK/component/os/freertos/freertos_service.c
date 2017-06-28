@@ -360,12 +360,15 @@ static void _freertos_msleep_os(int ms)
 #endif
 }
 
+extern void wait_us(int us); // До 2.147483648 секунды!
+
 static void _freertos_usleep_os(int us)
 {
 #if defined(STM32F2XX) || defined(STM32F4XX) || defined(STM32F10X_XL)
 	// FreeRTOS does not provide us level delay. Use busy wait
 	WLAN_BSP_UsLoop(us);
 #elif defined(CONFIG_PLATFORM_8195A)
+	wait_us(us);
 	//DBG_ERR("%s: Please Implement micro-second delay\n", __FUNCTION__);
 #elif defined(CONFIG_PLATFORM_8711B)
 	DelayUs(us);
@@ -385,7 +388,8 @@ static void _freertos_udelay_os(int us)
 	// FreeRTOS does not provide us level delay. Use busy wait
 	WLAN_BSP_UsLoop(us);
 #elif defined(CONFIG_PLATFORM_8195A)
-	HalDelayUs(us);
+//	HalDelayUs(us);
+	wait_us(us);
 #elif defined(CONFIG_PLATFORM_8711B)
 	DelayUs(us);
 #else

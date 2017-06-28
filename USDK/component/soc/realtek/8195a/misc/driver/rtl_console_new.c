@@ -241,11 +241,11 @@ MON_RAM_TEXT_SECTION void RtlConsolTaskRam(void *Data) {
 				}
 				if(flg) DiagPrintf("cmd: %s - nothing!\n", ArgvArray[0]);
 #if defined(configUSE_WAKELOCK_PMU) && (configUSE_WAKELOCK_PMU == 1)
-				pmu_release_wakelock(WAKELOCK_LOGUART);
+				release_wakelock(WAKELOCK_LOGUART);
 #endif
 			}
 #if defined(configUSE_WAKELOCK_PMU) && (configUSE_WAKELOCK_PMU == 1)
-			else pmu_acquire_wakelock(WAKELOCK_LOGUART);
+			else acquire_wakelock(WAKELOCK_LOGUART);
 #endif
 			p->pTmpLogBuf->BufCount = 0;
 			p->pTmpLogBuf->UARTLogBuf[0] = 0;

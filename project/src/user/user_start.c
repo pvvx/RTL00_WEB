@@ -89,7 +89,7 @@ void user_init_thrd(void) {
 	webserver_init(syscfg.web_port);
 
 	if(syscfg.cfg.b.powersave_enable) {
-		pmu_release_wakelock(~WAKELOCK_WLAN);
+		release_wakelock(~WAKELOCK_WLAN);
 	}
 
 	//	xTaskCreate(x_init_thrd, "wifi_init", 1024, NULL, tskIDLE_PRIORITY + 1 + PRIORITIE_OFFSET, NULL);

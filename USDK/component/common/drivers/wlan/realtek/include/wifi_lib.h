@@ -1977,6 +1977,53 @@ struct hal_ops {
 	uint8_t (*hal_get_tx_buff_rsvd_page_num)(_adapter *, bool);
 };
 
+ /* 138 */
+typedef enum  _P2P_ROLE // : __int32
+{
+   P2P_ROLE_DISABLE = 0x0,
+   P2P_ROLE_DEVICE = 0x1,
+   P2P_ROLE_CLIENT = 0x2,
+   P2P_ROLE_GO = 0x3,
+} P2P_ROLE;
+
+typedef enum P2P_STATE // : __int32
+{
+  P2P_STATE_NONE = 0x0,
+  P2P_STATE_IDLE = 0x1,
+  P2P_STATE_LISTEN = 0x2,
+  P2P_STATE_SCAN = 0x3,
+  P2P_STATE_FIND_PHASE_LISTEN = 0x4,
+  P2P_STATE_FIND_PHASE_SEARCH = 0x5,
+  P2P_STATE_TX_PROVISION_DIS_REQ = 0x6,
+  P2P_STATE_RX_PROVISION_DIS_RSP = 0x7,
+  P2P_STATE_RX_PROVISION_DIS_REQ = 0x8,
+  P2P_STATE_GONEGO_ING = 0x9,
+  P2P_STATE_GONEGO_OK = 0xA,
+  P2P_STATE_GONEGO_FAIL = 0xB,
+  P2P_STATE_RECV_INVITE_REQ_MATCH = 0xC,
+  P2P_STATE_PROVISIONING_ING = 0xD,
+  P2P_STATE_PROVISIONING_DONE = 0xE,
+  P2P_STATE_TX_INVITE_REQ = 0xF,
+  P2P_STATE_RX_INVITE_RESP = 0x10,
+  P2P_STATE_RECV_INVITE_REQ_DISMATCH = 0x11,
+  P2P_STATE_RECV_INVITE_REQ_GO = 0x12,
+  P2P_STATE_RECV_INVITE_REQ_JOIN = 0x13,
+  P2P_STATE_FORMATION_COMPLETE = 0x14,
+  P2P_STATE_CONNECTED = 0x15,
+} P2P_STATE;
+
+
+struct wifidirect_info
+{
+   P2P_ROLE role;
+   P2P_STATE p2p_state;
+   uint8_t baction_tx_pending;
+   uint8_t pending_peer[6];
+   struct xmit_frame *pending_action;
+   _timer pre_tx_scan_timer;
+};
+
+
 struct _atr_aligned4_ _ADAPTER {
 	uint16_t HardwareType;
 	uint16_t interface_type;	//+2
@@ -1994,6 +2041,9 @@ struct _atr_aligned4_ _ADAPTER {
 	struct registry_priv registrypriv;
 	struct pwrctrl_priv pwrctrlpriv; // pwrctrlpriv.bInternalAutoSuspend //+5061
 	struct eeprom_priv eeprompriv;
+
+  struct wifidirect_info wdinfo;
+
 	PVOID HalData;
 	uint32_t hal_data_sz;
 	struct hal_ops HalFunc;
@@ -2024,14 +2074,22 @@ struct _atr_aligned4_ _ADAPTER {
 	uint8_t bRxRSSIDisplay;
 	_adapter *pbuddy_adapter; //+6056
 	_mutex *hw_init_mutex;	//+6060
+
+_mutex *ph2c_fwcmd_mutex;
+
 	uint8_t isprimary;		//+6064
 	uint8_t adapter_type; 	//+6065
 	uint8_t iface_type;		//+6056
-	_mutex *ph2c_fwcmd_mutex; //+6068
+//	_mutex *ph2c_fwcmd_mutex; //+6068
 	_mutex *psetch_mutex;	//+6072
 	_mutex *psetbw_mutex;	//+6076
 	struct co_data_priv *pcodatapriv; //+6080
 	uint8_t fix_rate; //+6084
+
+	uint8_t ra_mask_user_en;
+	uint32_t ra_mask_define;
+	uint8_t auto_rate_fallback_user_en;
+
 }; // [6088] (!)
 typedef struct _ADAPTER *PADAPTER;
 // if sizeof(struct _ADAPTER) != 6088 #error "Check aligned struct!" !

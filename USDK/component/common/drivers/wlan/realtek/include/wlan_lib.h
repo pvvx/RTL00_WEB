@@ -1287,8 +1287,10 @@ extern void LPS_Enter(PADAPTER padapter);
 extern void LPS_Leave(PADAPTER padapter); 
 extern void LeaveAllPowerSaveMode(PADAPTER Adapter); 
 extern void rtw_init_pwrctrl_priv(PADAPTER padapter); 
-extern void rtw_free_pwrctrl_priv(PADAPTER adapter); 
-extern int rtw_pwr_wakeup(_adapter *padapter, uint32_t ips_deffer_ms, const char *caller); 
+extern void rtw_free_pwrctrl_priv(PADAPTER adapter);
+extern int _rtw_pwr_wakeup(_adapter *padapter, uint32_t ips_deffer_ms, const char *caller);
+#define RTW_PWR_STATE_CHK_INTERVAL 2000
+#define rtw_pwr_wakeup(adapter) _rtw_pwr_wakeup(adapter, RTW_PWR_STATE_CHK_INTERVAL, __FUNCTION__)
 extern int rtw_pm_set_lps(_adapter *padapter, int mode);
 extern int rtw_pm_set_ips(_adapter *padapter, int mode);
 extern int rtw_pm_set_tdma_param(_adapter *padapter, uint8_t tdma_slot_period, uint8_t tdma_rfon_period_len_1, uint8_t tdma_rfon_period_len_2, uint8_t tdma_rfon_period_len_3);

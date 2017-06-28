@@ -427,7 +427,7 @@ void log_service(void *param)
 		log_service_unlock();
 #endif
 #if defined(configUSE_WAKELOCK_PMU) && (configUSE_WAKELOCK_PMU == 1)
-		pmu_release_wakelock(WAKELOCK_LOGUART);
+		release_wakelock(WAKELOCK_LOGUART);
 #endif
 	}
 }

@@ -707,14 +707,14 @@ void fATSP(void *arg) {
 	switch (argv[1][0]) {
 	case 'a': // acquire
 	{
-		pmu_acquire_wakelock(WAKELOCK_OS);
+		acquire_wakelock(WAKELOCK_OS);
 		//at_printf("\r\n[ATSP] wakelock:0x%08x", get_wakelock_status());
 		break;
 	}
 
 	case 'r': // release
 	{
-		pmu_release_wakelock(WAKELOCK_OS);
+		release_wakelock(WAKELOCK_OS);
 		//at_printf("\r\n[ATSP] wakelock:0x%08x", get_wakelock_status());
 		break;
 	}
@@ -1110,7 +1110,7 @@ void fATSL(void *arg) {
 	{
 		if (argc == 3) {
 			lock_id = strtoul(argv[2], NULL, 16);
-			pmu_acquire_wakelock(lock_id);
+			acquire_wakelock(lock_id);
 		}
 		AT_DBG_MSG(AT_FLAG_OS, AT_DBG_ALWAYS, "[ATSL] wakelock:0x%08x",
 				pmu_get_wakelock_status());
@@ -1121,7 +1121,7 @@ void fATSL(void *arg) {
 	{
 		if (argc == 3) {
 			lock_id = strtoul(argv[2], NULL, 16);
-			pmu_release_wakelock(lock_id);
+			release_wakelock(lock_id);
 		}
 		AT_DBG_MSG(AT_FLAG_OS, AT_DBG_ALWAYS, "[ATSL] wakelock:0x%08x",
 				pmu_get_wakelock_status());

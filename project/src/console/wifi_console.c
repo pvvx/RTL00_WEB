@@ -226,16 +226,22 @@ LOCAL void fATSF(int argc, char *argv[])
 }
 
 LOCAL void fATWP(int argc, char *argv[]) {
+	int x = 0;
 	if(argc > 1) {
-		pmu_release_wakelock(0xffff);
-		wifi_set_power_mode(1, 1);
-		wifi_set_lps_dtim(atoi(argv[1]));
+		x = atoi(argv[1]);
+		if(x == 0) {
+			acquire_wakelock(~WAKELOCK_WLAN);
+			release_wakelock(0xffff);
+			_wext_enable_powersave(0, 0, 0);
+			_wext_set_lps_dtim(0, 1);
+		} else {
+			release_wakelock(~WAKELOCK_WLAN);
+			_wext_enable_powersave(0, 1, 1);
+			_wext_set_lps_dtim(0, x);
+		}
 	}
 	else {
-		unsigned char x;
-		if(wifi_get_lps_dtim(&x) >= 0) {
-			printf("DTIM: %d\n", x);
-		}
+		printf("DTIM: %d\n", _wext_get_lps_dtim(0));
 	}
 }
 /* --------  WiFi Scan ------------------------------- */
@@ -261,7 +267,6 @@ LOCAL void scan_result_handler(internal_scan_handler_t* ap_scan_result)
 			    record->SSID.val[record->SSID.len] = '\0';
 			    printf("%s\n", record->SSID.val);
 			}
-
 		}
 	} else {
 		printf("Scan networks: None!\n");
@@ -308,7 +313,7 @@ MON_RAM_TAB_SECTION COMMAND_TABLE console_cmd_wifi_api[] = {
 		{"P2P_DISCCONNECT", 0, cmd_p2p_disconnect, ": p2p disconnect"},
 		{"P2P_CONNECT", 0, cmd_p2p_connect, ": p2p connect"},
 #endif
-		{"ATWR", 0, fATWR, ": WIFI Connect, Disconnect"},
+		{"ATWR", 0, fATWR, "=[mode]: WIFI Mode: 0 - off, 1 - ST, 2 - AP, 3 - ST+AP"},
 #if CONFIG_WLAN_CONNECT_CB
 		{"ATON", 0, fATON, ": Open connections"},
 		{"ATOFF", 0, fATOF, ": Close connections"},
@@ -316,9 +321,9 @@ MON_RAM_TAB_SECTION COMMAND_TABLE console_cmd_wifi_api[] = {
 		{"ATWI", 0, fATWI, ": WiFi Info"},
 #if CONFIG_DEBUG_LOG > 3
 		{"ATWT", 1, fATWT, "=<tx_power>: WiFi tx power: 0 - 100%, 1 - 75%, 2 - 50%, 3 - 25%, 4 - 12.5%"},
-		{"ATSF", 0, fATSF, ": Test TSF value"},
+		{"ATSF", 0, fATSF, ": Get TSF value"},
 #endif
-		{"ATWP", 0, fATWP, ": WiFi power"},
+		{"ATWP", 0, fATWP, "=[dtim]: 0 - WiFi ipc/lpc off, 1..10 - on + dtim"},
 		{"ATSN", 0, fATSN, ": Scan networks"}
 };
 

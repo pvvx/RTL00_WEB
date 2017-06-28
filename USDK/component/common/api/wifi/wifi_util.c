@@ -13,7 +13,12 @@
 #endif
 #include <osdep_service.h>
 
+#include "sdk_ver.h"
+#if SDK_VER_NUM < 0x4000
 #define USE_WIFI_ADAPTER 1 // использовать прямое обращение в тело драйвера WiFi
+#else
+#define USE_WIFI_ADAPTER 0 // не использовать прямое обращение в тело драйвера WiFi (ещё не согласована struct adapter)
+#endif
 
 int iw_ioctl(const char * ifname, unsigned long request, struct iwreq * pwrq) {
 	memcpy(pwrq->ifr_name, ifname, 5);
@@ -32,7 +37,7 @@ int iw_ioctl(const char * ifname, unsigned long request, struct iwreq * pwrq) {
 	return ret;
 }
 
-#ifdef USE_WIFI_ADAPTER
+#if USE_WIFI_ADAPTER
 extern Rltk_wlan_t rltk_wlan_info[2]; // in wrapper.h
 LOCAL _adapter * get_padapter(const char *ifname) {
 	if(ifname[4] == '0') {
@@ -46,7 +51,7 @@ LOCAL _adapter * get_padapter(const char *ifname) {
 
 /* ssid = NULL -> not connected */
 int wext_get_ssid(const char *ifname, __u8 *ssid) {
-#ifdef USE_WIFI_ADAPTER
+#if USE_WIFI_ADAPTER
 	_adapter * pad = get_padapter(ifname);
 	rtw_result_t ret = RTW_ERROR;
 	if(pad != NULL && (pad->mlmepriv.fw_state & 0x41) != 0) {
@@ -250,7 +255,7 @@ int wext_get_mac_address(const char *ifname, char * mac)
 #endif
 
 int wext_enable_powersave(const char *ifname, __u8 ips_mode, __u8 lps_mode) {
-#ifdef USE_WIFI_ADAPTER
+#if USE_WIFI_ADAPTER
 	_adapter * pad = get_padapter(ifname);
 	rtw_result_t ret = RTW_ERROR;
 	if(pad) {
@@ -303,7 +308,7 @@ int wext_disable_powersave(const char *ifname) {
 
 int wext_set_tdma_param(const char *ifname, __u8 slot_period,
 		__u8 rfon_period_len_1, __u8 rfon_period_len_2, __u8 rfon_period_len_3) {
-#ifdef USE_WIFI_ADAPTER
+#if USE_WIFI_ADAPTER
 	_adapter * pad = get_padapter(ifname);
 	rtw_result_t ret = RTW_ERROR;
 	if(pad) {
@@ -336,7 +341,7 @@ int wext_set_tdma_param(const char *ifname, __u8 slot_period,
 }
 
 int wext_set_lps_dtim(const char *ifname, __u8 lps_dtim) {
-#ifdef USE_WIFI_ADAPTER
+#if USE_WIFI_ADAPTER
 	_adapter * pad =	get_padapter(ifname);
 	rtw_result_t ret = RTW_ERROR;
 	if(pad) {
@@ -365,7 +370,7 @@ int wext_set_lps_dtim(const char *ifname, __u8 lps_dtim) {
 }
 
 int wext_get_lps_dtim(const char *ifname, __u8 *lps_dtim) {
-#ifdef USE_WIFI_ADAPTER
+#if USE_WIFI_ADAPTER
 	_adapter * pad = get_padapter(ifname);
 	rtw_result_t ret = RTW_ERROR;
 	if(pad) {
@@ -506,7 +511,7 @@ int wext_get_ap_info(const char *ifname, rtw_bss_info_t * ap_info,
 #endif
 
 int wext_set_mode(const char *ifname, int mode) {
-#ifdef USE_WIFI_ADAPTER
+#if USE_WIFI_ADAPTER
 	_adapter * pad =	get_padapter(ifname);
 	int nwm;
 	if(rtw_pwr_wakeup(pad) && pad->hw_init_completed) {
@@ -540,7 +545,7 @@ int wext_set_mode(const char *ifname, int mode) {
 }
 
 int wext_get_mode(const char *ifname, int *mode) {
-#ifdef USE_WIFI_ADAPTER
+#if USE_WIFI_ADAPTER
 	_adapter * pad =	get_padapter(ifname);
 	rtw_result_t ret = RTW_ERROR;
 	if(pad) {
@@ -563,7 +568,7 @@ int wext_get_mode(const char *ifname, int *mode) {
 }
 
 int wext_set_ap_ssid(const char *ifname, const __u8 *ssid, __u16 ssid_len) {
-#ifdef USE_WIFI_ADAPTER
+#if USE_WIFI_ADAPTER
 	struct net_device * pdev = rltk_wlan_info[0].dev;
 	if(ifname[4] != '0')
 		pdev = rltk_wlan_info[1].dev;
@@ -593,7 +598,7 @@ int wext_set_country(const char *ifname, rtw_country_code_t country_code) {
 }
 
 int wext_get_rssi(const char *ifname, int *rssi) {
-#ifdef USE_WIFI_ADAPTER
+#if USE_WIFI_ADAPTER
 	_adapter * pad =	get_padapter(ifname);
 	rtw_result_t ret = RTW_ERROR;
 	if(pad) {
@@ -671,7 +676,7 @@ int wext_set_channel(const char *ifname, __u8 ch) {
 }
 
 int wext_get_channel(const char *ifname, __u8 *ch) {
-#ifdef USE_WIFI_ADAPTER
+#if USE_WIFI_ADAPTER
 		_adapter * pad = get_padapter(ifname);
 		rtw_result_t ret = RTW_ERROR;
 		if(pad) {

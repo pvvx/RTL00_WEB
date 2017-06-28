@@ -41,20 +41,20 @@ typedef enum PMU_DEVICE {
 
 #ifdef CONFIG_PLATFORM_8711B
 typedef enum {
-	PMU_OS					=0,
+	PMU_OS				=0,
 	PMU_WLAN_DEVICE		=1,
 	PMU_LOGUART_DEVICE	=2,
 	PMU_SDIO_DEVICE		=3,
 
-	PMU_UART0_DEVICE		=4,
-	PMU_UART1_DEVICE		=5,
+	PMU_UART0_DEVICE	=4,
+	PMU_UART1_DEVICE	=5,
 	PMU_I2C0_DEVICE		=6,
 	PMU_I2C1_DEVICE		=7,
 	PMU_USOC_DEVICE		=8,
 	PMU_DONGLE_DEVICE	=9,
 	PMU_RTC_DEVICE		=10,
 	PMU_CONSOL_DEVICE	=11,
-	PMU_ADC_DEVICE	=12,
+	PMU_ADC_DEVICE		=12,
 	PMU_DEV_USER_BASE	=16,
 
 	PMU_MAX				=31
@@ -81,7 +81,9 @@ typedef uint32_t (*PSM_HOOK_FUN)( unsigned int, void* param_ptr );
  *
  *  @param nDeviceId        : The bit which is attempt to add into wakelock
  */
-void pmu_acquire_wakelock(uint32_t nDeviceId);
+//void pmu_acquire_wakelock(uint32_t nDeviceId);
+void acquire_wakelock(uint32_t flg);
+#define pmu_acquire_wakelock(nDeviceId) acquire_wakelock(1<<(nDeviceId))
 
 /** Release wakelock
  *
@@ -89,13 +91,17 @@ void pmu_acquire_wakelock(uint32_t nDeviceId);
  *
  *  @param nDeviceId        : The bit which is attempt to remove from wakelock
  */
-void pmu_release_wakelock(uint32_t nDeviceId);
+//void pmu_release_wakelock(uint32_t nDeviceId);
+void release_wakelock(uint32_t flg);
+#define pmu_release_wakelock(nDeviceId) release_wakelock(1<<(nDeviceId))
 
 /** Get current wakelock bit map value
  *
  *  @return               : the current wakelock bit map value
  */
-uint32_t pmu_get_wakelock_status(void);
+//uint32_t pmu_get_wakelock_status(void);
+uint32_t get_wakelock_status(void);
+#define pmu_get_wakelock_status get_wakelock_status
 
 #if (configGENERATE_RUN_TIME_STATS == 1)
 

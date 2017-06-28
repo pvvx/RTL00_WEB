@@ -108,10 +108,10 @@ extern uint32_t SystemCoreClock;
 
 #define configUSE_COUNTING_SEMAPHORES 	1
 #define configUSE_ALTERNATIVE_API 		0
-#define configCHECK_FOR_STACK_OVERFLOW	2
+#define configCHECK_FOR_STACK_OVERFLOW	0
 #define configUSE_RECURSIVE_MUTEXES		1
 #define configQUEUE_REGISTRY_SIZE		0
-#define configGENERATE_RUN_TIME_STATS	1
+#define configGENERATE_RUN_TIME_STATS	0
 
 #if configGENERATE_RUN_TIME_STATS
 #define configUSE_STATS_FORMATTING_FUNCTIONS 1
@@ -161,7 +161,7 @@ extern int  freertos_ready_to_sleep();
 #define traceLOW_POWER_IDLE_END();              } while (0);
 
 /* It's FreeRTOS related feature but it's not included in FreeRTOS design. */
-#define configUSE_WAKELOCK_PMU                  1
+#define configUSE_WAKELOCK_PMU          1
 
 #endif // #if (__IASMARM__ != 1)
 

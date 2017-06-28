@@ -27,13 +27,12 @@ void fATSP(int argc, char *argv[])
 		}
 		}
 	}
-	printf("WakeLock Status %d\n", get_wakelock_status());
+	printf("WakeLock Status %d\n", pmu_get_wakelock_status());
 }
 
 
 MON_RAM_TAB_SECTION COMMAND_TABLE console_commands_pwrs[] = {
 		{"ATSP", 0, fATSP, "=<a,r>,<wakelock_status:1|2|4|8>: Power"}
-
 };
 
 

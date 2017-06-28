@@ -248,16 +248,16 @@ LOCAL uint8 chk_ap_netif_num(void)
 
 extern Rltk_wlan_t rltk_wlan_info[2]; // in wrapper.h
 
-/*LOCAL _adapter * get_padapter(int num) {
+/*LOCAL _adapter * get_padaptern(int num) {
 	if(rltk_wlan_info[num].enable) {
 		return *(_adapter **)((rltk_wlan_info[0].dev)->priv);
 	}
 	return NULL;
 };*/
-#define get_padapter(num) (*(_adapter **)((rltk_wlan_info[num].dev)->priv));
+#define get_padaptern(num) (*(_adapter **)((rltk_wlan_info[num].dev)->priv));
 
-LOCAL rtw_result_t _wext_set_lps_dtim(int adapter_num, uint8 lps_dtim ) {
-	_adapter * pad =	get_padapter(adapter_num);
+rtw_result_t _wext_set_lps_dtim(int adapter_num, uint8 lps_dtim ) {
+	_adapter * pad = get_padaptern(adapter_num);
 	rtw_result_t ret = RTW_ERROR;
 	if(pad) {
 		ret = rtw_pm_set_lps_dtim(pad, lps_dtim);
@@ -265,8 +265,13 @@ LOCAL rtw_result_t _wext_set_lps_dtim(int adapter_num, uint8 lps_dtim ) {
 	return ret;
 }
 
-LOCAL rtw_result_t _wext_enable_powersave(int adapter_num, uint8 ips_mode, uint8 lps_mode) {
-	_adapter * pad =	get_padapter(adapter_num);
+int _wext_get_lps_dtim(int adapter_num) {
+	_adapter * pad = get_padaptern(adapter_num);
+	return rtw_pm_get_lps_dtim(pad);
+}
+
+rtw_result_t _wext_enable_powersave(int adapter_num, uint8 ips_mode, uint8 lps_mode) {
+	_adapter * pad = get_padaptern(adapter_num);
 	rtw_result_t ret = RTW_ERROR;
 	if(pad) {
 		ret = rtw_pm_set_ips(pad, ips_mode); // 2 режима 1,2 !
@@ -280,7 +285,7 @@ LOCAL rtw_result_t _wext_enable_powersave(int adapter_num, uint8 ips_mode, uint8
 
 LOCAL int _wext_cmp_ssid(int adapter_num, uint8 *ssid)
 {
-	_adapter * pad = get_padapter(adapter_num);
+	_adapter * pad = get_padaptern(adapter_num);
 	int ret = 0;
 	if((pad != NULL) && (pad->mlmepriv.fw_state & 0x41) != 0) {
 		int len = pad->mlmepriv.cur_network.network.Ssid.SsidLength;
@@ -295,7 +300,7 @@ LOCAL int _wext_cmp_ssid(int adapter_num, uint8 *ssid)
 #ifdef NOT_USE_CALLS
 
 LOCAL rtw_result_t _wext_get_mode(int adapter_num, int *mode) {
-	_adapter * pad =	get_padapter(adapter_num);
+	_adapter * pad =	get_padaptern(adapter_num);
 	rtw_result_t ret = RTW_ERROR;
 	if(pad) {
 		uint16 f = pad->mlmepriv.fw_state;
@@ -310,7 +315,7 @@ LOCAL rtw_result_t _wext_get_mode(int adapter_num, int *mode) {
 
 LOCAL rtw_result_t _wext_get_channel(int adapter_num, uint8 *ch)
 {
-	_adapter * pad = get_padapter(adapter_num);
+	_adapter * pad = get_padaptern(adapter_num);
 	rtw_result_t ret = RTW_ERROR;
 	if(pad) {
 		if(pad->mlmepriv.fw_state & 1) {

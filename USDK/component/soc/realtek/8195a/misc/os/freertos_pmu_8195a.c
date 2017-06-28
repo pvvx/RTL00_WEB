@@ -37,9 +37,12 @@ static uint8_t last_wakelock_state[32] = {
     0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0
 };
+
+#if (configGENERATE_RUN_TIME_STATS == 1)
 static uint32_t last_acquire_wakelock_time[32] = {0};
 static uint32_t hold_wakelock_time[32] = {0};
 static uint32_t base_sys_time = 0;
+#endif
 
 static uint32_t sys_sleep_time = 0;
 
@@ -164,10 +167,48 @@ int freertos_ready_to_sleep() {
     return wakelock == 0;
 }
 
+
+void acquire_wakelock(uint32_t lock_id) {
+
+    wakelock |= lock_id;
+
+#if (configGENERATE_RUN_TIME_STATS == 1)
+    u32 i;
+    u32 current_timestamp = osKernelSysTick();
+    for (i=0; i<32; i++) {
+        if ( (1<<i & lock_id) && (last_wakelock_state[i] == 0) ) {
+            last_acquire_wakelock_time[i] = current_timestamp;
+            last_wakelock_state[i] = 1;
+        }
+    }
+#endif
+
+}
+
+void release_wakelock(uint32_t lock_id) {
+    wakelock &= ~lock_id;
+
+#if (configGENERATE_RUN_TIME_STATS == 1)
+    u32 i;
+    u32 current_timestamp = osKernelSysTick();
+    for (i=0; i<32; i++) {
+        if ( (1<<i & lock_id) && (last_wakelock_state[i] == 1) ) {
+            hold_wakelock_time[i] += current_timestamp - last_acquire_wakelock_time[i];
+            last_wakelock_state[i] = 0;
+        }
+    }
+#endif
+}
+
+uint32_t get_wakelock_status() {
+    return wakelock;
+}
+
+#if 0 // SDK3.5 compatible
 void pmu_acquire_wakelock(uint32_t lock_id) {
 
     wakelock |= BIT(lock_id);
-
+#if (configGENERATE_RUN_TIME_STATS == 1)
     if (generate_wakelock_stats) {
         uint32_t i;
         uint32_t current_timestamp = osKernelSysTick();
@@ -178,11 +219,13 @@ void pmu_acquire_wakelock(uint32_t lock_id) {
             }
         }
     }
+#endif
 }
 
 void pmu_release_wakelock(uint32_t lock_id) {
     wakelock &= ~BIT(lock_id);
 
+#if (configGENERATE_RUN_TIME_STATS == 1)
     if (generate_wakelock_stats) {
         uint32_t i;
         uint32_t current_timestamp = osKernelSysTick();
@@ -193,16 +236,20 @@ void pmu_release_wakelock(uint32_t lock_id) {
             }
         }
     }
+#endif
 }
 
 uint32_t pmu_get_wakelock_status() {
     return wakelock;
 }
 
+#endif
+
 void pmu_enable_wakelock_stats(unsigned char enable) {
     generate_wakelock_stats = enable;
 }
 
+#if (configGENERATE_RUN_TIME_STATS == 1)
 void pmu_get_wakelock_hold_stats( char *pcWriteBuffer ) {
     uint32_t i;
     uint32_t current_timestamp = osKernelSysTick();
@@ -239,6 +286,7 @@ void pmu_clean_wakelock_stat() {
     }
 	sys_sleep_time = 0;
 }
+#endif
 
 void pmu_add_wakeup_event(uint32_t event) {
     wakeup_event |= event;

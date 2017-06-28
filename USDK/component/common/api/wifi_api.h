@@ -185,4 +185,8 @@ rtw_result_t api_wifi_scan(api_scan_result_handler_t scan_result_cb);
 void wifi_close_scan(void);
 
 
+rtw_result_t _wext_set_lps_dtim(int adapter_num, uint8 lps_dtim);
+int _wext_get_lps_dtim(int adapter_num);
+rtw_result_t _wext_enable_powersave(int adapter_num, uint8 ips_mode, uint8 lps_mode);
+
 #endif // _WIFI_API_H_

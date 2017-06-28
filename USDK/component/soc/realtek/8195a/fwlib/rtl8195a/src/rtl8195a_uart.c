@@ -18,7 +18,7 @@ HalRuartGetChipVerRtl8195a(VOID)
 {
     u8 chip_ver;
     
-    chip_ver = (HAL_READ32(SYSTEM_CTRL_BASE, 0x01F0) >> 4) & 0x0f;
+    chip_ver = (HAL_READ32(SYSTEM_CTRL_BASE, REG_SYS_SYSTEM_CFG0) >> 4) & 0x0f; //  0x400001F0 RTL8710AF =  0x41000220
     return chip_ver;
 }
 
@@ -369,7 +369,7 @@ HalRuartSetBaudRateRtl8195a(
     u8 chip_ver;
 
     // get chip version
-    chip_ver = HalRuartGetChipVerRtl8195a();
+    chip_ver = HalRuartGetChipVerRtl8195a(); // RTL8710AF = 2
 #endif
 
     if (pHalRuartAdapter->WordLen == RUART_WLS_8BITS) {
