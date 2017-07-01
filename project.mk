@@ -3,7 +3,7 @@
 #=============================================
 WEB_INA219_DRV = 1
 #WEB_ADC_DRV = 1
-#WEB_SDCARD = 1
+WEB_SDCARD = 1
 #USE_AT = 1
 USE_FATFS = 1
 USE_SDIOH = 1

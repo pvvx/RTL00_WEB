@@ -121,7 +121,9 @@ void HalSdioHostOpInit(void *Data) {
 			HAL_GPIO_PullCtrl(PA_6, PullDown);
 			HAL_GPIO_PullCtrl(PA_7, PullDown);
 		}
+//		vTaskDelay(1);
 	}
+
 //#endif
 }
 

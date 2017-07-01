@@ -54,8 +54,8 @@ typedef struct _HAL_SDIO_HOST_ADAPTER_{
 	u32						IsWriteProtect;		//+14
 	u8 						SdStatus[SD_STATUS_LEN]; //+15..
 	u8						Csd[CSD_REG_LEN];	//+31
-    volatile u8             CmdCompleteFlg;
-    volatile u8             XferCompleteFlg;
+    volatile u8             CmdCompleteFlg;	//+128(u8)
+    volatile u8             XferCompleteFlg; //+129(u8)
 	volatile u8             ErrIntFlg;
     volatile u8             CardCurState;
 	u8						IsSdhc;
