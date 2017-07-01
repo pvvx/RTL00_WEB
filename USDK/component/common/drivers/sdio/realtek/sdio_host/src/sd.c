@@ -8,13 +8,14 @@
 #ifdef CONFIG_SDIO_HOST_EN
 #include "sd.h"
 #include "sdio_host.h"
+#include "semphr.h"
 
 #define SIZE_BLOCK_ADMA 512
 
 SemaphoreHandle_t sdWSema;
 
 void sd_xfer_done_callback(void *obj) {
-	RtlUpSema(&sdWSema);
+	rtw_up_sema(&sdWSema);
 }
 
 void sd_xfer_err_callback(void *obj) {
@@ -35,7 +36,7 @@ SD_RESULT SD_Init() {
 	else {
 		if (sdio_sd_getProtection() != 0)
 			result = SD_PROTECTED;
-		RtlInitSema(&sdWSema, 0);
+		rtw_init_sema(&sdWSema, 0);
 		sdio_sd_hook_xfer_cmp_cb(sd_xfer_done_callback, 0);
 		sdio_sd_hook_xfer_err_cb(sd_xfer_err_callback, 0);
 	}
@@ -45,7 +46,7 @@ SD_RESULT SD_Init() {
 //----- SD_DeInit
 SD_RESULT SD_DeInit() {
 	sdio_sd_deinit();
-	RtlFreeSema(&sdWSema);
+	rtw_free_sema(&sdWSema);
 	return SD_OK;
 }
 
@@ -119,7 +120,7 @@ SD_RESULT SD_ReadBlocks(u32 sector, u8 *data, u32 count) {
 		while (sector < end_sector) {
 			rd_count = sdio_read_blocks(sector, buf, 1);
 //			rtl_printf("rd_counts = %d\n", rd_count);
-			if (rd_count == 0 && RtlDownSemaWithTimeout(&sdWSema, 1000) != 1) {
+			if (rd_count == 0 && rtw_down_timeout_sema(&sdWSema, 1000) != 1) {
 				DBG_SDIO_ERR("SD_ReadBlocks timeout\n");
 				return SD_ERROR;
 			}
@@ -133,7 +134,7 @@ SD_RESULT SD_ReadBlocks(u32 sector, u8 *data, u32 count) {
 		return SD_OK;
 	} else {
 		if (sdio_read_blocks(sector, data, count) == 0) {
-			if (RtlDownSemaWithTimeout(&sdWSema, 1000) == 1)
+			if (rtw_down_timeout_sema(&sdWSema, 1000) == 1)
 				return SD_OK;
 			DBG_SDIO_ERR("SD_ReadBlocks timeout\n");
 		}
@@ -155,7 +156,7 @@ SD_RESULT SD_WriteBlocks(u32 sector, const u8 *data, u32 count) {
 		while (sector != end_sector) {
 			rtl_memcpy(buf, data, SIZE_BLOCK_ADMA);
 			wr_count = sdio_write_blocks(sector, buf, 1);
-			if (wr_count == 0 && RtlDownSemaWithTimeout(&sdWSema, 1000) != 1) {
+			if (wr_count == 0 && rtw_down_timeout_sema(&sdWSema, 1000) != 1) {
 				DBG_SDIO_ERR("SD_WriteBlocks timeout\n");
 				return SD_ERROR;
 			}
@@ -166,7 +167,7 @@ SD_RESULT SD_WriteBlocks(u32 sector, const u8 *data, u32 count) {
 		if (wr_count == 0)
 			return SD_OK;
 	} else if (sdio_write_blocks(sector, data, count) == 0) {
-		if (RtlDownSemaWithTimeout(&sdWSema, 1000) == 1)
+		if (rtw_down_timeout_sema(&sdWSema, 1000) == 1)
 			return SD_OK;
 		DBG_SDIO_ERR("SD_WriteBlocks timeout\n");
 	}

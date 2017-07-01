@@ -1,11 +1,12 @@
 #=============================================
 # SDK CONFIG
 #=============================================
-#WEB_INA219_DRV = 1
+WEB_INA219_DRV = 1
 #WEB_ADC_DRV = 1
+#WEB_SDCARD = 1
 #USE_AT = 1
-#USE_FATFS = 1
-#USE_SDIOH = 1
+USE_FATFS = 1
+USE_SDIOH = 1
 #USE_POLARSSL = 1
 #USE_P2P_WPS = 1
 #USE_GCC_LIB = 1
@@ -34,11 +35,19 @@ ADD_SRC_C += project/src/console/atcmd_user.c
 ADD_SRC_C += project/src/console/wifi_console.c
 ADD_SRC_C += project/src/console/wlan_tst.c
 #ADD_SRC_C += project/src/console/pwm_tst.c
+
+ifdef WEB_SDCARD
+USE_FATFS = 1
+USE_SDIOH = 1
+ADD_SRC_C += project/src/console/sd_fat.c
+endif
+
 ifdef WEB_INA219_DRV
 ADD_SRC_C += project/src/driver/i2c_drv.c
 ADD_SRC_C += project/src/ina219/ina219drv.c
 CFLAGS += -DWEB_INA219_DRV=1
 endif
+
 ifdef WEB_ADC_DRV
 ADD_SRC_C += project/src/driver/adc_drv.c
 ADD_SRC_C += project/src/adc_ws/adc_ws.c

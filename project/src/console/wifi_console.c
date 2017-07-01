@@ -323,7 +323,7 @@ MON_RAM_TAB_SECTION COMMAND_TABLE console_cmd_wifi_api[] = {
 		{"ATWT", 1, fATWT, "=<tx_power>: WiFi tx power: 0 - 100%, 1 - 75%, 2 - 50%, 3 - 25%, 4 - 12.5%"},
 		{"ATSF", 0, fATSF, ": Get TSF value"},
 #endif
-		{"ATWP", 0, fATWP, "=[dtim]: 0 - WiFi ipc/lpc off, 1..10 - on + dtim"},
+//		{"ATWP", 0, fATWP, "=[dtim]: 0 - WiFi ipc/lpc off, 1..10 - on + dtim"},
 		{"ATSN", 0, fATSN, ": Scan networks"}
 };
 

@@ -8,23 +8,34 @@
   </head>
   <body>
     <h3 style="width:800px; text-align: center;">Read regs U & I INA219</h3>
-    <div id="div_g" style="width:800px; height:400px;"></div>
+    <div id="div_v" style="width:800px; height:400px;"></div>
     <script type="text/javascript">
-var data = [];
-var g = new Dygraph(
-	document.getElementById("div_g"), 
-    data,
+var datau = [];
+//var datai = [];
+var gu = new Dygraph(
+	document.getElementById("div_v"), 
+    datau,
 	{
-		drawPoints: true,
-		showRoller: true,
-	labels: ['X', 'U', 'I']});
-	
+		labels: ['X', 'I', 'U'],
+//		drawPoints: true,
+		rollPeriod: 100,
+//		errorBars: true,
+//		showRoller: true,
+		y2label: 'U(mV)',
+		ylabel: 'I(mA)',
+		series : {
+			'U': { axis: 'y2' }
+		}
+//		, axes: { y: {valueRange: [4500, 5500] },	y2: {valueRange: [75, 125] }}
+	});
+
 var oldblkid = 0;
 var rdnextflg = false;
 var cur_idx = 0;
+var sig = 10;
 ws = new WebSocket('ws://rtl871x0/web.cgi');
 ws.binaryType = 'arraybuffer';
-ws.onopen = function(){ws.send('ina219')};
+ws.onopen = function(){ws.send('ina219'); ws.send('pr=0')};
 ws.onmessage = function (event) {
 	if(event.data instanceof ArrayBuffer) {
 		var wordarray = new Int16Array(event.data);
@@ -37,11 +48,11 @@ ws.onmessage = function (event) {
 				} else rdnextflg = true;
 				oldblkid = blkid + blksz;
 				for (var i=2; i<wordarray.length; i+=2) {
- 					if(cur_idx > 2000 ) data.shift();
-					data.push([cur_idx, wordarray[i], wordarray[i+1]*50]);
+ 					if(cur_idx > 10000 ) datau.shift();
+					datau.push([cur_idx, wordarray[i+1], wordarray[i]*0.5 ]);
 					cur_idx++;
 				}
-	 	 	    g.updateOptions({'file':data});
+	 	 	    gu.updateOptions({'file':datau});
 			}
 		}
 		ws.send("ina219");

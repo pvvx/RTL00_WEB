@@ -25,6 +25,7 @@ typedef struct{
 	ll_diskio_drv	*drv[_VOLUMES];
 	unsigned int            nbr;
 }ff_disk_drv;
+
 extern ff_disk_drv  disk;
 
 int FATFS_RegisterDiskDriver(ll_diskio_drv *disk_drv);
