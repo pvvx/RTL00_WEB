@@ -290,7 +290,7 @@ LOCAL void fATDS(int argc, char *argv[])
 {
     uint32 sleep_ms = 10000;
     if(argc > 1) sleep_ms = atoi(argv[1]);
-#if 0    
+#if 0 // WakeUp PB_1
     if(argc > 2) {
             printf("%u ms waiting low level on PB_1 before launching Deep-Sleep...\n", sleep_ms);
             // turn off log uart
