@@ -40,7 +40,7 @@ all: LIBS +=_wlan _platform_new _wps _websocket _xmodem _mdns
 mp: LIBS +=_wlan_mp _platform_new _wps _websocket _xmodem _mdns
 endif
 ifdef USE_SDIOH
-LIBS += _sdcard
+LIBS += _sdcard_v2
 CFLAGS += -DCONFIG_FATFS_EN=1
 endif
 # m c nosys gcc
@@ -364,15 +364,16 @@ endif
 #utilities - FatFS
 ifdef USE_FATFS
 INCLUDES += sdk/component/common/file_system/fatfs
+INCLUDES += sdk/component/common/file_system/fatfs/fatfs_ext/inc
 INCLUDES += sdk/component/common/file_system/fatfs/r0.10c/include
 SRC_C += sdk/component/common/file_system/fatfs/fatfs_ext/src/ff_driver.c
 SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/diskio.c
 SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/ff.c
 SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/option/ccsbcs.c
+endif
 ifdef USE_SDIOH
 INCLUDES += sdk/component/common/file_system/fatfs/disk_if/inc
 SRC_C += sdk/component/common/file_system/fatfs/disk_if/src/sdcard.c
-endif
 endif
 
 # Reversed SDK component

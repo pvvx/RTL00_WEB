@@ -46,24 +46,24 @@ typedef enum _SDIO_XFER_TYPE_{
 }SDIO_XFER_TYPE;
 
 typedef struct _HAL_SDIO_HOST_ADAPTER_{
-	IRQ_HANDLE				IrqHandle;			//+0..6(u32) Irq Handler
-	ADMA2_DESC_FMT			*AdmaDescTbl;		//+7(u32)
-	u32						Response[4];		//+8..11(u32)
-	u32						CardOCR;			//+12
-	u32 					CardStatus;			//+13
-	u32						IsWriteProtect;		//+14
-	u8 						SdStatus[SD_STATUS_LEN]; //+15..
-	u8						Csd[CSD_REG_LEN];	//+31
-    volatile u8             CmdCompleteFlg;	//+128(u8)
-    volatile u8             XferCompleteFlg; //+129(u8)
-	volatile u8             ErrIntFlg;
-    volatile u8             CardCurState;
-	u8						IsSdhc;
-	u8						CurrSdClk;	//+133?
-	u16 					RCA;
-	u16						SdSpecVer;
-	SDIO_ERR_TYPE			errType;
-	SDIO_XFER_TYPE			XferType;
+	IRQ_HANDLE				IrqHandle;			//+0..
+	ADMA2_DESC_FMT			*AdmaDescTbl;		//+16
+	u32						Response[4];		//+20,24,28,32
+	u32						CardOCR;			//+36
+	u32 					CardStatus;			//+40
+	u32						IsWriteProtect;		//+44
+	u8 						SdStatus[SD_STATUS_LEN]; //+48..
+	u8						Csd[CSD_REG_LEN];	//+112..
+    volatile u8             CmdCompleteFlg;	//+128
+    volatile u8             XferCompleteFlg; //+129
+	volatile u8             ErrIntFlg;		//+130
+    volatile u8             CardCurState;	//+131
+	u8						IsSdhc;		//+132
+	u8						CurrSdClk;	//+133
+	u16 					RCA;		//+134
+	u16						SdSpecVer;	//+136
+	SDIO_ERR_TYPE			errType;	//+140
+	SDIO_XFER_TYPE			XferType;	//+144
 	VOID (*XferCompCallback)(VOID *pAdapter);
 	VOID *XferCompCbPara;
 	VOID (*ErrorCallback)(VOID *pAdapter);

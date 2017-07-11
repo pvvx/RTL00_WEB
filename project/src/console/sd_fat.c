@@ -211,6 +211,71 @@ void sd_unmount(FATFS *m_fs) {
 	SD_DeInit(); // sdio_sd_deinit();
 }
 
+void read_file_test(char* file_name) {
+    FIL *f = malloc(sizeof(FIL));
+    if (f_open(f, file_name, FA_READ) == FR_OK) {
+        char * buf = malloc(2048);
+        unsigned int bytesread =0;
+        unsigned int totalread=0;
+        do {
+            if (f_read(f, buf, 2048, &bytesread) != FR_OK) {
+                totalread += bytesread;
+                printf("Read error!");
+                break;
+            }
+            totalread += bytesread;
+        }
+        while (bytesread !=0);
+        free(buf);
+        f_close(f);
+    } else {
+    	printf("No open file!");
+    }
+    free(f);
+}
+
+
+LOCAL void fATHF(int argc, char *argv[]) {
+	uint8 buf[512];
+	FATFS * fs = sd_mount();
+	if (fs != NULL) {
+		u8 * pbuf = (u8 *) malloc(512); // char *lfn = malloc (_MAX_LFN + 1);
+		if (pbuf != NULL) {
+			DIR dir;
+			FILINFO fno;
+			struct os_tm tm;
+			fno.lfname = (TCHAR*) pbuf;
+			fno.lfsize = 512;
+			u8 * sdir;
+			if(argc > 1
+				&& argv[1] != NULL
+				&& (sdir = (u8 *) malloc(strlen(argv[1]) + 4)) != NULL )
+					strcpy(strcpy(sdir, logical_drv) + 3, argv[1]);
+			else sdir = logical_drv;
+			if (f_opendir(&dir, sdir) == FR_OK) {
+				while (f_readdir(&dir, &fno) == FR_OK && fno.fname[0] != 0) {
+					if ((fno.fattrib & AM_VOL)==0 && fno.fsize > 0) {
+						if (*fno.lfname) {
+							strcpy(strcpy(buf, logical_drv) + 3, fno.lfname);
+						} else {
+							strcpy(strcpy(buf, logical_drv) + 3, fno.fname);
+						}
+					    TickType_t t1 = xTaskGetTickCount();
+						read_file_test(buf);
+						t1 = xTaskGetTickCount() - t1;
+						if(t1 == 0) t1 = 1;
+						printf("%u kbytes/sec\t%s\n", t1, buf);
+					}
+				}
+			} else
+				printf("FATFS: Open dir fail!\n");
+			free(pbuf);
+			if(sdir != logical_drv) free(sdir);
+		}
+	}
+	sd_unmount(fs);
+
+}
 /*	Test SD  */
 LOCAL void fATHS(int argc, char *argv[]) {
 	//	HalPinCtrlRtl8195A(UART0,0,0);
@@ -311,8 +376,9 @@ LOCAL void fATHS(int argc, char *argv[]) {
 }
 
 
-MON_RAM_TAB_SECTION COMMAND_TABLE console_commands_spitst[] = {
-		{"ATHS", 0, fATHS, ": SD test"}
+MON_RAM_TAB_SECTION COMMAND_TABLE console_commands_dscard[] = {
+		{"ATHS", 0, fATHS, ": SD test"},
+		{"ATHF", 0, fATHF, ": SD file read"}
 };
 
 #endif // CONFIG_SDIO_HOST_EN

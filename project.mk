@@ -3,7 +3,7 @@
 #=============================================
 #WEB_INA219_DRV = 1
 #WEB_ADC_DRV = 1
-#WEB_SDCARD = 1
+USE_SDCARD = 1
 #USE_AT = 1
 #USE_FATFS = 1
 #USE_SDIOH = 1
@@ -15,6 +15,11 @@ USE_MBED = 1
 ifndef USE_AT
 USE_NEWCONSOLE = 1
 USE_WIFI_API = 1
+endif
+
+ifdef USE_SDCARD
+USE_FATFS = 1
+USE_SDIOH = 1
 endif
 
 #RTOSDIR=freertos_v8.1.2
@@ -36,9 +41,7 @@ ADD_SRC_C += project/src/console/wifi_console.c
 ADD_SRC_C += project/src/console/wlan_tst.c
 #ADD_SRC_C += project/src/console/pwm_tst.c
 
-ifdef WEB_SDCARD
-USE_FATFS = 1
-USE_SDIOH = 1
+ifdef USE_SDCARD
 ADD_SRC_C += project/src/console/sd_fat.c
 endif
 

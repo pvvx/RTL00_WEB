@@ -425,14 +425,14 @@ typedef struct _ADMA2_DESC_FMT_
 /* 0x0E */
 typedef struct _SDIO_HOST_CMD_FMT_
 {
-	u16 RespType:2;
-	u16 Rsvd0:1;
-	u16 CmdCrcChkEn:1;
-	u16 CmdIdxChkEn:1;
-	u16 DataPresent:1;
-	u16 CmdType:2;
-	u16 CmdIdx:6;
-	u16 Rsvd1:2;
+	u16 RespType:2;		//bit:0..1
+	u16 Rsvd0:1;		//bit:2
+	u16 CmdCrcChkEn:1;	//bit:3
+	u16 CmdIdxChkEn:1;	//bit:4
+	u16 DataPresent:1;	//bit:5
+	u16 CmdType:2;		//bit:6..7
+	u16 CmdIdx:6;		//bit:8..13
+	u16 Rsvd1:2;		//bit:14..15
 }SDIO_HOST_CMD_FMT, *PSDIO_HOST_CMD_FMT;
 
 typedef struct _SDIO_HOST_CMD_

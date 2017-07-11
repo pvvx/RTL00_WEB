@@ -1,6 +1,7 @@
 #ifndef _BITBAND_IO_H_
 #define _BITBAND_IO_H_
 
+#include "PinNames.h"
 #include "hal_platform.h"
 #include "hal_api.h"
 #include "hal_gpio.h"
@@ -142,5 +143,11 @@
 #define BITBAND_K4 ucBITBAND_PERI(GPIO_REG_BASE+GPIO_PORTC_DR,24)  //Port = 2, bit = 24, K4
 #define BITBAND_K5 ucBITBAND_PERI(GPIO_REG_BASE+GPIO_PORTC_DR,25)  //Port = 2, bit = 25, K5
 #define BITBAND_K6 ucBITBAND_PERI(GPIO_REG_BASE+GPIO_PORTC_DR,26)  //Port = 2, bit = 26, K6
+
+volatile uint8_t * BitBandAddr(void *addr, uint8_t bit);
+volatile uint8_t * BitBandPeriAddr(void *addr, uint8_t bit);
+volatile uint8_t * GetOutPinBitBandAddr(PinName pin);
+volatile uint8_t * GetInPinBitBandAddr(PinName pin);
+volatile uint8_t * HardSetPin(PinName pin, HAL_GPIO_PIN_MODE pmode, uint8_t val);
 
 #endif // _BITBAND_IO_H_

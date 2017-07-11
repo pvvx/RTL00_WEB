@@ -235,6 +235,7 @@ s8 sdio_sd_init(void) {
 		}
 		sdio_status = SDIO_SD_OK;
 		if (HalSdioHostOp.HalSdioHostChangeSdClock(&SdioHostAdapter,
+//				SD_CLK_20_8MHZ) != HAL_OK)
 				SD_CLK_41_6MHZ) != HAL_OK)
 			DBG_SDIO_INFO("SD card does not support high speed.\n");
 	}
@@ -259,7 +260,7 @@ s8 sdio_sd_setClock(SD_CLK_FREQUENCY SDCLK) {
 		DBG_SDIO_ERR("Malloc ADMA2 table fail.\n");
 		return -1;
 	}
-	DBG_SDIO_INFO("SD card set CLK %d Hz\n", PLATFORM_CLOCK/(4<<(SD_CLK_41_6MHZ-SDCLK)));
+	DBG_SDIO_INFO("SD card set CLK %d Hz\n", PLATFORM_CLOCK/(2 << (SD_CLK_41_6MHZ - SDCLK)));
 	sta = HalSdioHostOp.HalSdioHostChangeSdClock(&SdioHostAdapter, SDCLK);
 	rtw_mfree(padma, sizeof(ADMA2_DESC_FMT));
 	if (sta)
