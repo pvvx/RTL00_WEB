@@ -568,7 +568,7 @@ LOCAL void BOOT_RAM_TEXT_SECTION EnterImage15(int flg) {
 		//----- SDRAM Off
 		SDR_PIN_FCTRL(OFF);
 		LDO25M_CTRL(OFF);
-		HAL_PERI_ON_WRITE32(REG_SOC_FUNC_EN, HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) | BIT(21)); // Flag SDRAM Off
+		HAL_PERI_ON_WRITE32(REG_SOC_FUNC_EN, HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) | BIT(21)); // Flag SDRAM Init
 	} else {
 		//----- SDRAM On
 		LDO25M_CTRL(ON);
@@ -580,7 +580,7 @@ LOCAL void BOOT_RAM_TEXT_SECTION EnterImage15(int flg) {
 		DBG_8195A("Spic Init Error!\n");
 		RtlConsolRam();
 	};
-	if ((HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) & BIT(21)) == 0) { // уже загружена?
+	if ((HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) & BIT(21)) == 0) { // Flag SDRAM Init?
 //		extern DRAM_DEVICE_INFO SdrDramInfo_rom;  // 50 MHz
 		if (!SdrControllerInit_rom(&SdrDramInfo)) { // 100 MHz
 			DBG_8195A("SDR Controller Init fail!\n");
@@ -604,7 +604,7 @@ LOCAL void BOOT_RAM_TEXT_SECTION EnterImage15(int flg) {
 			DBG_8195A("SDR tst end\n");
 		};
 #endif // test
-		HAL_PERI_ON_WRITE32(REG_SOC_FUNC_EN, HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) | BIT(21));
+		HAL_PERI_ON_WRITE32(REG_SOC_FUNC_EN, HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) | BIT(21)); // Flag SDRAM Init
 	};
 
 	if (!flg)

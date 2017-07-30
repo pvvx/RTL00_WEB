@@ -668,10 +668,10 @@
 			</target>
 			<target name="reset" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>mingw32-make.exe</buildCommand>
-				<buildArguments/>
+				<buildArguments>-s</buildArguments>
 				<buildTarget>reset</buildTarget>
 				<stopOnError>true</stopOnError>
-				<useDefaultCommand>false</useDefaultCommand>
+				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>false</runAllBuilders>
 			</target>
 			<target name="test" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">

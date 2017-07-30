@@ -30,7 +30,7 @@ LOCAL void FlashDump(int argc, char *argv[]) {
 }
 
 MON_RAM_TAB_SECTION COMMAND_TABLE console_flash_tst[] = {
-		{"FLASHDB", 1, FlashDump, ": <faddr(HEX)>[,size]: Flash Dump"}
+		{"FLASHDB", 1, FlashDump, "=<faddr(HEX)>[,size]: Flash Dump"}
 };
 
 

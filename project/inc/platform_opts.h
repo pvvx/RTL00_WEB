@@ -39,7 +39,7 @@
  * For FreeRTOS tickless configurations
  */
 #define FREERTOS_PMU_TICKLESS_PLL_RESERVED   0   // In sleep mode, 0: close PLL clock, 1: reserve PLL clock
-#define FREERTOS_PMU_TICKLESS_SUSPEND_SDRAM  1   // In sleep mode, 1: suspend SDRAM, 0: no act
+#define FREERTOS_PMU_TICKLESS_SUSPEND_SDRAM  0   // In sleep mode, 1: suspend SDRAM, 0: no act
 
 /******************************************************************************/
 

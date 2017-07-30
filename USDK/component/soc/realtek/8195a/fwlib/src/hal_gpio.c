@@ -95,6 +95,7 @@ HAL_GPIO_Init(
     port_num = HAL_GPIO_GET_PORT_BY_NAME(GPIO_Pin->pin_name);
     pin_num = HAL_GPIO_GET_PIN_BY_NAME(GPIO_Pin->pin_name);
     chip_pin = GPIO_GetChipPinName_8195a(port_num, pin_num);
+#if CONFIG_DEBUG_LOG > 3
     if (GpioFunctionChk(chip_pin, ENABLE) == _FALSE) {
 //    	if((chip_pin > 0x03) && (chip_pin != 0x25)) {
     		DBG_GPIO_ERR("HAL_GPIO_Init: GPIO Pin(%x) Unavailable\n ", chip_pin);
@@ -102,15 +103,16 @@ HAL_GPIO_Init(
 //    	}
 //    	else DBG_GPIO_WARN("HAL_GPIO_Init: GPIO Pin(%x) Warning for RTL8710AF!\n ", chip_pin);
     }
-
+#endif
     // Make the pin pull control default as High-Z
     GPIO_PullCtrl_8195a(chip_pin, HAL_GPIO_HIGHZ);
 
     ret = HAL_GPIO_Init_8195a(GPIO_Pin);
-    
+#if CONFIG_DEBUG_LOG > 3
     if (ret != HAL_OK) {
         GpioFunctionChk(chip_pin, DISABLE);
     }
+#endif
 }
 
 /**
@@ -146,18 +148,21 @@ HAL_GPIO_Irq_Init(
     port_num = HAL_GPIO_GET_PORT_BY_NAME(GPIO_Pin->pin_name);
     pin_num = HAL_GPIO_GET_PIN_BY_NAME(GPIO_Pin->pin_name);
     chip_pin = GPIO_GetChipPinName_8195a(port_num, pin_num);
+#if CONFIG_DEBUG_LOG > 3
     if (GpioFunctionChk(chip_pin, ENABLE) == _FALSE) {
         DBG_GPIO_ERR("HAL_GPIO_Irq_Init: GPIO Pin(%x) Unavailable\n ", chip_pin);
         return;
     }
-
+#endif
     DBG_GPIO_INFO("HAL_GPIO_Irq_Init: GPIO(name=0x%x)(mode=%d)\n ", GPIO_Pin->pin_name, 
         GPIO_Pin->pin_mode);
     HAL_GPIO_MaskIrq_8195a(GPIO_Pin);
     ret = HAL_GPIO_Init_8195a(GPIO_Pin);
+#if CONFIG_DEBUG_LOG > 3
     if (ret != HAL_OK) {
         GpioFunctionChk(chip_pin, DISABLE);
-    }    
+    }
+#endif
 }
 
 /**
@@ -199,8 +204,9 @@ HAL_GPIO_DeInit(
     pin_num = HAL_GPIO_GET_PIN_BY_NAME(GPIO_Pin->pin_name);
     chip_pin = GPIO_GetChipPinName_8195a(port_num, pin_num);
     HAL_GPIO_DeInit_8195a(GPIO_Pin);
-
+#if CONFIG_DEBUG_LOG > 3
     GpioFunctionChk(chip_pin, DISABLE);
+#endif
 }
 
 

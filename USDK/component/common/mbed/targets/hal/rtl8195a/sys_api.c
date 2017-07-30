@@ -38,12 +38,13 @@ extern VOID HalJtagPinOff(VOID);
 
 extern void HalInitLogUart(void);
 extern void HalDeinitLogUart(void);
-
+/*
 #ifdef	CONFIG_SDR_EN
 //#if defined ( __ICCARM__ )
 extern u8 IsSdrPowerOn();
 //#endif
 #endif
+*/
 /**
  *  @brief   Turn off the JTAG function
  *
@@ -203,12 +204,12 @@ void sys_reset(void)
 	                              (1 << 2));                                  // SYSRESETREQ
 }
 
+/*
 #ifdef	CONFIG_SDR_EN
 u8 sys_is_sdram_power_on(void)
 {
 	return IsSdrPowerOn();
 }
-
 void sys_sdram_off(void)
 {
 	if (IsSdrPowerOn()) {
@@ -216,3 +217,4 @@ void sys_sdram_off(void)
 	}
 }
 #endif
+*/

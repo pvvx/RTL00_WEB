@@ -377,8 +377,8 @@ LOCAL void fATHS(int argc, char *argv[]) {
 
 
 MON_RAM_TAB_SECTION COMMAND_TABLE console_commands_dscard[] = {
-		{"ATHS", 0, fATHS, ": SD test"},
-		{"ATHF", 0, fATHF, ": SD file read"}
+		{"ATHS", 0, fATHS, "=[dir]: SD test"},
+		{"ATHF", 0, fATHF, "=[dir]: SD file read"}
 };
 
 #endif // CONFIG_SDIO_HOST_EN

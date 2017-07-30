@@ -207,6 +207,10 @@ SDRSleep(
                     
     HAL_WRITE32(0x40005000, 0X10, HAL_READ32(0x40005000, 0x10)|BIT28);
     ACTCK_SDR_CCTRL(OFF);
+
+    GPIOState[PORT_G] = 0;
+    GPIOState[PORT_J] = 0;
+
     gpio_init(&gpio_obj, PG_1);
     gpio_mode(&gpio_obj, PullUp);
     gpio_dir(&gpio_obj, PIN_OUTPUT);
@@ -243,6 +247,7 @@ SDRSleep(
     gpio_mode(&gpio_obj, PullUp);
     gpio_dir(&gpio_obj, PIN_OUTPUT);
     gpio_write(&gpio_obj, GPIO_PIN_LOW);
+
 }
 #endif
 

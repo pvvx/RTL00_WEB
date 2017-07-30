@@ -74,8 +74,7 @@ void freertos_pre_sleep_processing(unsigned int *expected_idle_time) {
     uint32_t tick_after_sleep;
     uint32_t tick_passed;
     uint32_t backup_systick_reg;
-    unsigned char IsDramOn = 1;
-    unsigned char suspend_sdram = 1;
+    unsigned char suspend_sdram;
 
     /* To disable freertos sleep function and use our sleep function, 
      * we can set original expected idle time to 0. */
@@ -91,23 +90,20 @@ void freertos_pre_sleep_processing(unsigned int *expected_idle_time) {
     // Store gtimer timestamp before sleep
     tick_before_sleep = us_ticker_read();
 
-    if ( sys_is_sdram_power_on() == 0 ) {
-        IsDramOn = 0;
-    }
-
-    if (IsDramOn) {
-#if defined(FREERTOS_PMU_TICKLESS_SUSPEND_SDRAM) && (FREERTOS_PMU_TICKLESS_SUSPEND_SDRAM==0)
-        // sdram is turned on, and we don't want suspend sdram
-        suspend_sdram = 0;
-#endif
-    } else {
-        // sdram didn't turned on, we should not suspend it
-        suspend_sdram = 0;
-    }
-
     backup_systick_reg = portNVIC_SYSTICK_CURRENT_VALUE_REG;
 
-    // sleep
+#if defined(FREERTOS_PMU_TICKLESS_SUSPEND_SDRAM) && (FREERTOS_PMU_TICKLESS_SUSPEND_SDRAM==0)
+	suspend_sdram = 0;
+#else
+#ifdef	CONFIG_SDR_EN
+	extern u8 IsSdrPowerOn();
+	suspend_sdram = IsSdrPowerOn(); // = 0 if SDRAM уже init
+#else
+	suspend_sdram = 0;
+#endif
+#endif
+
+	// sleep
     sleep_ex_selective(wakeup_event, stime, reserve_pll, suspend_sdram);
 
     portNVIC_SYSTICK_CURRENT_VALUE_REG = backup_systick_reg;

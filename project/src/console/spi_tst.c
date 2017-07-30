@@ -79,5 +79,5 @@ LOCAL void fATSSI(int argc, char *argv[])
 }
 
 MON_RAM_TAB_SECTION COMMAND_TABLE console_commands_spitst[] = {
-		{"ATSSI", 0, fATSSI, "[len[,count[,clk[,ssn]]]]: Spi test"}
+		{"ATSSI", 0, fATSSI, "=[len[,count[,clk[,ssn]]]]: Spi test"}
 };
