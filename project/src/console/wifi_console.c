@@ -191,6 +191,9 @@ LOCAL void fATWI(int argc, char *argv[]) {
 	printf("\nWIFI ST config:\n");
 	printf(&str_rom_57ch3Dch0A[25]); // "================================\n"
 	show_wifi_st_cfg();
+	printf("\nWIFI AP clients:\n");
+	printf(&str_rom_57ch3Dch0A[25]); // "================================\n"
+	show_wifi_ap_clients();
 	printf("\n");
 }
 

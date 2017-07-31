@@ -866,3 +866,28 @@ void show_wifi_cfg(void) {
 	printf("\tSave flags: %p\n", wifi_cfg.save_flg);
 }
 
+int show_wifi_ap_clients(void) {
+	if((wifi_mode == RTW_MODE_AP) || (wifi_mode == RTW_MODE_STA_AP)) {
+		struct {
+			int    count;
+			rtw_mac_t mac_list[AP_STA_NUM];
+		} client_info;
+		client_info.count = AP_STA_NUM;
+		if(wext_get_associated_client_list(wlan_ap_name, &client_info, sizeof(client_info)) >= 0) {
+			if(client_info.count) {
+				printf("\tAP %u clients:\n", client_info.count);
+				int client_idx = 0;
+				while(client_idx++ < client_info.count) {
+				    unsigned char *pmac = client_info.mac_list[client_idx].octet;
+				    printf("\tsta[%u]: %02x:%02x:%02x:%02x:%02x:%02x\n", client_idx,
+				            pmac[0],pmac[1],pmac[2],pmac[3],pmac[4],pmac[5]);
+				}
+			} else {
+				printf("\tAP clients none\n");
+			}
+			return client_info.count;
+		};
+	};
+	printf("Get AP clients error!\n");
+	return -1;
+}

@@ -468,6 +468,15 @@ int wext_get_tx_power(const char *ifname, __u8 *poweridx) {
 	return ret;
 }
 
+int wext_get_associated_client_list(const char *ifname,
+		void * client_list_buffer, uint16_t buffer_length) {
+	char buf[25];
+
+	memset(buf, 0, sizeof(buf));
+	snprintf(buf, 25, "get_client_list %x", client_list_buffer);
+	return wext_private_command(ifname, buf, 0);
+}
+
 #if 0 // work ?
 int wext_set_txpower(const char *ifname, int poweridx) {
 	int ret;
@@ -476,18 +485,6 @@ int wext_set_txpower(const char *ifname, int poweridx) {
 	memset(buf, 0, sizeof(buf));
 //	snprintf(buf, 24, "txpower patha=%d", poweridx);
 	snprintf(buf, sizeof(buf), "txpower patha=%d,pathb=%d", poweridx, poweridx);
-	ret = wext_private_command(ifname, buf, 0);
-
-	return ret;
-}
-
-int wext_get_associated_client_list(const char *ifname,
-		void * client_list_buffer, uint16_t buffer_length) {
-	int ret;
-	char buf[25];
-
-	memset(buf, 0, sizeof(buf));
-	snprintf(buf, 25, "get_client_list %x", client_list_buffer);
 	ret = wext_private_command(ifname, buf, 0);
 
 	return ret;
