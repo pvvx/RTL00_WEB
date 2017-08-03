@@ -1938,6 +1938,7 @@ void qfnk_task(void)
 	WEB_SRV_QFNK qfn;
 	WEB_SRV_QFNK qfnt;
 	TickType_t timetick;
+	qfnt.fnc = NULL;
 	while(1) {
 		if(xQueueReceive(xQueueWebSrv, &qfn, 5) == pdPASS) { // portMAX_DELAY
 			if(qfn.fnc) {
