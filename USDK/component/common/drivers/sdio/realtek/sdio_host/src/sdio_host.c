@@ -223,20 +223,20 @@ s8 sdio_write_blocks(uint32_t sector, const uint8_t *buffer, uint32_t count) {
 //-----
 s8 sdio_sd_init(void) {
 	if (sdio_status != SDIO_SD_OK) {
-		SdioHostAdapter.AdmaDescTbl = gAdmaTbls;
 		if (sdio_status <= SDIO_INIT_FAIL)
 			sdio_init_host();
 		if (sdio_status != SDIO_INIT_OK) {
 			return -1;
 		}
 		DBG_SDIO_INFO("Init sd card.\n");
+		SdioHostAdapter.AdmaDescTbl = gAdmaTbls;
 		if (HalSdioHostOp.HalSdioHostInitCard(&SdioHostAdapter)) {
 			return -1;
 		}
 		sdio_status = SDIO_SD_OK;
 		if (HalSdioHostOp.HalSdioHostChangeSdClock(&SdioHostAdapter,
-//				SD_CLK_20_8MHZ) != HAL_OK)
-				SD_CLK_41_6MHZ) != HAL_OK)
+				SD_CLK_20_8MHZ) != HAL_OK)
+//				SD_CLK_41_6MHZ) != HAL_OK)
 			DBG_SDIO_INFO("SD card does not support high speed.\n");
 	}
 	return 0;

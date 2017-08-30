@@ -19,9 +19,9 @@
 # FLAGS
 # -------------------------------------------------------------------
 CFLAGS = -DM3 -DCONFIG_PLATFORM_8195A -DGCC_ARMCM3 -DARDUINO_SDK -DF_CPU=166666666L -DNDEBUG
-CFLAGS += -mcpu=cortex-m3 -mthumb -g2 -Os -std=gnu99 -Wall -Werror
+CFLAGS += -mcpu=cortex-m3 -mthumb -g2 -Os -std=gnu99 -Wall -Werror -Wpedantic -Wextra
 CFLAGS += -fno-common -fmessage-length=0 -ffunction-sections -fdata-sections -fomit-frame-pointer -fno-short-enums -fsigned-char 
-CFLAGS += -w -Wno-pointer-sign    
+CFLAGS += -w -Wno-pointer-sign  
 ifdef USE_GCC_LIB 
 LFLAGS = -mcpu=cortex-m3 -mthumb -g -Os -nostartfiles --specs=nano.specs
 else
@@ -40,7 +40,7 @@ all: LIBS +=_wlan _platform_new _wps _websocket _xmodem _mdns
 mp: LIBS +=_wlan_mp _platform_new _wps _websocket _xmodem _mdns
 endif
 ifdef USE_SDIOH
-LIBS += _sdcard_v2
+#LIBS += _sdcard_v2
 CFLAGS += -DCONFIG_FATFS_EN=1
 endif
 # m c nosys gcc
@@ -259,6 +259,7 @@ ifdef USE_SDIOH
 SRC_C += sdk/component/soc/realtek/8195a/fwlib/src/hal_sdio_host.c
 SRC_C += sdk/component/common/drivers/sdio/realtek/sdio_host/src/sd.c 
 SRC_C += sdk/component/common/drivers/sdio/realtek/sdio_host/src/sdio_host.c 
+SRC_C += sdk/component/soc/realtek/8195a/fwlib/rtl8195a/src/rtl8195a_sdio_host_open.c 
 endif
 
 #peripheral - osdep

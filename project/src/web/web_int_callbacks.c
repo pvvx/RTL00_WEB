@@ -22,6 +22,7 @@
 #include "wifi_api.h"
 #include "sys_api.h"
 #include "esp_comp.h"
+#include "sdk_ver.h"
 
 #ifdef USE_NETBIOS
 #include "netbios/netbios.h"

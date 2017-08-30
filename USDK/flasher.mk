@@ -206,8 +206,7 @@ runram:
 	-f $(FLASHER_PATH)rtl8710.ocd -c 'init' -c 'reset halt' -c 'adapter_khz $(FLASHER_SPEED)' \
 	-c 'load_image $(RAM1R_IMAGE) 0x10000bc8 bin' \
 	-c 'load_image $(RAM2_IMAGE) 0x10006000 bin' \
-	-c 'mww 0x40000210 0x20200113' \
-	-c 'reset run' -c shutdown
+	-c 'mww 0x40000210 0x20111157' -c 'rtl8710_reboot' -c shutdown
 
 endif
 endif

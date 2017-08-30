@@ -112,7 +112,8 @@ void HalSdioHostOpInit(void *Data) {
 	phsha->HalSdioHostErase = &HalSdioHostEraseRtl8195a;
 	phsha->HalSdioHostGetWriteProtect = &HalSdioHostGetWriteProtectRtl8195a;
 	phsha->HalSdioHostSetWriteProtect = &HalSdioHostSetWriteProtectRtl8195a;
-//#ifdef RTL8710AF
+
+#if 0 //#ifdef RTL8710AF
 	if(HalGetChipId() != CHIP_ID_8195AM) {
 		GPIOState[0] &= ~((1 << 8) - 1);
 		{
@@ -123,8 +124,7 @@ void HalSdioHostOpInit(void *Data) {
 		}
 //		vTaskDelay(1);
 	}
-
-//#endif
+#endif
 }
 
 #endif // CONFIG_SDIO_HOST_EN

@@ -119,7 +119,7 @@
 /  FatFs supports only BMP. */
 
 
-#define _FS_RPATH		0	/* 0 to 2 */
+#define _FS_RPATH		2	/* 0 to 2 */
 /* The _FS_RPATH option configures relative path feature.
 /
 /   0: Disable relative path feature and remove related functions.
