@@ -217,10 +217,12 @@ u8_t ip4_addr_netmask_valid(u32_t netmask);
                       ipaddr != NULL ? ip4_addr4_16(ipaddr) : 0))
 
 /* Get one byte from the 4-byte address */
+#ifndef ip4_addr1
 #define ip4_addr1(ipaddr) (((u8_t*)(ipaddr))[0])
 #define ip4_addr2(ipaddr) (((u8_t*)(ipaddr))[1])
 #define ip4_addr3(ipaddr) (((u8_t*)(ipaddr))[2])
 #define ip4_addr4(ipaddr) (((u8_t*)(ipaddr))[3])
+#endif
 /* These are cast to u16_t, with the intent that they are often arguments
  * to printf using the U16_F format from cc.h. */
 #define ip4_addr1_16(ipaddr) ((u16_t)ip4_addr1(ipaddr))

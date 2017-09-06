@@ -376,7 +376,7 @@ BaseType_t xTaskGenericCreate( TaskFunction_t pxTaskCode,
 								TaskHandle_t * const pxCreatedTask,
 								StackType_t * const puxStackBuffer,
 								const MemoryRegion_t * const xRegions ) PRIVILEGED_FUNCTION;
-#define xTaskCreate( pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask ) xTaskGenericCreate( ( pvTaskCode ), ( pcName ), ( usStackDepth ), ( pvParameters ), ( uxPriority ), ( pxCreatedTask ), ( NULL ), ( NULL ) )
+#define xTaskCreate(pvTaskCode, pcName, usStackDepth, pvParameters, uxPriority, pxCreatedTask ) xTaskGenericCreate( (TaskFunction_t)( pvTaskCode ), ( pcName ), ( usStackDepth ), ( pvParameters ), ( uxPriority ), ( pxCreatedTask ), ( NULL ), ( NULL ) )
 #else
 	BaseType_t xTaskCreate(	TaskFunction_t pxTaskCode,
 							const char * const pcName,

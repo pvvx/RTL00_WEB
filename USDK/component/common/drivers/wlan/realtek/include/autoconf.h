@@ -208,6 +208,7 @@
   #if defined(CONFIG_HARDWARE_8188F)
   #define NET_IF_NUM 2
   #else
+  #undef NET_IF_NUM
   #define NET_IF_NUM ((CONFIG_ETHERNET) + (CONFIG_WLAN) + 1)
   #endif
 #else

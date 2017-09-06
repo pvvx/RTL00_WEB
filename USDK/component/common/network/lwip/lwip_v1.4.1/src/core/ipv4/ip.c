@@ -128,7 +128,9 @@ struct netif *
 ip_route(ip_addr_t *dest)
 {
   struct netif *netif;
+#if CONFIG_ETHERNET
   struct netif *last_netif = NULL;
+#endif
 
 #ifdef LWIP_HOOK_IP4_ROUTE
   netif = LWIP_HOOK_IP4_ROUTE(dest);

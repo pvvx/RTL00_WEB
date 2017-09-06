@@ -287,6 +287,7 @@ RtkDACIdxChk(
     IN  u8  DACIdx
 )
 {
+	(void) DACIdx;
 #if !DAC0_USED
     if (DACIdx == DAC0_SEL)
         return _EXIT_FAILURE;

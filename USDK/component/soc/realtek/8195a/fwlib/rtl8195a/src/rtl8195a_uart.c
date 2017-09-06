@@ -12,6 +12,7 @@
 #include "rtl8195a_uart.h"
 #include "hal_uart.h"
 #include "hal_gdma.h"
+#include "strproc.h"
 
 u8
 HalRuartGetChipVerRtl8195a(VOID)

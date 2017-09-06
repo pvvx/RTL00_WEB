@@ -17,9 +17,9 @@ extern "C" {
 #include <queue.h>
 
 //-----------------------------------------------------------------------------
-#ifndef FLASH_SECTOR_SIZE
-	#define FLASH_SECTOR_SIZE 		4096
-#endif
+//#ifndef FLASH_SECTOR_SIZE
+//	#define FLASH_SECTOR_SIZE 		4096
+//#endif
 #define FLASH_SECTORS 			256	// 1 Mbytes
 #define FLASH_CHIP_SIZE			(FLASH_SECTORS * FLASH_SECTOR_SIZE)
 #define FMEMORY_SCFG_BANK_SIZE	FLASH_SECTOR_SIZE // размер сектора, 4096 bytes

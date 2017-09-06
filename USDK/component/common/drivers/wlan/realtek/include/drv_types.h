@@ -56,6 +56,7 @@
 #include <section_config.h>
 //#include "rtl_utility_ram.h"
 #include "platform/platform_stdlib.h"
+
 #else
 #define SRAM_BD_DATA_SECTION
 #define WLAN_ROM_TEXT_SECTION
@@ -114,7 +115,7 @@ enum _NIC_VERSION {
 
 };
 
-typedef struct _ADAPTER _adapter, ADAPTER,*PADAPTER;
+typedef struct _ADAPTER _adapter, ADAPTER, *PADAPTER;
 
 #include "wireless.h"
 #include <netdev.h>

@@ -42,9 +42,9 @@
 
 #define max_len_buf_write_flash 2048 // размер буфера при записи flash. Увеличение/уменньшение размера (до сектора 4096) ускорения не дает (1..2%)
 
-#define mMIN(a, b)  ((a<b)?a:b)
-#define mMAX(a, b)  ((a>b)?a:b)
-
+//#define mMIN(a, b)  ((a<b)?a:b)
+//#define mMAX(a, b)  ((a>b)?a:b)
+#undef atoi
 #define atoi(s) rom_atoi(s)
 
 LOCAL void web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR ;
@@ -854,7 +854,7 @@ LOCAL void ICACHE_FLASH_ATTR web_send_fnohanle(TCP_SERV_CONN *ts_conn) {
 	}
 	if(pdata != 0 && size != 0) {
 //		spi_flash_read(pdata & MASK_ADDR_FLASH_ICACHE_DATA, pbuf, size);
-		tcpsrv_int_sent_data(ts_conn, pdata, size);
+		tcpsrv_int_sent_data(ts_conn, (uint8 *) pdata, size);
 	}
 #if DEBUGSOO > 1
 	os_printf("%u ", size);
@@ -864,7 +864,7 @@ LOCAL void ICACHE_FLASH_ATTR web_send_fnohanle(TCP_SERV_CONN *ts_conn) {
 /******************************************************************************
 *******************************************************************************/
 LOCAL int ICACHE_FLASH_ATTR web_find_cbs(uint8 * chrbuf, uint32 len) {
-  int i;
+  uint32 i;
   for(i = 0; i < len; i++)  if(chrbuf[i] == '~')  return i;
   return -1;
 }
@@ -1442,7 +1442,7 @@ LOCAL int ICACHE_FLASH_ATTR upload_boundary(TCP_SERV_CONN *ts_conn) // HTTP_UPLO
 #if DEBUGSOO > 2
 					os_printf("Write flash addr:%p[0x%04x]\n", pupload->faddr, block_size);
 #endif
-					flash_stream_write(&flashobj, pupload->faddr, (block_size + 3)&(~3), (uint32 *)pstr);
+					flash_stream_write(&flashobj, pupload->faddr, (block_size + 3)&(~3), (uint8_t *)pstr);
 
 					device_mutex_unlock(RT_DEV_LOCK_FLASH);
 
@@ -1938,6 +1938,8 @@ void qfnk_task(void)
 	WEB_SRV_QFNK qfn;
 	WEB_SRV_QFNK qfnt;
 	TickType_t timetick;
+	qfnt.fnc = NULL;
+	qfnt.pause_ms = 0;
 	while(1) {
 		if(xQueueReceive(xQueueWebSrv, &qfn, 5) == pdPASS) { // portMAX_DELAY
 			if(qfn.fnc) {
@@ -1948,7 +1950,7 @@ void qfnk_task(void)
 					timetick = xTaskGetTickCount();
 					qfnt = qfn;
 				}
-				else qfn.fnc(qfn.param);
+				else qfn.fnc((uint32) qfn.param);
 			}
 		}
 		else if(qfnt.fnc) {
@@ -1956,7 +1958,7 @@ void qfnk_task(void)
 #if DEBUGSOO > 3
 				os_printf("qfnt: %p(%p),%d\n", qfnt.fnc, qfnt.param, qfnt.pause_ms);
 #endif
-				qfnt.fnc(qfnt.param);
+				qfnt.fnc((uint32) qfnt.param);
 				qfnt.fnc = NULL;
 			}
 		}
@@ -2026,7 +2028,7 @@ err_t ICACHE_FLASH_ATTR webserver_close(uint16 portn)
 #endif
 	if(xQueueWebSrv) {
 		WEB_SRV_QFNK qfn;
-		qfn.fnc = vTaskDelete;
+		qfn.fnc = (web_ex_func_cb) vTaskDelete;
 		qfn.param = NULL;
 		qfn.pause_ms = 0;
 		if(xQueueSendToBack(xQueueWebSrv, &qfn, 1000) == pdPASS) {

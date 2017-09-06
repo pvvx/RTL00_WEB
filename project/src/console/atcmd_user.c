@@ -16,6 +16,7 @@
 #include "tcm_heap.h"
 #include "rtl8195a/rtl_libc.h"
 
+#include "flash_api.h"
 #include "sleep_ex_api.h"
 
 #include "lwip/tcp_impl.h"
@@ -36,12 +37,14 @@ void ShowMemInfo(void)
 //------------------------------------------------------------------------------
 // Mem, Tasks info
 //------------------------------------------------------------------------------
-LOCAL void fATST(int argc, char *argv[]) {
+void fATST(int argc, char *argv[]) {
+		(void) argc;
+		(void) argv;
 		ShowMemInfo();
 #if 0 //CONFIG_DEBUG_LOG > 1
 		dump_mem_block_list();
 		tcm_heap_dump();
-#endif;
+#endif
 		printf("\n");
 #if (configGENERATE_RUN_TIME_STATS == 1)
 		char *cBuffer = pvPortMalloc(512);
@@ -127,12 +130,12 @@ extern char str_rom_hex_addr[]; // in *.ld "[Addr]   .0 .1 .2 .3 .4 .5 .6 .7 .8 
 void dump_bytes(uint32 addr, int size)
 {
 	uint8 buf[17];
-	u32 symbs_line = sizeof(buf)-1;
+	int symbs_line = sizeof(buf)-1;
 	printf(str_rom_hex_addr);
 	while (size) {
 		if (symbs_line > size) symbs_line = size;
 		printf("%08X ", addr);
-		copy_align4_to_align1(buf, addr, symbs_line);
+		copy_align4_to_align1(buf, (void *) addr, symbs_line);
 		print_hex_dump(buf, symbs_line, ' ');
 		int i;
 		for(i = 0 ; i < symbs_line ; i++) {
@@ -151,6 +154,12 @@ void dump_bytes(uint32 addr, int size)
 //------------------------------------------------------------------------------
 // Dump byte register
 //------------------------------------------------------------------------------
+extern u32 Strtoul(
+    IN  const u8 *nptr,
+    IN  u8 **endptr,
+    IN  u32 base
+);
+
 LOCAL void fATSB(int argc, char *argv[])
 {
 	int size = 16;
@@ -169,7 +178,8 @@ LOCAL void fATSB(int argc, char *argv[])
 		dump_bytes(addr, size);
 	}
 }
-
+extern u32 CmdDumpWord(IN u16 argc, IN u8 *argv[]);
+extern u32 CmdWriteWord(IN u16 argc, IN u8 *argv[]);
 //------------------------------------------------------------------------------
 // Dump dword register
 //------------------------------------------------------------------------------
@@ -280,6 +290,7 @@ void print_tcp_pcb(void)
 *******************************************************************************/
 LOCAL void fATLW(int argc, char *argv[]) 	// Info Lwip
 {
+	(void) argc; (void) argv;
 	print_udp_pcb();
 	print_tcp_pcb();
 }
@@ -289,7 +300,8 @@ LOCAL void fATLW(int argc, char *argv[]) 	// Info Lwip
 //------------------------------------------------------------------------------
 LOCAL void fATGI(int argc, char *argv[])
 {
-    int i;
+	(void) argc; (void) argv;
+	int i;
 	for (i = 0; i < _PORT_MAX; i++)
 		printf("Port %c state: 0x%04x\n", i + 'A', GPIOState[i]);
 }

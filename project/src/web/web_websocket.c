@@ -28,7 +28,7 @@
 
 #define copy_s4d1 rtl_memcpy
 
-#define mMIN(a, b)  ((a<b)?a:b)
+//#define mMIN(a, b)  ((a<b)?a:b)
 
 #define MAX_RX_BUF_SIZE 8192
 

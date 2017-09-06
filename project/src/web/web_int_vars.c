@@ -17,6 +17,7 @@
 #include "ethernetif.h"
 #include "web_srv_int.h"
 #include "web_utils.h"
+#include "webfs/webfs.h"
 #include "flash_eep.h"
 #include "device_lock.h"
 #include "rtl8195a/rtl_libc.h"
@@ -63,6 +64,7 @@ extern void web_hexdump(TCP_SERV_CONN *ts_conn);
 #define ifcmp(a)  if(rom_xstrcmp(cstr, a))
 
 extern int rom_atoi(const char *);
+#undef atoi
 #define atoi rom_atoi
 
 typedef uint32 (* call_func)(uint32 a, uint32 b, uint32 c);
@@ -119,7 +121,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
 			cstr += 4;
 			ifcmp("port") {
 				if(syscfg.web_port != val) {
-					webserver_qfn((web_ex_func_cb)webserver_reinit, (void *)syscfg.web_port, 200);
+					webserver_qfn((web_ex_func_cb)webserver_reinit, (void *)((uint32)syscfg.web_port), 200);
 					syscfg.web_port = val;
 				}
 			}
@@ -189,7 +191,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
       cstr+=5;
       ifcmp("scan") api_wifi_scan(NULL);
       else ifcmp("rdcfg") web_conn->udata_stop = read_wifi_cfg(val);
-      else ifcmp("newcfg") webserver_qfn((web_ex_func_cb)wifi_run, (void *)wifi_cfg.mode, 200);
+      else ifcmp("newcfg") webserver_qfn((web_ex_func_cb)wifi_run, (void *)((uint32) wifi_cfg.mode), 200);
       else ifcmp("mode")	wifi_cfg.mode = val;
       else ifcmp("bgn")  	wifi_cfg.bgn = val;
       else ifcmp("lflg") 	wifi_cfg.load_flg = val;
@@ -246,7 +248,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
        		  if(wifi_cfg.save_flg & BID_AP_HOSTNAME) {
        			  WEB_SRV_QFNK x;
        			  x.fnc = write_wifi_cfg;
-       			  x.param = BID_AP_HOSTNAME;
+       			  x.param = (void *)BID_AP_HOSTNAME;
        			  xQueueSendToBack(xQueueWebSrv, &x, 0);
        		  }
           }
@@ -303,7 +305,7 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
        		  if(wifi_cfg.save_flg & BID_ST_HOSTNAME) {
        			  WEB_SRV_QFNK x;
        			  x.fnc = write_wifi_cfg;
-       			  x.param = BID_ST_HOSTNAME;
+       			  x.param = (void *)BID_ST_HOSTNAME;
        			  x.pause_ms = 0;
        			  xQueueSendToBack(xQueueWebSrv, &x, 0);
        		  }

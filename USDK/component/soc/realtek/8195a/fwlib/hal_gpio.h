@@ -190,11 +190,11 @@ typedef struct _HAL_GPIO_PIN_ {
     u32 pin_name;    // Pin: [7:5]: port number, [4:0]: pin number
 }HAL_GPIO_PIN, *PHAL_GPIO_PIN;
 
-typedef struct _HAL_GPIO_OP_ {
 #if defined(__ICCARM__)
+typedef struct _HAL_GPIO_OP_ {
     void* dummy;
-#endif
 }HAL_GPIO_OP, *PHAL_GPIO_OP;
+#endif
 
 typedef void (*GPIO_IRQ_FUN)(VOID *Data, u32 Id);
 typedef void (*GPIO_USER_IRQ_FUN)(u32 Id);

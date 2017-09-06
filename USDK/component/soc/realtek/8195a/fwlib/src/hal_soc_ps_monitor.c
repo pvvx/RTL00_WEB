@@ -541,7 +541,7 @@ VOID SleepPwrGatted(
     u32 Rtemp = 0;
     u32 ScaleTemp = 0;
     u32 PeriodTemp = 0;
-    u32 CalTemp = 0;
+
 
     //Backup CPU CLK
     BackupCPUClk();
@@ -553,7 +553,7 @@ VOID SleepPwrGatted(
     //3 1.1 Set TU timer timescale
     //0x4000_0090[21:16] = 6'h1F
     //0x4000_0090[15] = 1'b0 => Disable timer
-    CalTemp = (CLKCal(ANACK) << 16);
+    u32 CalTemp = (CLKCal(ANACK) << 16);
     Rtemp = (HAL_READ32(SYSTEM_CTRL_BASE, REG_SYS_ANA_TIM_CTRL)
     		& (~((BIT_MASK_SYS_DSTDY_TIM_SCAL << BIT_SHIFT_SYS_DSTDY_TIM_SCAL) |  (BIT_MASK_SYS_ANACK_TU_TIME << BIT_SHIFT_SYS_ANACK_TU_TIME))))
     		| ScaleTemp;
@@ -608,7 +608,6 @@ DStandby(
     u32 Rtemp = 0;
     u32 ScaleTemp = 0;
     u32 PeriodTemp = 0;
-    u32 CalTemp = 0;
 
     //Backup CPU CLK
     BackupCPUClk();
@@ -621,7 +620,7 @@ DStandby(
     //3 1.1 Set TU timer timescale
     //0x4000_0090[21:16] = 6'h1F
     //0x4000_0090[15] = 1'b0 => Disable timer
-    CalTemp = (CLKCal(ANACK) << 16);
+    u32 CalTemp = (CLKCal(ANACK) << 16);
     Rtemp = (HAL_READ32(SYSTEM_CTRL_BASE, REG_SYS_ANA_TIM_CTRL)
     		& (~((BIT_MASK_SYS_DSTDY_TIM_SCAL << BIT_SHIFT_SYS_DSTDY_TIM_SCAL) |  (BIT_MASK_SYS_ANACK_TU_TIME << BIT_SHIFT_SYS_ANACK_TU_TIME))))
     		| ScaleTemp;
@@ -679,7 +678,7 @@ DSleep(
     u32 UTemp = 0;
     u32 MaxTemp = 0;
  
-    u32 Reada335 = 0;
+    u32 Reada335;
 
     //2 Deep Sleep mode:
     //3 2.1 Set TU timer timescale

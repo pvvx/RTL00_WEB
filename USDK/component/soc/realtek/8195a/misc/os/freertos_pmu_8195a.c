@@ -7,6 +7,8 @@
 #include "platform_autoconf.h"
 #include "sys_api.h"
 #include "sleep_ex_api.h"
+#include "us_ticker_api.h"
+#include "cmsis_os.h"
 
 #include "task.h"
 
@@ -64,7 +66,7 @@ unsigned char generate_wakelock_stats = 0;
  *  @param  expected_idle_time : The time that FreeRTOS expect to sleep.
  *                               If we set this value to 0 then FreeRTOS will do nothing in its sleep function.
  **/
-void freertos_pre_sleep_processing(unsigned int *expected_idle_time) {
+void freertos_pre_sleep_processing(uint32_t *expected_idle_time) {
 
 #ifdef CONFIG_SOC_PS_MODULE
 
@@ -150,7 +152,7 @@ void freertos_pre_sleep_processing(unsigned int *expected_idle_time) {
 #endif
 }
 
-void freertos_post_sleep_processing(unsigned int *expected_idle_time) {
+void freertos_post_sleep_processing(uint32_t *expected_idle_time) {
 #ifndef configSYSTICK_CLOCK_HZ
 	*expected_idle_time = 1 + ( portNVIC_SYSTICK_CURRENT_VALUE_REG / ( configCPU_CLOCK_HZ / configTICK_RATE_HZ ) );
 #else
@@ -246,6 +248,10 @@ void pmu_enable_wakelock_stats(unsigned char enable) {
 }
 
 #if (configGENERATE_RUN_TIME_STATS == 1)
+
+extern int sprintf(char* str, const char* fmt, ...);
+extern size_t strlen(const char *str);
+//#define sprintf rtl_sprintf
 void pmu_get_wakelock_hold_stats( char *pcWriteBuffer ) {
     uint32_t i;
     uint32_t current_timestamp = osKernelSysTick();

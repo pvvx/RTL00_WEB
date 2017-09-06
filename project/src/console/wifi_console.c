@@ -198,8 +198,10 @@ LOCAL void fATWI(int argc, char *argv[]) {
 }
 
 extern uint8_t rtw_power_percentage_idx;
+extern int rltk_set_tx_power_percentage(rtw_tx_pwr_percentage_t power_percentage_idx);
 
-LOCAL void fATWT(int argc, char *argv[]) {
+void fATWT(int argc, char *argv[]) {
+	(void) argc; (void) argv;
 	if(argc > 1) {
 		int txpwr = atoi(argv[1]);
 		debug_printf("set tx power (%d)...\n", txpwr);
@@ -212,7 +214,10 @@ LOCAL void fATWT(int argc, char *argv[]) {
 
 //-- Test tsf (64-bits counts, 1 us step) ---
 
-#include "hal_com_reg.h"
+//#include "hal_com_reg.h"
+#define WIFI_REG_BASE               0x40080000
+#define REG_TSFTR						0x0560
+#define REG_TSFTR1						0x0568	// HW Port 1 TSF Register
 
 #define ReadTSF_Lo32() (*((volatile unsigned int *)(WIFI_REG_BASE + REG_TSFTR)))
 #define ReadTSF_Hi32() (*((volatile unsigned int *)(WIFI_REG_BASE + REG_TSFTR1)))
@@ -222,13 +227,15 @@ LOCAL uint64_t get_tsf(void)
 	return *((uint64_t *)(WIFI_REG_BASE + REG_TSFTR));
 }
 
-LOCAL void fATSF(int argc, char *argv[])
+void fATSF(int argc, char *argv[])
 {
+	(void) argc; (void) argv;
 	uint64_t tsf = get_tsf();
 	printf("\nTSF: %08x%08x\n", (uint32_t)(tsf>>32), (uint32_t)(tsf));
 }
 
-LOCAL void fATWP(int argc, char *argv[]) {
+void fATWP(int argc, char *argv[]) {
+	(void) argc; (void) argv;
 	int x = 0;
 	if(argc > 1) {
 		x = atoi(argv[1]);
@@ -248,7 +255,7 @@ LOCAL void fATWP(int argc, char *argv[]) {
 	}
 }
 /* --------  WiFi Scan ------------------------------- */
-LOCAL void scan_result_handler(internal_scan_handler_t* ap_scan_result)
+LOCAL rtw_result_t scan_result_handler(internal_scan_handler_t* ap_scan_result)
 {
 	if (ap_scan_result) {
 		if(ap_scan_result->scan_cnt) {
@@ -274,10 +281,13 @@ LOCAL void scan_result_handler(internal_scan_handler_t* ap_scan_result)
 	} else {
 		printf("Scan networks: None!\n");
 	}
+	return RTW_SUCCESS;
 }
 /* --------  WiFi Scan ------------------------------- */
-LOCAL void fATSN(int argc, char *argv[])
+void fATSN(int argc, char *argv[])
 {
+	(void) argc;
+	(void) argv;
 	api_wifi_scan(scan_result_handler);
 }
 

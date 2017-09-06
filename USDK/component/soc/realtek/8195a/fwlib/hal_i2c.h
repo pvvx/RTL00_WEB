@@ -288,7 +288,7 @@ typedef enum _I2C_ERR_TYPE_ {
 // I2C Time Out type
 typedef enum _I2C_TIMEOUT_TYPE_ {
     I2C_TIMEOOUT_DISABLE    =   0x00,           
-    I2C_TIMEOOUT_ENDLESS    =   0xFFFFFFFF,
+    I2C_TIMEOOUT_ENDLESS    =   -1 // 0xFFFFFFFF,
 }I2C_TIMEOUT_TYPE, *PI2C_TIMEOUT_TYPE;
 
 //======================================================

@@ -81,7 +81,7 @@ typedef uint32 (* web_ex_func_cb)(uint32 flg); // внешняя или отло
 typedef struct
 {
 	web_ex_func_cb fnc;
-	void *	param;
+	void * param;
 	uint16	pause_ms;
 } WEB_SRV_QFNK;
 

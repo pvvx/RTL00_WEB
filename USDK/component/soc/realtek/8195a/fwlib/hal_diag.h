@@ -72,10 +72,10 @@ typedef struct _LOG_UART_ADAPTER_ {
 }LOG_UART_ADAPTER, *PLOG_UART_ADAPTER;
 
 typedef struct _COMMAND_TABLE_ {
-    const   u8* cmd;
+    const   char * cmd;
     u16     ArgvCnt;
-    u32     (*func)(u16 argc, u8* argv[]);
-    const   u8* msg;
+    void     (*func)(int argc, char * argv[]);
+    const   char * msg;
 }COMMAND_TABLE, *PCOMMAND_TABLE;
 
 //VOID

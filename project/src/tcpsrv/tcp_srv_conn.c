@@ -32,9 +32,16 @@
 #define ts_printf(...) rtl_printf(__VA_ARGS__)
 #define system_get_free_heap_size xPortGetFreeHeapSize
 
+extern void *pvPortZalloc(size_t xWantedSize);
+extern void vPortFree(void *pv);
+extern void *pvPortMalloc(size_t xWantedSize);
+#undef os_free
 #define os_free(p) vPortFree(p)
+#undef os_malloc
 #define os_malloc(p) pvPortMalloc(p)
+#undef os_zalloc
 #define os_zalloc(p) pvPortZalloc(p)
+#undef os_realloc
 #define os_realloc(p,s) pvPortReAlloc(p,s)
 /*
 extern __rtl_memsetw_v1_00(void *, uint32, size_t);
@@ -55,16 +62,16 @@ const uint8 txt_tcpsrv_already_initialized[] TCP_SRV_RODATA_ATTR = "tcpsrv: alre
 const uint8 txt_tcpsrv_out_of_mem[] TCP_SRV_RODATA_ATTR = "tcpsrv: out of mem!\n";
 #endif
 
-#define mMIN(a, b)  ((a<b)?a:b)
+//#define mMIN(a, b)  ((a<b)?a:b)
 // пред.описание...
 static void tcpsrv_list_delete(TCP_SERV_CONN * ts_conn) TCP_SRV_CODE_ATTR;
 static void tcpsrv_disconnect_successful(TCP_SERV_CONN * ts_conn) TCP_SRV_CODE_ATTR;
 static void tcpsrv_server_close(TCP_SERV_CONN * ts_conn) TCP_SRV_CODE_ATTR;
 static err_t tcpsrv_poll(void *arg, struct tcp_pcb *pcb) TCP_SRV_CODE_ATTR;
 static void tcpsrv_error(void *arg, err_t err) TCP_SRV_CODE_ATTR;
-static err_t tcpsrv_connected(void *arg, struct tcp_pcb *tpcb, err_t err) TCP_SRV_CODE_ATTR;
-static err_t tcpsrv_client_connect(TCP_SERV_CONN * ts_conn) TCP_SRV_CODE_ATTR;
-static void tcpsrv_client_reconnect(TCP_SERV_CONN * ts_conn) TCP_SRV_CODE_ATTR;
+//err_t tcpsrv_connected(void *arg, struct tcp_pcb *tpcb, err_t err) TCP_SRV_CODE_ATTR;
+//err_t tcpsrv_client_connect(TCP_SERV_CONN * ts_conn) TCP_SRV_CODE_ATTR;
+//void tcpsrv_client_reconnect(TCP_SERV_CONN * ts_conn) TCP_SRV_CODE_ATTR;
 
 #ifndef LWIP_DEBUG
 #include "lwip/init.h"
@@ -90,6 +97,7 @@ static const char *err_strerr[] = {
            "Low-level netif error", /* ERR_IF         -15 */
 };
 #endif
+
 static const char srvContenErrX[] = "?";
 /******************************************************************************
  * FunctionName : tspsrv_error_msg
@@ -97,7 +105,7 @@ static const char srvContenErrX[] = "?";
  * Parameters   : LwIP err
  * Returns      : указатель на строку ошибки
  *******************************************************************************/
-char * tspsrv_error_msg(err_t err)
+const char * tspsrv_error_msg(err_t err)
 {
 	if((err > -16) && (err < 1)) {
 		return lwip_strerr(err);
@@ -112,7 +120,7 @@ extern const char * const tcp_state_str[];
  * Parameters   : LwIP tcp_state
  * Returns      : указатель на строку
  *******************************************************************************/
-char * tspsrv_tcp_state_msg(enum tcp_state state)
+const char * tspsrv_tcp_state_msg(enum tcp_state state)
 {
 	if(state > TIME_WAIT && state < CLOSED) return srvContenErrX;
 	return tcp_state_str[state];
@@ -123,17 +131,18 @@ char * tspsrv_tcp_state_msg(enum tcp_state state)
  * Parameters   : LwIP tcp_state
  * Returns      : указатель на строку
  *******************************************************************************/
-static char *msg_srvconn_state[] = {
+static const char *msg_srvconn_state[] = {
       "NONE",
       "CLOSEWAIT",
       "LISTEN",
       "CONNECT",
       "CLOSED"
 };
-char * tspsrv_srvconn_state_msg(enum srvconn_state state)
+
+const char * tspsrv_srvconn_state_msg(enum srvconn_state state)
 {
-	if(state > SRVCONN_CLOSED && state < SRVCONN_NONE) return srvContenErrX;
-	return msg_srvconn_state[state];
+	if(state > SRVCONN_CLOSED && state < SRVCONN_NONE) return (const char *) srvContenErrX;
+	return (const char *) msg_srvconn_state[state];
 }
 //#endif
 /******************************************************************************

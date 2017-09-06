@@ -1296,7 +1296,7 @@ struct osdep_service_ops {
 	int (*ATOMIC_INC_RETURN)(ATOMIC_T *v);
 	int (*ATOMIC_DEC_RETURN)(ATOMIC_T *v);
 	u64 (*rtw_modular64)(u64 x, u64 y);
-	int (*rtw_get_random_bytes)(void* dst, u32 size);
+	int (*rtw_get_random_bytes)(void* dst, size_t size);
 	u32 (*rtw_getFreeHeapSize)(void);
 	int (*rtw_create_task)(struct task_struct *task, const char *name, u32 stack_size, u32 priority, thread_func_t func, void *thctx);
 	void (*rtw_delete_task)(struct task_struct *task);

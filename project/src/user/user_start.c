@@ -58,6 +58,7 @@ void sys_write_cfg(void)
 	flash_write_cfg(&syscfg, FEEP_ID_SYS_CFG, sizeof(syscfg));
 }
 
+extern void console_init(void);
 
 void user_init_thrd(void) {
 

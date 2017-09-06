@@ -74,7 +74,7 @@ WIFI_CONFIG wifi_cfg = {
 SOFTAP_CONFIG wifi_ap_cfg = {
 		.ssid = DEF_AP_SSID,
 		.password = DEF_AP_PASSWORD,
-		.security = DEF_AP_SECURITY, // RTW_SECURITY_WPA2_AES_PSK or RTW_SECURITY_OPEN
+		.security = (unsigned char)DEF_AP_SECURITY, // RTW_SECURITY_WPA2_AES_PSK or RTW_SECURITY_OPEN
 		.beacon_interval = DEF_AP_BEACON,
 		.channel = DEF_AP_CHANNEL,
 		.ssid_hidden = 0,
@@ -91,7 +91,7 @@ STATION_CONFIG wifi_st_cfg = {
 		.ssid = DEF_ST_SSID,
 		.password = DEF_ST_PASSWORD,
 		.bssid = DEF_ST_BSSID,
-		.flg = DEF_ST_BSSID,
+		.flg = DEF_ST_USE_BSSID,
 		.security = DEF_ST_SECURITY,
 		.autoreconnect = DEF_ST_AUTORECONNECT,
 		.reconnect_pause =	DEF_ST_RECONNECT_PAUSE,
@@ -204,8 +204,8 @@ LOCAL int wlan_init_done_callback(void) {
 //char wlan_st_name[] = WLAN0_NAME;
 char wlan_st_name[] = WLAN0_NAME;
 char wlan_ap_name[] = WLAN1_NAME;
-char wlan_st_netifn = 0;
-char wlan_ap_netifn = 1;
+unsigned char wlan_st_netifn = 0;
+unsigned char wlan_ap_netifn = 1;
 
 
 uint32 get_new_ip(void)
@@ -283,7 +283,7 @@ rtw_result_t _wext_enable_powersave(int adapter_num, uint8 ips_mode, uint8 lps_m
 	return ret;
 }
 
-LOCAL int _wext_cmp_ssid(int adapter_num, uint8 *ssid)
+LOCAL int _wext_cmp_ssid(int adapter_num, unsigned char *ssid)
 {
 	_adapter * pad = get_padaptern(adapter_num);
 	int ret = 0;
@@ -362,7 +362,7 @@ LOCAL rtw_result_t wifi_run_ap(void) {
 			int timeout = wifi_test_timeout_ms / wifi_test_timeout_step_ms;
 			while (1) {
 #if 1
-				if (_wext_cmp_ssid(WLAN_AP_NETIF_NUM, &wifi_ap_cfg.ssid )) {
+				if (_wext_cmp_ssid(WLAN_AP_NETIF_NUM, wifi_ap_cfg.ssid )) {
 #else
 				char essid[33];
 				if ((wext_get_ssid(wlan_ap_name, (unsigned char *) essid) > 0)
@@ -409,7 +409,7 @@ LOCAL rtw_result_t StartStDHCPClient(void)
 	debug_printf("Start DHCPClient...\n");
 	int ret = RTW_SUCCESS;
 	struct netif * pnetif = &xnetif[WLAN_ST_NETIF_NUM];
-	DHCP_CONFIG *p = (dhcp_cfg *)&wifi_st_dhcp;
+	DHCP_CONFIG *p = (DHCP_CONFIG *)&wifi_st_dhcp;
 	unsigned char mode = p->mode;
 	if(mode == 2 && p->ip != IP4ADDR(255,255,255,255) && p->ip != IP4ADDR(0,0,0,0)) { // fixed ip
 		netif_set_addr(pnetif, (ip_addr_t *)&p->ip, (ip_addr_t *)&p->mask, (ip_addr_t *)&p->gw);
@@ -602,8 +602,8 @@ LOCAL void _LwIP_Init(void)
 			xnetif[idx].name[0] = 'r';
 			xnetif[idx].name[1] = '0' + idx;
 		}
-		netif_add(&xnetif[WLAN_ST_NETIF_NUM], (struct netif *)&wifi_st_dhcp.ip, (struct netif *)&wifi_st_dhcp.mask, (struct netif *)&wifi_st_dhcp.gw, NULL, &ethernetif_init, &tcpip_input);
-		netif_add(&xnetif[WLAN_AP_NETIF_NUM], (struct netif *)&wifi_ap_dhcp.ip, (struct netif *)&wifi_ap_dhcp.mask, (struct netif *)&wifi_ap_dhcp.gw, NULL, &ethernetif_init, &tcpip_input);
+		netif_add(&xnetif[WLAN_ST_NETIF_NUM], (ip_addr_t *)&wifi_st_dhcp.ip, (ip_addr_t *)&wifi_st_dhcp.mask, (ip_addr_t *)&wifi_st_dhcp.gw, NULL, &ethernetif_init, &tcpip_input);
+		netif_add(&xnetif[WLAN_AP_NETIF_NUM], (ip_addr_t *)&wifi_ap_dhcp.ip, (ip_addr_t *)&wifi_ap_dhcp.mask, (ip_addr_t *)&wifi_ap_dhcp.gw, NULL, &ethernetif_init, &tcpip_input);
 #if CONFIG_ETHERNET // && NET_IF_NUM > 2
 		{
 				struct ip_addr ipaddr;
@@ -627,6 +627,8 @@ LOCAL void _LwIP_Init(void)
 		init_event_callback_list();
 	}
 }
+
+extern int rltk_set_tx_power_percentage(rtw_tx_pwr_percentage_t power_percentage_idx);
 
 int wifi_run(rtw_mode_t mode) {
 	int ret = 0;
@@ -668,8 +670,8 @@ int wifi_run(rtw_mode_t mode) {
     		netbios_set_name(WLAN_ST_NETIF_NUM, lwip_host_name[0]);
 #endif
 #endif
-			netif_set_addr(&xnetif[WLAN_ST_NETIF_NUM], &wifi_st_dhcp.ip,
-				&wifi_st_dhcp.mask, &wifi_st_dhcp.gw);
+			netif_set_addr(&xnetif[WLAN_ST_NETIF_NUM], (ip_addr_t *) &wifi_st_dhcp.ip,
+					(ip_addr_t *) &wifi_st_dhcp.mask, (ip_addr_t *) &wifi_st_dhcp.gw);
 			pnif = &xnetif[WLAN_AP_NETIF_NUM];
 #if LWIP_NETIF_HOSTNAME
 			// @todo ethernetif_init()...
@@ -678,8 +680,8 @@ int wifi_run(rtw_mode_t mode) {
     		netbios_set_name(WLAN_AP_NETIF_NUM, lwip_host_name[1]);
 #endif
 #endif
-			netif_set_addr(&xnetif[WLAN_AP_NETIF_NUM], &wifi_ap_dhcp.ip,
-				&wifi_ap_dhcp.mask, &wifi_ap_dhcp.gw);
+			netif_set_addr(&xnetif[WLAN_AP_NETIF_NUM], (ip_addr_t *) &wifi_ap_dhcp.ip,
+					(ip_addr_t *) &wifi_ap_dhcp.mask, (ip_addr_t *) &wifi_ap_dhcp.gw);
 
 		}
 		switch(mode) {

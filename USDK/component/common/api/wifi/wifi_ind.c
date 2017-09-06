@@ -102,103 +102,103 @@ void wifi_indication(WIFI_EVENT_INDICATE event, unsigned char *buf, int buf_len,
 	//		, and tries not to share the same stack with wlan driver if remaining stack space is 
 	//		not available for the following operations. 
 	//		ex: using semaphore to notice another thread.
-	switch (event) {
+	switch ((u32)event) {
 	case WIFI_EVENT_DISCONNECT:
 #if(WIFI_INDICATE_MSG>0)
 		info_printf("%s(%d): Disconnection indication received\n", __func__, event);
 #endif
 		break;
+#if(WIFI_INDICATE_MSG>0)
 	case WIFI_EVENT_CONNECT:
 		// For WPA/WPA2 mode, indication of connection does not mean data can be
 		// 		correctly transmitted or received. Data can be correctly transmitted or
 		// 		received only when 4-way handshake is done.
 		// Please check WIFI_EVENT_FOURWAY_HANDSHAKE_DONE event
-#if(WIFI_INDICATE_MSG>0)
 		// Sample: return mac address
 		if (buf != NULL && buf_len == 6) {
 			info_printf(
 					"%s(%d): Connect indication received: %02x:%02x:%02x:%02x:%02x:%02x\n",
 					__func__, event, buf[0], buf[1], buf[2], buf[3], buf[4], buf[5]);
 		}
-#endif
 		break;
-	case WIFI_EVENT_FOURWAY_HANDSHAKE_DONE:
+#endif
 #if(WIFI_INDICATE_MSG>0)
+	case WIFI_EVENT_FOURWAY_HANDSHAKE_DONE:
 		if (buf != NULL)
 				info_printf("%s(%d): %s\n", __func__, event, buf);
-#endif
 		break;
+#endif
+#if(WIFI_INDICATE_MSG>0)
 	case WIFI_EVENT_SCAN_RESULT_REPORT:
-#if(WIFI_INDICATE_MSG>0)
 		info_printf("%s(%d): WIFI_EVENT_SCAN_RESULT_REPORT\n", __func__, event);
-#endif
 		break;
-	case WIFI_EVENT_SCAN_DONE:
+#endif
 #if(WIFI_INDICATE_MSG>0)
+	case WIFI_EVENT_SCAN_DONE:
 		info_printf("%s(%d): WIFI_EVENT_SCAN_DONE\n", __func__, event);
 //#if CONFIG_DEBUG_LOG > 3
 //			debug_printf("Time at start %d ms.\n", xTaskGetTickCount());
 //#endif
-#endif
 		break;
+#endif
+#if(WIFI_INDICATE_MSG>0)
 	case WIFI_EVENT_RECONNECTION_FAIL:
-#if(WIFI_INDICATE_MSG>0)
 		info_printf("%s(%d): %s\n", __func__, event, buf);
-#endif
 		break;
+#endif
+#if(WIFI_INDICATE_MSG>0)
 	case WIFI_EVENT_NO_NETWORK:
-#if(WIFI_INDICATE_MSG>0)
 		info_printf("%s(%d): %s\n", __func__, event, buf);
-#endif
 		break;
+#endif
 #if CONFIG_ENABLE_P2P
+#if(WIFI_INDICATE_MSG>0)
 	case WIFI_EVENT_SEND_ACTION_DONE:
-#if(WIFI_INDICATE_MSG>0)
 		info_printf("%s(%d): %s\n", __func__, event, buf);
-#endif
 		break;
+#endif
+#if(WIFI_INDICATE_MSG>0)
 	case WIFI_EVENT_RX_MGNT:
-#if(WIFI_INDICATE_MSG>0)
 		info_printf("%s(%d): WIFI_EVENT_RX_MGNT\n", __func__, event);
-#endif
 		break;
+#endif
 #endif //CONFIG_ENABLE_P2P
+#if(WIFI_INDICATE_MSG>0)
 	case WIFI_EVENT_STA_ASSOC:
-#if(WIFI_INDICATE_MSG>0)
 		info_printf("%s(%d): WIFI_EVENT_STA_ASSOC\n", __func__, event);
-#endif
 		break;
+#endif
+#if(WIFI_INDICATE_MSG>0)
 	case WIFI_EVENT_STA_DISASSOC:
-#if(WIFI_INDICATE_MSG>0)
 		info_printf("%s(%d): WIFI_EVENT_STA_DISASSOC\n", __func__, event);
-#endif
 		break;
+#endif
 #ifdef CONFIG_WPS
+#if(WIFI_INDICATE_MSG>0)
 		case WIFI_EVENT_STA_WPS_START:
-#if(WIFI_INDICATE_MSG>0)
 		info_printf("%s(%d): WIFI_EVENT_STA_WPS_START\n", __func__, event);
-#endif
 		break;
+#endif
+#if(WIFI_INDICATE_MSG>0)
 		case WIFI_EVENT_WPS_FINISH:
-#if(WIFI_INDICATE_MSG>0)
 		info_printf("%s(%d): WIFI_EVENT_WPS_FINISH\n", __func__, event);
-#endif
 		break;
-		case WIFI_EVENT_EAPOL_RECVD:
+#endif
 #if(WIFI_INDICATE_MSG>0)
+		case WIFI_EVENT_EAPOL_RECVD:
 		info_printf("%s(%d): WIFI_EVENT_EAPOL_RECVD\n", __func__, event);
-#endif
 		break;
 #endif
-	case WIFI_EVENT_BEACON_AFTER_DHCP:
-#if(WIFI_INDICATE_MSG>1)
-		info_printf("%s(%d): WIFI_EVENT_BEACON_AFTER_DHCP\n", __func__, event);
 #endif
+#if(WIFI_INDICATE_MSG>1)
+	case WIFI_EVENT_BEACON_AFTER_DHCP:
+		info_printf("%s(%d): WIFI_EVENT_BEACON_AFTER_DHCP\n", __func__, event);
 #if 0 // test beacon
 		gpio_write(&gpio_led, 1);
 		gpio_write(&gpio_led, 0);
 #endif			
 		break;
+#endif
 	}
 
 #if CONFIG_INIC_EN

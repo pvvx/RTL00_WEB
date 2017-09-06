@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "FreeRTOS.h"
+#include "task.h"
 #include "wait_api.h"
 #include "us_ticker_api.h"
 
@@ -78,6 +80,7 @@ typedef struct
 #define CoreDebug_DEMCR_TRCENA_Pos         24                                             /*!< CoreDebug DEMCR: TRCENA Position */
 #define CoreDebug_DEMCR_TRCENA_Msk         (1UL << CoreDebug_DEMCR_TRCENA_Pos)            /*!< CoreDebug DEMCR: TRCENA Mask */
 #endif
+
 
 void wait(float s) { // До 1073741 секунд? 298 часов
 //	wait_us((int)(s * 1000000.0f));

@@ -194,7 +194,7 @@ typedef enum {
     PWM_OUT     = PD_4,
 */
     // Not connected
-    NC = (uint32_t)0xFFFFFFFF
+    NC = -1 // (uint32_t)0xFFFFFFFF
 } PinName;
 
 typedef enum {

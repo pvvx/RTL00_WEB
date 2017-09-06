@@ -134,6 +134,7 @@ typedef struct A_BLOCK_LINK {
 	size_t xBlockSize; /*<< The size of the free block. */
 } BlockLink_t;
 
+static void vPortDefineHeapRegions(const HeapRegion_t * const pxHeapRegions);
 /*-----------------------------------------------------------*/
 
 /*
@@ -502,7 +503,7 @@ static void vPortDefineHeapRegions(const HeapRegion_t * const pxHeapRegions) {
 	uint8 chip_id = HalGetChipId();
 	while (pxHeapRegion->xSizeInBytes > 0) {
 		if (pxHeapRegion->pucStartAddress
-				> 0x20000000 && chip_id >= CHIP_ID_8711AN && chip_id <= CHIP_ID_8711AF) {
+				> (uint8_t *) 0x20000000 && chip_id >= CHIP_ID_8711AN && chip_id <= CHIP_ID_8711AF) {
 //				pxHeapRegion->pucStartAddress = 0;
 //				pxHeapRegion->xSizeInBytes = 0;
 //				DBG_8195A("ChipID: %p !\n", chip_id);
@@ -584,6 +585,8 @@ static void vPortDefineHeapRegions(const HeapRegion_t * const pxHeapRegions) {
 
 }
 
+extern _LONG_CALL_ void * __rtl_memcpy_v1_00(void * __restrict dst0 , const void * __restrict src0 , size_t len0);
+
 void* pvPortReAlloc(void *pv, size_t xWantedSize) {
 	BlockLink_t *pxLink;
 
@@ -612,7 +615,7 @@ void* pvPortReAlloc(void *pv, size_t xWantedSize) {
 
 			int oldSize = (pxLink->xBlockSize & ~xBlockAllocatedBit) - uxHeapStructSize;
 			int copySize = (oldSize < xWantedSize) ? oldSize : xWantedSize;
-			rtl_memcpy(newArea, pv, copySize);
+			__rtl_memcpy_v1_00(newArea, pv, copySize);
 
 			vTaskSuspendAll();
 			{

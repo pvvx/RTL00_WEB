@@ -1,8 +1,7 @@
 #ifndef _user_config_h_
 #define _user_config_h_
 
-#define SYS_VERSION "1.0.0"
-//#define SDK_VERSION "3.5.3"
+#define SYS_VERSION "1.0.1"
 #include "sdk_ver.h"
 
 #define USE_WEB		80 	// включить в трансялцию порт Web, если =0 - по умолчанию выключен

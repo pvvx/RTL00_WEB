@@ -22,7 +22,9 @@
 #define strsep		__rtl_strsep_v1_00
 #define strtok		__rtl_strtok_v1_00
 
-static char toupper(char ch) {
+extern int isdigit (int c);
+
+static int toupper(int ch) {
  	return  ((ch >= 'a' && ch <= 'z') ? ch - 'a' + 'A' : ch);
 };
 
@@ -1071,6 +1073,8 @@ int c_printf(const char *fmt, ...)
 }
 
 #endif // ENAC_FLOAT
+
+extern _LONG_CALL_ROM_ void HalSerialPutcRtl8195a(char c);
 
 int puts (const char *s)
 {

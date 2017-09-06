@@ -8,11 +8,12 @@
 #define __TCP_SERV_CONN_H__
 
 #include "user_config.h"
-//#include "os_type.h"
+#include "tcp.h"
 
 #include "lwip/err.h"
 
 #define mMIN(a, b)  ((a < b)? a : b)
+#define mMAX(a, b)  ((a>b)?a:b)
 
 enum srvconn_state {
     SRVCONN_NONE =0,
@@ -178,8 +179,8 @@ err_t tcpsrv_close(TCP_SERV_CFG *p);
 err_t tcpsrv_close_port(uint16 portn);
 err_t tcpsrv_close_all(void);
 
-char * tspsrv_error_msg(err_t err);
-char * tspsrv_tcp_state_msg(enum tcp_state state);
-char * tspsrv_srvconn_state_msg(enum srvconn_state state);
+const char * tspsrv_error_msg(err_t err);
+const char * tspsrv_tcp_state_msg(enum tcp_state state);
+const char * tspsrv_srvconn_state_msg(enum srvconn_state state);
 
 #endif // __TCP_SERV_CONN_H__

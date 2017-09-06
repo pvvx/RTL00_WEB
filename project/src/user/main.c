@@ -11,12 +11,13 @@
 #include "hal_log_uart.h"
 #include "hal_misc.h"
 #include "diag.h"
-//#include "wdt_api.h"
-//#include <osdep_service.h>
+#include "tcm_heap.h"
 #include "hal_platform.h"
 #include "rtl8195a_sys_on.h"
+#include "hal_timer.h"
 
 #ifdef CONFIG_WDG_ON_IDLE
+#include "rtl8195a_wdt.h"
 #include "hal_peri_on.h"
 #include "rtl8195a_peri_on.h"
 #endif
@@ -41,6 +42,7 @@ const unsigned char cus_sig[32] = "WEB Sample";
 #define CONFIG_INTERACTIVE_MODE     1
 #endif
 
+extern VOID WDGStart(VOID);
 extern void user_init_thrd(void);
 
 /* RAM/TCM/Heaps info */
@@ -51,7 +53,7 @@ void ShowMemInfo(void)
 }
 
 /* main */
-void main(void)
+int main(void)
 {
 #if DEBUG_MAIN_LEVEL > 3
 	 ConfigDebugErr  = -1;

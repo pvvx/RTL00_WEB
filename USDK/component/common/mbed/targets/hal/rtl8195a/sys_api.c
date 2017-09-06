@@ -26,11 +26,16 @@
 #define OTA_Signature_len		8
 #define OTA_Signature_offset	8
 #define OTA_valid_offset		0x100000
+
+#undef printf
 #define printf					DiagPrintf
 
 #if !defined(__ICCARM__)
+#undef memcmp
 #define memcmp(dst, src, sz)      _memcmp(dst, src, sz)
+#undef memset
 #define memset(dst, val, sz)      _memset(dst, val, sz)
+#undef memcpy
 #define memcpy(dst, src, sz)      _memcpy(dst, src, sz)
 #endif  // #if !defined(__ICCARM__)
 

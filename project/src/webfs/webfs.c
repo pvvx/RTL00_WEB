@@ -464,7 +464,7 @@ uint32 WEBFS_CODE_ATTR WEBFS_curent_size(void)
 {
 	uint32 size = 0;
 	web_mutex_lock();
-	if(numFiles) flash_read_word(&flashobj, disk_base_addr + 8, &size);
+	if(numFiles) flash_read_word(&flashobj, disk_base_addr + 8, (uint32_t *) &size);
 	web_mutex_unlock();
 	return size;
 }

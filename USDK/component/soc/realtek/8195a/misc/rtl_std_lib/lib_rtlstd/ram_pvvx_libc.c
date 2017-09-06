@@ -177,7 +177,6 @@ int vprintf(const char * fmt, __VALIST param) {
 int vsnprintf(char *str, size_t size, const char *fmt, __VALIST param) {
 	int result;
 	int w;
-	int v11;
 	FILE f;
 #if CHECK_LIBC_INIT
 	if (!libc_has_init) {
@@ -324,7 +323,7 @@ int sscanf(const char *buf, const char *fmt, ...) {
 	return i;
 }
 
-char toupper(char ch) {
+int toupper(int ch) {
  	return  ((ch >= 'a' && ch <= 'z') ? ch - 'a' + 'A' : ch);
 };
 

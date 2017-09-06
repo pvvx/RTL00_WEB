@@ -11,6 +11,7 @@
 #include "diag.h"
 #include "os_support.h"
 #include "osdep_service.h"
+#include "timers.h"
 
 
 #define JIFFIES	        xTaskGetTickCount()

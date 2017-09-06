@@ -10,10 +10,12 @@
 #include "wifi_constants.h"
 #include "queue.h"
 
+#ifndef ip4_addr1
 #define ip4_addr1(ipaddr) (((uint8_t*)(ipaddr))[0])
 #define ip4_addr2(ipaddr) (((uint8_t*)(ipaddr))[1])
 #define ip4_addr3(ipaddr) (((uint8_t*)(ipaddr))[2])
 #define ip4_addr4(ipaddr) (((uint8_t*)(ipaddr))[3])
+#endif
 
 #define IPSTR "%d.%d.%d.%d"
 
@@ -118,8 +120,8 @@ extern unsigned char wifi_mode; // rtw_mode_t
 extern unsigned char wifi_st_status; // WIFI_STA_ENUM
 extern char wlan_st_name[];
 extern char wlan_ap_name[];
-extern char wlan_st_netifn;
-extern char wlan_ap_netifn;
+extern unsigned char wlan_st_netifn;
+extern unsigned char wlan_ap_netifn;
 
 /* WiFi Station & scan security */
 typedef enum {

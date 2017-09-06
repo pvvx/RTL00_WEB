@@ -7,7 +7,8 @@
 #include <osdep_service.h>
 #include <stdio.h>
 #include <freertos_pmu.h>
-//#include <tcm_heap.h>
+#include <tcm_heap.h>
+#include <netdev.h>
 /********************* os depended utilities ********************/
 
 #ifndef USE_MUTEX_FOR_SPINLOCK
@@ -549,7 +550,9 @@ static u32 _freertos_GetFreeHeapSize(void)
 {
 	return (u32)xPortGetFreeHeapSize();
 }
-void *tcm_heap_malloc(int size);
+
+//extern void *tcm_heap_malloc(int size);
+
 static int _freertos_create_task(struct task_struct *ptask, const char *name,
 	u32  stack_size, u32 priority, thread_func_t func, void *thctx)
 {
@@ -576,7 +579,7 @@ static int _freertos_create_task(struct task_struct *ptask, const char *name,
 
 	priority += tskIDLE_PRIORITY + PRIORITIE_OFFSET;
 
-	if(rtw_if_wifi_thread(name) == 0){
+	if(rtw_if_wifi_thread((char *)name) == 0){
 
 #if CONFIG_USE_TCM_HEAP
 		void *stack_addr = tcm_heap_malloc(stack_size*sizeof(int));

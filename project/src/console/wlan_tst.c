@@ -6,6 +6,8 @@
  */
 #include <platform_opts.h>
 #include "rtl8195a.h"
+#include "FreeRTOS.h"
+#include "task.h"
 #if 1
 #include "drv_types.h" // or #include "wlan_lib.h"
 #else
@@ -18,11 +20,12 @@
 //#include "hal_diag.h"
 #include "rtl8195a/rtl_libc.h"
 
-extern void dump_bytes(uint32 addr, int size);
+void dump_bytes(uint32 addr, int size);
 extern Rltk_wlan_t rltk_wlan_info[2]; // in wrapper.h
 
 LOCAL void tst_wlan_struct(int argc, char *argv[])
 {
+	(void) argc; (void) argv;
 	printf("Test: sizeof(struct _ADAPTER) = %d\n", sizeof(struct _ADAPTER)); //6088
 	printf("mlmeextpriv\t+%d\n", offsetof(struct _ADAPTER, mlmeextpriv)); //+1256
 	printf("TSFValue\t+%d\n", offsetof(struct _ADAPTER, mlmeextpriv.TSFValue)); //+1992

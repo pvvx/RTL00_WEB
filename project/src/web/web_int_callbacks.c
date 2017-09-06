@@ -9,6 +9,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "diag.h"
+#include "tcm_heap.h"
 #include "lwip/tcp.h"
 #include "flash_eep.h"
 #include "device_lock.h"
@@ -49,9 +50,10 @@
 #include "overlay.h"
 #endif
 
+#undef atoi
 #define atoi rom_atoi
 
-#define mMIN(a, b)  ((a<b)?a:b)
+//#define mMIN(a, b)  ((a<b)?a:b)
 #define ifcmp(a)  if(rom_xstrcmp(cstr, a))
 
 #define OpenFlash() { device_mutex_lock(RT_DEV_LOCK_FLASH); flash_turnon(); }
@@ -127,6 +129,7 @@ void ICACHE_FLASH_ATTR web_test_adc(TCP_SERV_CONN *ts_conn)
 //===============================================================================
 // WiFi Scan XML
 //-------------------------------------------------------------------------------
+extern void wifi_set_timer_scan(int ms);
 LOCAL void ICACHE_FLASH_ATTR web_wscan_xml(TCP_SERV_CONN *ts_conn)
 {
 	WEB_SRV_CONN *web_conn = (WEB_SRV_CONN *) ts_conn->linkd;
@@ -489,7 +492,7 @@ extern int adc_ws(TCP_SERV_CONN *ts_conn, char cmd);
         else ifcmp("wifi_") {
           cstr+=5;
           ifcmp("rdcfg") read_wifi_cfg(-1);
-          else ifcmp("newcfg") webserver_qfn((web_ex_func_cb)wifi_run, (void *)wifi_cfg.mode, 200);
+          else ifcmp("newcfg") webserver_qfn((web_ex_func_cb)wifi_run, (void *)((uint32)wifi_cfg.mode), 200);
           else ifcmp("cmode") tcp_puts("%d", wifi_mode);
           else ifcmp("mode") tcp_puts("%d", wifi_cfg.mode);
           else ifcmp("bgn") tcp_puts("%d", wifi_cfg.bgn);

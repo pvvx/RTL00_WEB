@@ -5,6 +5,7 @@
  ******************************************************************************/
 
 #include <osdep_service.h>
+#include "tcm_heap.h"
 #define OSDEP_DBG(x, ...) do {} while(0)
 
 extern struct osdep_service_ops osdep_service;

@@ -157,6 +157,9 @@ extern unsigned char dhcp_mode_sta;
 #include "freertos/wrapper.h"
 #include "skbuff.h"
 
+extern unsigned char is_promisc_enabled(void);
+extern int promisc_set(rtw_rcr_level_t enabled, void (*callback)(unsigned char*, unsigned int, void*), unsigned char len_used);
+
 //------------------------------------------------------------------------end-patch//
 static int wifi_connect_local(rtw_network_info_t *pWifi) {
 	int ret = 0;
@@ -278,8 +281,8 @@ static void wifi_disconn_hdl(char* buf, int buf_len, int flags, void* userdata) 
 			else if (rtw_join_status == 0)
 				error_flag = RTW_CONNECT_FAIL;
 
-			else if (rtw_join_status == JOIN_COMPLETE | JOIN_SECURITY_COMPLETE
-					| JOIN_ASSOCIATED | JOIN_AUTHENTICATED | JOIN_LINK_READY)
+			else if (rtw_join_status == (JOIN_COMPLETE | JOIN_SECURITY_COMPLETE
+					| JOIN_ASSOCIATED | JOIN_AUTHENTICATED | JOIN_LINK_READY))
 				error_flag = RTW_WRONG_PASSWORD;
 		}
 
@@ -368,6 +371,7 @@ void restore_wifi_info_to_flash() {
 
 #endif
 
+int wext_set_bssid(const char *ifname, const __u8 *bssid);
 //----------------------------------------------------------------------------//
 int wifi_connect(
 		unsigned char bssid[ETH_ALEN],
@@ -380,7 +384,7 @@ int wifi_connect(
 
 	int ssid_len = 0;
 	int password_len = 0;
-	int bssid_len = 6;
+//	int bssid_len = 6;
 	xSemaphoreHandle join_semaphore;
 	rtw_result_t result = RTW_SUCCESS;
 	u8 wep_hex = 0;
@@ -440,7 +444,7 @@ int wifi_connect(
 
 			if (password_len == 10) {
 
-				u32 g[5] = { 0 };
+				unsigned int g[5] = { 0 };
 				u8 i = 0;
 				sscanf((const char*) password, "%02x%02x%02x%02x%02x", &g[0],
 						&g[1], &g[2], &g[3], &g[4]);
@@ -450,7 +454,7 @@ int wifi_connect(
 				password_len = 5;
 				wep_hex = 1;
 			} else if (password_len == 26) {
-				u32 g[13] = { 0 };
+				unsigned int g[13] = { 0 };
 				u8 i = 0;
 				sscanf((const char*) password, "%02x%02x%02x%02x%02x%02x%02x"
 						"%02x%02x%02x%02x%02x%02x", &g[0], &g[1], &g[2], &g[3],
@@ -731,8 +735,10 @@ int wifi_get_ap_info(rtw_bss_info_t * ap_info, rtw_security_t* security) {
 	return ret;
 }
 
+extern int wext_get_drv_ability(const char *ifname, __u32 *ability);
+
 int wifi_get_drv_ability(uint32_t *ability) {
-	return wext_get_drv_ability(WLAN0_NAME, ability);
+	return wext_get_drv_ability(WLAN0_NAME, (__u32 *)ability);
 }
 
 //----------------------------------------------------------------------------//
@@ -861,6 +867,9 @@ int wifi_on(rtw_mode_t mode) {
 	return ret;
 }
 
+extern void dhcps_deinit(void); //#include "dhcps.h"
+
+
 int wifi_off(void) {
 //	int ret = 0;
 
@@ -947,6 +956,8 @@ int wifi_get_last_error(void) {
 #if defined(CONFIG_ENABLE_WPS_AP) && CONFIG_ENABLE_WPS_AP
 int wpas_wps_init(const char* ifname);
 #endif
+
+extern int set_hidden_ssid(const char *ifname, uint8_t value);
 
 int wifi_start_ap(char *ssid, rtw_security_t security_type, char *password, int channel, char ssid_hidden) {
 	const char *ifname = WLAN0_NAME;
@@ -1489,6 +1500,8 @@ void wifi_enter_promisc_mode() {
 	}
 }
 
+extern void dhcps_init(struct netif * pnetif);
+
 int wifi_restart_ap(unsigned char *ssid, rtw_security_t security_type,
 		unsigned char *password, int channel) {
 	unsigned char idx = 0;
@@ -1543,10 +1556,8 @@ int wifi_restart_ap(unsigned char *ssid, rtw_security_t security_type,
 		printf("AP: security_type=%d\n", setting.security_type);
 		printf("AP: password=%s\n", (char* )setting.password);
 		printf("AP: key_idx =%d\n", setting.key_idx);
-		ret = wifi_connect((char*) setting.ssid, setting.security_type,
-				(char*) setting.password, strlen((char* )setting.ssid),
-				strlen((char* )setting.password), setting.key_idx,
-				NULL);
+		ret = wifi_connect(NULL, 0 , (char*) setting.ssid, setting.security_type,
+				(char*) setting.password, setting.key_idx,	NULL);
 		if (ret == RTW_SUCCESS) {
 #if CONFIG_DHCP_CLIENT
 			/* Start DHCPClient */
@@ -1723,25 +1734,32 @@ int wifi_disable_packet_filter(unsigned char filter_id) {
 int wifi_remove_packet_filter(unsigned char filter_id) {
 	return promisc_remove_packet_filter(filter_id);
 }
-#endif
+#endif // CONFIG_PROMISC
 
 #ifdef CONFIG_AP_MODE
+
+extern int wext_enable_forwarding(const char *ifname);
 int wifi_enable_forwarding(void) {
 	return wext_enable_forwarding(WLAN0_NAME);
 }
 
+extern int wext_disable_forwarding(const char *ifname);
 int wifi_disable_forwarding(void) {
 	return wext_disable_forwarding(WLAN0_NAME);
 }
-#endif
+
+#endif // CONFIG_AP_MODE
 
 /* API to set flag for concurrent mode wlan1 issue_deauth when channel switched by wlan0
  * usage: wifi_set_ch_deauth(0) -> wlan0 wifi_connect -> wifi_set_ch_deauth(1)
  */
 #ifdef CONFIG_CONCURRENT_MODE
+
+extern int wext_set_ch_deauth(const char *ifname, __u8 enable);
 int wifi_set_ch_deauth(__u8 enable) {
 	return wext_set_ch_deauth(WLAN1_NAME, enable);
 }
+
 #endif
 
 //----------------------------------------------------------------------------//

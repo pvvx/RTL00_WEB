@@ -39,21 +39,21 @@
 //	0x0000h ~ 0x00FFh	System Configuration
 //
 //-----------------------------------------------------
-#define REG_SYS_ISO_CTRL				0x0000
-#define REG_SYS_FUNC_EN				0x0002
+#define REG_SYS_ISO_CTRL_				0x0000
+#define REG_SYS_FUNC_EN_				0x0002
 #define REG_APS_FSMCO					0x0004
 #define REG_SYS_CLKR					0x0008
 #define REG_9346CR						0x000A
-#define REG_SYS_EEPROM_CTRL			0x000A
+#define REG_SYS_EEPROM_CTRL				0x000A
 #define REG_EE_VPD						0x000C
 #define REG_AFE_MISC					0x0010
 #define REG_SPS0_CTRL					0x0011
 #define REG_SPS0_CTRL_6					0x0016
 #define REG_POWER_OFF_IN_PROCESS 		0x0017
-#define REG_SPS_OCP_CFG				0x0018
+#define REG_SPS_OCP_CFG					0x0018
 #define REG_RSV_CTRL					0x001C
 #define REG_RF_CTRL						0x001F
-#define REG_LDOA15_CTRL				0x0020
+#define REG_LDOA15_CTRL					0x0020
 #define REG_LDOV12D_CTRL				0x0021
 #define REG_LDOHCI12_CTRL				0x0022
 #define REG_LPLDO_CTRL					0x0023
@@ -67,9 +67,9 @@
 #define REG_PWR_DATA					0x0038
 #define REG_CAL_TIMER					0x003C
 #define REG_ACLK_MON					0x003E
-#define REG_GPIO_MUXCFG				0x0040
+#define REG_GPIO_MUXCFG					0x0040
 #define REG_GPIO_IO_SEL					0x0042
-#define REG_MAC_PINMUX_CFG			0x0043
+#define REG_MAC_PINMUX_CFG				0x0043
 #define REG_GPIO_PIN_CTRL				0x0044
 #define REG_GPIO_INTM					0x0048
 #define REG_LEDCFG0						0x004C
@@ -80,18 +80,18 @@
 #define REG_FSISR						0x0054
 #define REG_HSIMR						0x0058
 #define REG_HSISR						0x005c
-#define REG_GPIO_PIN_CTRL_2			0x0060 // RTL8723 WIFI/BT/GPS Multi-Function GPIO Pin Control.
+#define REG_GPIO_PIN_CTRL_2				0x0060 // RTL8723 WIFI/BT/GPS Multi-Function GPIO Pin Control.
 #define REG_GPIO_IO_SEL_2				0x0062 // RTL8723 WIFI/BT/GPS Multi-Function GPIO Select.
-#define REG_MULTI_FUNC_CTRL			0x0068 // RTL8723 WIFI/BT/GPS Multi-Function control source.
+#define REG_MULTI_FUNC_CTRL				0x0068 // RTL8723 WIFI/BT/GPS Multi-Function control source.
 #define REG_GSSR						0x006c
 #define REG_AFE_XTAL_CTRL_EXT			0x0078 //RTL8188E
 #define REG_XCK_OUT_CTRL				0x007c //RTL8188E
-#define REG_MCUFWDL					0x0080
+#define REG_MCUFWDL						0x0080
 #define REG_WOL_EVENT					0x0081 //RTL8188E
 #define REG_MCUTSTCFG					0x0084
 #define REG_FDHM0						0x0088
 #define REG_HOST_SUSP_CNT				0x00BC	// RTL8192C Host suspend counter on FPGA platform
-#define REG_SYSTEM_ON_CTRL			0x00CC	// For 8723AE Reset after S3
+#define REG_SYSTEM_ON_CTRL				0x00CC	// For 8723AE Reset after S3
 #define REG_EFUSE_ACCESS				0x00CF	// Efuse access protection for RTL8723
 #define REG_BIST_SCAN					0x00D0
 #define REG_BIST_RPT					0x00D4
@@ -101,16 +101,16 @@
 #define REG_PCIE_MIO_INTD				0x00E8
 #define REG_HPON_FSM					0x00EC
 #define REG_SYS_CFG						0x00F0
-#define REG_GPIO_OUTSTS				0x00F4	// For RTL8723 only.
+#define REG_GPIO_OUTSTS					0x00F4	// For RTL8723 only.
 #define REG_TYPE_ID						0x00FC
 
 
-#define REG_WL_CLK_CTRL                 		0x0002 
-#define REG_WL_FUNC_EN                  		0x0004
-#define REG_WL_PMC_CTRL                 		0x0020
+#define REG_WL_CLK_CTRL                 0x0002
+#define REG_WL_FUNC_EN                  0x0004
+#define REG_WL_PMC_CTRL                 0x0020
 #define REG_WL_AFE_CTRL    				0x0050
-#define REG_WL_PMC_IMR                  		0x0080
-#define REG_WL_PMC_ISR                  		0x0084
+#define REG_WL_PMC_IMR                  0x0080
+#define REG_WL_PMC_ISR                  0x0084
 
 
 //-----------------------------------------------------
@@ -121,7 +121,7 @@
 #define REG_CR							0x0100
 #define REG_PBP							0x0104
 #define REG_PKT_BUFF_ACCESS_CTRL		0x0106
-#define REG_TRXDMA_CTRL				0x010C
+#define REG_TRXDMA_CTRL					0x010C
 #define REG_TRXFF_BNDY					0x0114
 #define REG_TRXFF_STATUS				0x0118
 #define REG_RXFF_PTR					0x011C
@@ -134,25 +134,25 @@
 #define REG_FWISR						0x0134
 #define REG_FTIMR						0x0138
 #define REG_FTISR						0x013C //RTL8192C
-#define REG_PKTBUF_DBG_CTRL			0x0140
+#define REG_PKTBUF_DBG_CTRL				0x0140
 #define REG_RXPKTBUF_CTRL				(REG_PKTBUF_DBG_CTRL+2)
 #define REG_PKTBUF_DBG_DATA_L			0x0144
-#define REG_PKTBUF_DBG_DATA_H		0x0148
+#define REG_PKTBUF_DBG_DATA_H			0x0148
 
 #define REG_TC0_CTRL					0x0150
 #define REG_TC1_CTRL					0x0154
 #define REG_TC2_CTRL					0x0158
 #define REG_TC3_CTRL					0x015C
 #define REG_TC4_CTRL					0x0160
-#define REG_TCUNIT_BASE				0x0164
-#define REG_MBIST_START				0x0174
+#define REG_TCUNIT_BASE					0x0164
+#define REG_MBIST_START					0x0174
 #define REG_MBIST_DONE					0x0178
 #define REG_MBIST_FAIL					0x017C
 #define REG_32K_CTRL					0x0194 //RTL8188E
-#define REG_C2HEVT_MSG_NORMAL		0x01A0
+#define REG_C2HEVT_MSG_NORMAL			0x01A0
 #define REG_C2HEVT_CLEAR				0x01AF
 #define REG_MCUTST_1					0x01c0
-#define REG_MCUTST_WOWLAN			0x01C7	// Defined after 8188E series.
+#define REG_MCUTST_WOWLAN				0x01C7	// Defined after 8188E series.
 #define REG_FMETHR						0x01C8
 #define REG_HMETFR						0x01CC
 #define REG_HMEBOX_0					0x01D0
@@ -180,7 +180,7 @@
 //	0x0280h ~ 0x02FFh	RXDMA Configuration
 //
 //-----------------------------------------------------
-#define REG_RXDMA_AGG_PG_TH			0x0280
+#define REG_RXDMA_AGG_PG_TH				0x0280
 #define REG_RXPKT_NUM					0x0284 
 #define REG_RXDMA_STATUS				0x0288
 #define REG_C2H_PKT_8723B				0x0294
@@ -194,7 +194,7 @@
 #define REG_PCIE_CTRL_REG				0x0300
 #define REG_INT_MIG						0x0304	// Interrupt Migration 
 #define REG_BCNQ_DESA					0x0308	// TX Beacon Descriptor Address
-#define REG_HQ_DESA					0x0310	// TX High Queue Descriptor Address
+#define REG_HQ_DESA						0x0310	// TX High Queue Descriptor Address
 #define REG_MGQ_DESA					0x0318	// TX Manage Queue Descriptor Address
 #define REG_VOQ_DESA					0x0320	// TX VO Queue Descriptor Address
 #define REG_VIQ_DESA					0x0328	// TX VI Queue Descriptor Address
@@ -203,9 +203,9 @@
 #define REG_RX_DESA						0x0340	// RX Queue	Descriptor Address
 //sherry added for DBI Read/Write  20091126
 #define REG_DBI_WDATA					0x0348	// Backdoor REG for Access Configuration
-#define REG_DBI_RDATA                         	0x034C	//Backdoor REG for Access Configuration
-#define REG_DBI_CTRL                      		0x0350	//Backdoor REG for Access Configuration
-#define REG_DBI_FLAG                      		0x0352	//Backdoor REG for Access Configuration
+#define REG_DBI_RDATA                   0x034C	//Backdoor REG for Access Configuration
+#define REG_DBI_CTRL                    0x0350	//Backdoor REG for Access Configuration
+#define REG_DBI_FLAG                    0x0352	//Backdoor REG for Access Configuration
 #define REG_MDIO						0x0354	// MDIO for Access PCIE PHY
 #define REG_DBG_SEL						0x0360	// Debug Selection Register
 #define REG_PCIE_HRPWM					0x0361	//PCIe RPWM
@@ -214,88 +214,88 @@
 
 // For new buffer descriptor ring architecture
 
-#define REG_LX_CTRL1                			0x0300  // 4 Bytes
+#define REG_LX_CTRL1                	0x0300  // 4 Bytes
 
-#define REG_BCNQ_TXBD_DESA          		0x0308  // 8 Bytes
-#define REG_MGQ_TXBD_DESA           		0x0310  // 8 Bytes 
+#define REG_BCNQ_TXBD_DESA          	0x0308  // 8 Bytes
+#define REG_MGQ_TXBD_DESA           	0x0310  // 8 Bytes
 #define REG_VOQ_TXBD_DESA          		0x0318  // 8 Bytes
-#define REG_VIQ_TXBD_DESA           		0x0320  // 8 Bytes
-#define REG_BEQ_TXBD_DESA           		0x0328  // 8 Bytes
-#define REG_BKQ_TXBD_DESA           		0x0330  // 8 Bytes
-#define REG_RXQ_RXBD_DESA           		0x0338  // 8 Bytes
-#define REG_HI0Q_TXBD_DESA          		0x0340  // 8 Bytes
-#define REG_HI1Q_TXBD_DESA          		0x0348  // 8 Bytes
-#define REG_HI2Q_TXBD_DESA          		0x0350  // 8 Bytes
-#define REG_HI3Q_TXBD_DESA          		0x0358  // 8 Bytes
-#define REG_HI4Q_TXBD_DESA          		0x0360  // 8 Bytes
-#define REG_HI5Q_TXBD_DESA          		0x0368  // 8 Bytes
+#define REG_VIQ_TXBD_DESA           	0x0320  // 8 Bytes
+#define REG_BEQ_TXBD_DESA           	0x0328  // 8 Bytes
+#define REG_BKQ_TXBD_DESA           	0x0330  // 8 Bytes
+#define REG_RXQ_RXBD_DESA           	0x0338  // 8 Bytes
+#define REG_HI0Q_TXBD_DESA          	0x0340  // 8 Bytes
+#define REG_HI1Q_TXBD_DESA          	0x0348  // 8 Bytes
+#define REG_HI2Q_TXBD_DESA          	0x0350  // 8 Bytes
+#define REG_HI3Q_TXBD_DESA          	0x0358  // 8 Bytes
+#define REG_HI4Q_TXBD_DESA          	0x0360  // 8 Bytes
+#define REG_HI5Q_TXBD_DESA          	0x0368  // 8 Bytes
 #define REG_HI6Q_TXBD_DESA         		0x0370  // 8 Bytes
-#define REG_HI7Q_TXBD_DESA          		0x0378  // 8 Bytes
+#define REG_HI7Q_TXBD_DESA          	0x0378  // 8 Bytes
 
-#define REG_MGQ_TXBD_NUM            		0x0380  // 2 Bytes
-#define REG_RX_RXBD_NUM             		0x0382  // 2 Bytes
-#define REG_VOQ_TXBD_NUM            		0x0384  // 2 Bytes
-#define REG_VIQ_TXBD_NUM            		0x0386  // 2 Bytes
-#define REG_BEQ_TXBD_NUM            		0x0388  // 2 Bytes
-#define REG_BKQ_TXBD_NUM            		0x038A  // 2 Bytes
-#define REG_HI0Q_TXBD_NUM           		0x038C  // 2 Bytes
-#define REG_HI1Q_TXBD_NUM           		0x038E  // 2 Bytes
-#define REG_HI2Q_TXBD_NUM           		0x0390  // 2 Bytes
-#define REG_HI3Q_TXBD_NUM           		0x0392  // 2 Bytes
-#define REG_HI4Q_TXBD_NUM           		0x0394  // 2 Bytes
-#define REG_HI5Q_TXBD_NUM           		0x0396  // 2 Bytes
-#define REG_HI6Q_TXBD_NUM           		0x0398  // 2 Bytes
-#define REG_HI7Q_TXBD_NUM           		0x039A  // 2 Bytes
+#define REG_MGQ_TXBD_NUM            	0x0380  // 2 Bytes
+#define REG_RX_RXBD_NUM             	0x0382  // 2 Bytes
+#define REG_VOQ_TXBD_NUM            	0x0384  // 2 Bytes
+#define REG_VIQ_TXBD_NUM            	0x0386  // 2 Bytes
+#define REG_BEQ_TXBD_NUM            	0x0388  // 2 Bytes
+#define REG_BKQ_TXBD_NUM            	0x038A  // 2 Bytes
+#define REG_HI0Q_TXBD_NUM           	0x038C  // 2 Bytes
+#define REG_HI1Q_TXBD_NUM           	0x038E  // 2 Bytes
+#define REG_HI2Q_TXBD_NUM           	0x0390  // 2 Bytes
+#define REG_HI3Q_TXBD_NUM           	0x0392  // 2 Bytes
+#define REG_HI4Q_TXBD_NUM           	0x0394  // 2 Bytes
+#define REG_HI5Q_TXBD_NUM           	0x0396  // 2 Bytes
+#define REG_HI6Q_TXBD_NUM           	0x0398  // 2 Bytes
+#define REG_HI7Q_TXBD_NUM           	0x039A  // 2 Bytes
 
-#define REG_BD_RWPTR_CLR            		0x039C  // 4 Bytes
-#define REG_VOQ_TXBD_IDX            		0x03A0  // 4 Bytes
-#define REG_VIQ_TXBD_IDX            		0x03A4  // 4 Bytes
-#define REG_BEQ_TXBD_IDX            		0x03A8  // 4 Bytes
-#define REG_BKQ_TXBD_IDX            		0x03AC  // 4 Bytes
-#define REG_MGQ_TXBD_IDX            		0x03B0  // 4 Bytes
-#define REG_RXQ_RXBD_IDX            		0x03B4  // 4 Bytes
-#define REG_HI0Q_TXBD_IDX           		0x03B8  // 4 Bytes
-#define REG_HI1Q_TXBD_IDX           		0x03BC  // 4 Bytes
-#define REG_HI2Q_TXBD_IDX           		0x03C0  // 4 Bytes
-#define REG_HI3Q_TXBD_IDX           		0x03C4  // 4 Bytes
-#define REG_HI4Q_TXBD_IDX           		0x03C8  // 4 Bytes
-#define REG_HI5Q_TXBD_IDX           		0x03CC  // 4 Bytes
-#define REG_HI6Q_TXBD_IDX           		0x03D0  // 4 Bytes
-#define REG_HI7Q_TXBD_IDX           		0x03D4  // 4 Bytes
+#define REG_BD_RWPTR_CLR            	0x039C  // 4 Bytes
+#define REG_VOQ_TXBD_IDX            	0x03A0  // 4 Bytes
+#define REG_VIQ_TXBD_IDX            	0x03A4  // 4 Bytes
+#define REG_BEQ_TXBD_IDX            	0x03A8  // 4 Bytes
+#define REG_BKQ_TXBD_IDX            	0x03AC  // 4 Bytes
+#define REG_MGQ_TXBD_IDX            	0x03B0  // 4 Bytes
+#define REG_RXQ_RXBD_IDX            	0x03B4  // 4 Bytes
+#define REG_HI0Q_TXBD_IDX           	0x03B8  // 4 Bytes
+#define REG_HI1Q_TXBD_IDX           	0x03BC  // 4 Bytes
+#define REG_HI2Q_TXBD_IDX           	0x03C0  // 4 Bytes
+#define REG_HI3Q_TXBD_IDX           	0x03C4  // 4 Bytes
+#define REG_HI4Q_TXBD_IDX           	0x03C8  // 4 Bytes
+#define REG_HI5Q_TXBD_IDX           	0x03CC  // 4 Bytes
+#define REG_HI6Q_TXBD_IDX           	0x03D0  // 4 Bytes
+#define REG_HI7Q_TXBD_IDX           	0x03D4  // 4 Bytes
 
 //CPWM &RPWM
-#define REG_LX_HRPWM_8711B			0x03D9  // 1 Bytes
-#define REG_LX_HCPWM_8711B			0x03DA  // 1 Bytes //from 0x14c
+#define REG_LX_HRPWM_8711B				0x03D9  // 1 Bytes
+#define REG_LX_HCPWM_8711B				0x03DA  // 1 Bytes //from 0x14c
 
-#define REG_LX_CTRL2                			0x03DB  // 1 Bytes
+#define REG_LX_CTRL2                	0x03DB  // 1 Bytes
 
-#define REG_LX_HRPWM2_8711B          		0x03DC  // 2 Bytes //REG_LX_HCPWM1_8711B
-#define REG_LX_HCPWM2_8711B          		0x03DE  // 2 Bytes 
+#define REG_LX_HRPWM2_8711B          	0x03DC  // 2 Bytes //REG_LX_HCPWM1_8711B
+#define REG_LX_HCPWM2_8711B          	0x03DE  // 2 Bytes
 #define REG_LX_H2C_MSG_V1         		0x03E0  // 4 Bytes
 #define REG_LX_C2H_MSG_V1         		0x03E4  // 4 Bytes
 
 
-#define REG_LX_DMA_ISR              			0x03E8  // 4 Bytes
-#define REG_LX_DMA_IMR              			0x03EC  // 4 Bytes
-#define REG_LX_DMA_DBG              			0x03F0  // 4 Bytes
+#define REG_LX_DMA_ISR              	0x03E8  // 4 Bytes
+#define REG_LX_DMA_IMR              	0x03EC  // 4 Bytes
+#define REG_LX_DMA_DBG              	0x03F0  // 4 Bytes
 
-#define REG_BUS_MIX_CFG             			0x03F8  // 4 Bytes#
-#define REG_BUS_MIX_CFG1            		0x03FC  // 4 Bytes
+#define REG_BUS_MIX_CFG             	0x03F8  // 4 Bytes#
+#define REG_BUS_MIX_CFG1            	0x03FC  // 4 Bytes
 
 //-----------------------------------------------------
 //
 //	0x0400h ~ 0x047Fh	Protocol Configuration
 //
 //-----------------------------------------------------
-#define REG_VOQ_INFORMATION			0x0400
-#define REG_VIQ_INFORMATION			0x0404
-#define REG_BEQ_INFORMATION			0x0408
-#define REG_BKQ_INFORMATION			0x040C
-#define REG_MGQ_INFORMATION			0x0410
-#define REG_HGQ_INFORMATION			0x0414
+#define REG_VOQ_INFORMATION				0x0400
+#define REG_VIQ_INFORMATION				0x0404
+#define REG_BEQ_INFORMATION				0x0408
+#define REG_BKQ_INFORMATION				0x040C
+#define REG_MGQ_INFORMATION				0x0410
+#define REG_HGQ_INFORMATION				0x0414
 #define REG_BCNQ_INFORMATION			0x0418
-#define REG_TXPKT_EMPTY				0x041A
-#define REG_CPU_MGQ_INFORMATION		0x041C
+#define REG_TXPKT_EMPTY					0x041A
+#define REG_CPU_MGQ_INFORMATION			0x041C
 #define REG_FWHW_TXQ_CTRL				0x0420
 #define REG_HWSEQ_CTRL					0x0423
 #define REG_BCNQ_BDNY					0x0424
@@ -314,8 +314,8 @@
 #define REG_BCNQ1_BDNY					0x0457
 
 #define REG_AGGLEN_LMT					0x0458
-#define REG_AMPDU_MIN_SPACE			0x045C
-#define REG_WMAC_LBK_BF_HD			0x045D
+#define REG_AMPDU_MIN_SPACE				0x045C
+#define REG_WMAC_LBK_BF_HD				0x045D
 #define REG_FAST_EDCA_CTRL				0x0460
 #define REG_RD_RESP_PKT_TH				0x0463
 
@@ -326,24 +326,24 @@
 
 #define REG_POWER_STAGE1				0x04B4
 #define REG_POWER_STAGE2				0x04B8
-#define REG_PKT_VO_VI_LIFE_TIME		0x04C0
-#define REG_PKT_BE_BK_LIFE_TIME		0x04C2
+#define REG_PKT_VO_VI_LIFE_TIME			0x04C0
+#define REG_PKT_BE_BK_LIFE_TIME			0x04C2
 #define REG_STBC_SETTING				0x04C4
 #define REG_QUEUE_CTRL					0x04C6
 #define REG_SINGLE_AMPDU_CTRL			0x04c7
-#define REG_PROT_MODE_CTRL			0x04C8
+#define REG_PROT_MODE_CTRL				0x04C8
 #define REG_MAX_AGGR_NUM				0x04CA
 #define REG_RTS_MAX_AGGR_NUM			0x04CB
 #define REG_BAR_MODE_CTRL				0x04CC
-#define REG_RA_TRY_RATE_AGG_LMT		0x04CF
+#define REG_RA_TRY_RATE_AGG_LMT			0x04CF
 //#define REG_EARLY_MODE_CONTROL		0x04D0
-#define REG_MACID_SLEEP_2			0x04D0
-#define REG_MACID_SLEEP				0x04D4
+#define REG_MACID_SLEEP_2				0x04D0
+#define REG_MACID_SLEEP					0x04D4
 #define REG_NQOS_SEQ					0x04DC
-#define REG_QOS_SEQ					0x04DE
-#define REG_NEED_CPU_HANDLE			0x04E0
+#define REG_QOS_SEQ						0x04DE
+#define REG_NEED_CPU_HANDLE				0x04E0
 #define REG_PKT_LOSE_RPT				0x04E1
-#define REG_PTCL_ERR_STATUS			0x04E2
+#define REG_PTCL_ERR_STATUS				0x04E2
 #define REG_TX_RPT_CTRL					0x04EC
 #define REG_TX_RPT_TIME					0x04F0	// 2 byte
 #define REG_DUMMY						0x04FC
@@ -358,12 +358,12 @@
 #define REG_EDCA_BE_PARAM				0x0508
 #define REG_EDCA_BK_PARAM				0x050C
 #define REG_BCNTCFG						0x0510
-#define REG_PIFS							0x0512
+#define REG_PIFS						0x0512
 #define REG_RDG_PIFS					0x0513
 #define REG_SIFS_CTX					0x0514
 #define REG_SIFS_TRX					0x0516
 #define REG_TSFTR_SYN_OFFSET			0x0518
-#define REG_AGGR_BREAK_TIME			0x051A
+#define REG_AGGR_BREAK_TIME				0x051A
 #define REG_SLOT						0x051B
 #define REG_TX_PTCL_CTRL				0x0520
 #define REG_TXPAUSE						0x0522
@@ -394,9 +394,9 @@
 #define REG_BCN_INTERVAL				0x0554	// The same as REG_MBSSID_BCN_SPACE
 #define REG_DRVERLYINT					0x0558
 #define REG_BCNDMATIM					0x0559
-#define REG_ATIMWND					0x055A
+#define REG_ATIMWND						0x055A
 #define REG_USTIME_TSF					0x055C
-#define REG_BCN_MAX_ERR				0x055D
+#define REG_BCN_MAX_ERR					0x055D
 #define REG_RXTSF_OFFSET_CCK			0x055E
 #define REG_RXTSF_OFFSET_OFDM			0x055F	
 #define REG_TSFTR						0x0560
@@ -408,17 +408,17 @@
 #define REG_TIMER1						0x0588
 #define REG_ACMHWCTRL					0x05C0
 #define REG_NOA_DESC_SEL				0x05CF
-#define REG_NOA_DESC_DURATION		0x05E0
+#define REG_NOA_DESC_DURATION			0x05E0
 #define REG_NOA_DESC_INTERVAL			0x05E4
-#define REG_NOA_DESC_START			0x05E8
-#define REG_NOA_DESC_COUNT			0x05EC
+#define REG_NOA_DESC_START				0x05E8
+#define REG_NOA_DESC_COUNT				0x05EC
 
 #define REG_DMC							0x05F0	//Dual MAC Co-Existence Register
 #define REG_SCH_TX_CMD					0x05F8
 
-#define REG_FW_RESET_TSF_CNT_1		0x05FC
-#define REG_FW_RESET_TSF_CNT_0		0x05FD
-#define REG_FW_BCN_DIS_CNT			0x05FE
+#define REG_FW_RESET_TSF_CNT_1			0x05FC
+#define REG_FW_RESET_TSF_CNT_0			0x05FD
+#define REG_FW_BCN_DIS_CNT				0x05FE
 
 //-----------------------------------------------------
 //
@@ -430,7 +430,7 @@
 #define REG_TCR							0x0604
 #define REG_RCR							0x0608
 #define REG_RX_PKT_LIMIT				0x060C
-#define REG_RX_DLK_TIME				0x060D
+#define REG_RX_DLK_TIME					0x060D
 #define REG_RX_DRVINFO_SZ				0x060F
 
 #define REG_MACID						0x0610
@@ -438,15 +438,15 @@
 #define REG_MAR							0x0620
 #define REG_MBIDCAMCFG					0x0628
 
-#define REG_USTIME_EDCA				0x0638
+#define REG_USTIME_EDCA					0x0638
 #define REG_MAC_SPEC_SIFS				0x063A
 // 20100719 Joseph: Hardware register definition change. (HW datasheet v54)
 #define REG_RESP_SIFS_CCK				0x063C	// [15:8]SIFS_R2T_OFDM, [7:0]SIFS_R2T_CCK
-#define REG_RESP_SIFS_OFDM                    0x063E	// [15:8]SIFS_T2T_OFDM, [7:0]SIFS_T2T_CCK
+#define REG_RESP_SIFS_OFDM              0x063E	// [15:8]SIFS_T2T_OFDM, [7:0]SIFS_T2T_CCK
 
 #define REG_ACKTO						0x0640
 #define REG_CTS2TO						0x0641
-#define REG_EIFS							0x0642
+#define REG_EIFS						0x0642
 
 #define REG_PORT_CTRL					0x076D
 
@@ -454,19 +454,19 @@
 #define RXERR_TYPE_OFDM_PPDU			0
 #define RXERR_TYPE_OFDM_FALSE_ALARM 	1
 #define RXERR_TYPE_OFDM_MPDU_OK 		2
-#define RXERR_TYPE_OFDM_MPDU_FAIL	3
+#define RXERR_TYPE_OFDM_MPDU_FAIL		3
 #define RXERR_TYPE_CCK_PPDU 			4
-#define RXERR_TYPE_CCK_FALSE_ALARM	5
-#define RXERR_TYPE_CCK_MPDU_OK		6
+#define RXERR_TYPE_CCK_FALSE_ALARM		5
+#define RXERR_TYPE_CCK_MPDU_OK			6
 #define RXERR_TYPE_CCK_MPDU_FAIL		7
 #define RXERR_TYPE_HT_PPDU				8
-#define RXERR_TYPE_HT_FALSE_ALARM	9
+#define RXERR_TYPE_HT_FALSE_ALARM		9
 #define RXERR_TYPE_HT_MPDU_TOTAL		10
 #define RXERR_TYPE_HT_MPDU_OK			11
 #define RXERR_TYPE_HT_MPDU_FAIL 		12
 #define RXERR_TYPE_RX_FULL_DROP 		15
 
-#define RXERR_COUNTER_MASK			0xFFFFF
+#define RXERR_COUNTER_MASK				0xFFFFF
 #define RXERR_RPT_RST					BIT(27)
 #define _RXERR_RPT_SEL(type)			((type) << 28)
 
@@ -493,7 +493,7 @@
 // Security
 #define REG_CAMCMD						0x0670
 #define REG_CAMWRITE					0x0674
-#define REG_CAMREAD					0x0678
+#define REG_CAMREAD						0x0678
 #define REG_CAMDBG						0x067C
 #define REG_SECCFG						0x0680
 
@@ -501,13 +501,13 @@
 #define REG_WOW_CTRL					0x0690
 #define REG_PS_RX_INFO					0x0692
 #define REG_UAPSD_TID					0x0693
-#define REG_WKFMCAM_CMD				0x0698
-#define REG_WKFMCAM_NUM				REG_WKFMCAM_CMD
-#define REG_WKFMCAM_RWD				0x069C
+#define REG_WKFMCAM_CMD					0x0698
+#define REG_WKFMCAM_NUM					REG_WKFMCAM_CMD
+#define REG_WKFMCAM_RWD					0x069C
 #define REG_RXFLTMAP0					0x06A0
 #define REG_RXFLTMAP1					0x06A2
 #define REG_RXFLTMAP2					0x06A4
-#define REG_BCN_PSR_RPT				0x06A8
+#define REG_BCN_PSR_RPT					0x06A8
 #define REG_BT_COEX_TABLE				0x06C0
 
 // Hardware Port 2
@@ -515,7 +515,7 @@
 #define REG_BSSID1						0x0708
 
 /* port0 & port1 enable */
-#define REG_PORT_CTRL					0x76D
+// #define REG_PORT_CTRL					0x76D
 
 //-----------------------------------------------------
 //
@@ -523,8 +523,8 @@
 //
 //-----------------------------------------------------
 #define REG_USB_INFO					0xFE17
-#define REG_USB_SPECIAL_OPTION		0xFE55
-#define REG_USB_DMA_AGG_TO			0xFE5B
+#define REG_USB_SPECIAL_OPTION			0xFE55
+#define REG_USB_DMA_AGG_TO				0xFE5B
 #define REG_USB_AGG_TO					0xFE5C
 #define REG_USB_AGG_TH					0xFE5D
 
@@ -872,7 +872,7 @@ Default: 00b.
 #define IMR_PSTIMEOUT			BIT14		// Power save time out interrupt 
 #define IMR_BcnInt				BIT13		// Beacon DMA Interrupt 0
 #define IMR_RXFOVW				BIT12		// Receive FIFO Overflow
-#define IMR_RDU					BIT11		// Receive Descriptor Unavailable
+#define IMR_RDU_				BIT11		// Receive Descriptor Unavailable
 #define IMR_ATIMEND				BIT10		// For 92C,ATIM Window End Interrupt. For 8723 and later ICs, it also means P2P CTWin End interrupt.
 #define IMR_BDOK				BIT9		// Beacon Queue DMA OK Interrup
 #define IMR_HIGHDOK				BIT8		// High Queue DMA OK Interrupt

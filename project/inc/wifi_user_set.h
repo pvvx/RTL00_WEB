@@ -47,7 +47,7 @@
 //==== Interface 1 - wlan1 = STA ==========
 #define DEF_ST_SSID			"HOMEAP"		// Имя SSID AP (роутера) для присоединения по умолчанию (первый старт)
 #define DEF_ST_PASSWORD		"0123456789"	// Пароль AP (роутера) для присоединения по умолчанию (первый старт)
-#define DEF_ST_SECURITY		RTW_SECURITY_WPA_WPA2_MIXED // Тип Security
+#define DEF_ST_SECURITY		RTW_ENCRYPTION_WPA2_MIXED // Тип Security
 #define DEF_ST_BSSID		{ 0xff, 0xff, 0xff, 0xff, 0xff, 0xff } // If bssid set is not ff.ff.ff.ff.ff.ff,
 #define DEF_ST_USE_BSSID	0 			// station will connect to the router with both ssid[] and bssid[] matched.
 #define DEF_ST_CHANNEL		1			// 1..14

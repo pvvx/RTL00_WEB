@@ -133,7 +133,7 @@ void rltk_wlan_recv(int idx, struct eth_drv_sg *sg_list, int sg_len)
 
 	DBG_TRACE("%s is called", __FUNCTION__);
 	
-    if (!rltk_wlan_check_isup(idx))
+    if (rltk_wlan_check_isup(idx) == 0)
         return;
 	
 	if(idx == -1){

@@ -257,7 +257,7 @@ LOCAL int BOOT_RAM_TEXT_SECTION SetSpicBitMode(uint8 BitMode) {
 }
 
 void BOOT_RAM_TEXT_SECTION InitSpicFlashType(struct spic_table_flash_type *ptable_flash) {
-	u8 * ptrb = &ptable_flash->cmd;
+	u8 * ptrb = (u8 *) &ptable_flash->cmd;
 	volatile u32 * ptrreg = (volatile u32 *)(SPI_FLASH_CTRL_BASE + REG_SPIC_READ_FAST_SINGLE);// 0x400060E0
     HAL_SPI_WRITE32(REG_SPIC_SSIENR, 0); // Disable SPI_FLASH User Mode
 	do	{
@@ -404,7 +404,7 @@ LOCAL const uint32 tab_seg_def[] = { 0x10000000, 0x10070000, 0x1fff0000,
 
 LOCAL uint32 BOOT_RAM_TEXT_SECTION get_seg_id(uint32 addr, int32 size) {
 	uint32 ret = SEG_ID_ERR;
-	uint32 * ptr = &tab_seg_def;
+	uint32 * ptr = (uint32 *) &tab_seg_def;
 	if (size > 0) {
 		do {
 			ret++;
@@ -447,7 +447,7 @@ LOCAL uint32 BOOT_RAM_TEXT_SECTION load_segs(uint32 faddr, PIMG2HEAD hdr,
 					segnum, faddr, txt_tab_seg[seg_id], hdr->seg.ldaddr,
 					hdr->seg.size);
 #endif
-			fnextaddr += flashcpy(fnextaddr, hdr->seg.ldaddr, hdr->seg.size);
+			fnextaddr += flashcpy(fnextaddr, (void *)hdr->seg.ldaddr, hdr->seg.size);
 		} else if (seg_id) {
 #if CONFIG_DEBUG_LOG > 2
 			DBG_8195A("Skip Flash seg%d: 0x%08x -> %s: 0x%08x, size: %d\n", segnum,
@@ -476,7 +476,7 @@ LOCAL int BOOT_RAM_TEXT_SECTION loadUserImges(int imgnum) {
 		faddr = (faddr + FLASH_SECTOR_SIZE - 1) & (~(FLASH_SECTOR_SIZE - 1));
 		uint32 img_id = load_img2_head(faddr, &hdr);
 		if ((img_id >> 8) > 4 || (uint8) img_id != 0) {
-			faddr = load_segs(faddr + 0x10, &hdr.seg, imagenum == imgnum);
+			faddr = load_segs(faddr + 0x10, (PIMG2HEAD) &hdr.seg, imagenum == imgnum);
 			if (imagenum == imgnum) {
 //				DBG_8195A("Image%d: %s\n", imgnum, hdr.name);
 				break;
@@ -535,6 +535,8 @@ LOCAL uint8 BOOT_RAM_TEXT_SECTION IsForceLoadDefaultImg2(void) {
 	return result;
 }
 
+extern _LONG_CALL_ void RtlConsolTaskRom(void *Data);
+
 /* RTL Console ROM */
 LOCAL void BOOT_RAM_TEXT_SECTION RtlConsolRam(void) {
 //	DiagPrintf("\r\nRTL Console ROM\r\n");
@@ -544,7 +546,7 @@ LOCAL void BOOT_RAM_TEXT_SECTION RtlConsolRam(void) {
 	pUartLogCtl->pTmpLogBuf->UARTLogBuf[0] = '?';
 	pUartLogCtl->pTmpLogBuf->BufCount = 1;
 	pUartLogCtl->ExecuteCmd = 1;
-	RtlConsolTaskRom(pUartLogCtl);
+	RtlConsolTaskRom((void *) pUartLogCtl);
 }
 
 /* Enter Image 1.5 */

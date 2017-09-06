@@ -123,7 +123,7 @@ const uint32 tab_seg_def[] = {
 
 SEG_ID get_seg_id(uint32 addr, int32 size) {
 	SEG_ID ret = SEG_ID_ERR;
-	uint32 * ptr = &tab_seg_def;
+	uint32 * ptr = (uint32 *) &tab_seg_def;
 	if (size > 0) {
 		do {
 			ret++;
@@ -531,6 +531,9 @@ int ICACHE_FLASH_ATTR htmlcode(uint8 *d, uint8 *s, uint16 lend, uint16 lens)
 	return ret;
 }
 //=============================================================================
+extern size_t rtl_strlen(const char *str);
+extern int rtl_strncmp(const char *s1, const char *s2, size_t n);
+
 uint8* ICACHE_FLASH_ATTR
 web_strnstr(const uint8* buffer, const uint8* token, int len)
 {
@@ -563,7 +566,7 @@ bool ICACHE_FLASH_ATTR base64decode(const uint8 *in, int len, uint8_t *out, int 
 {
 //	uint8 *map = (uint8 *)UartDev.rcv_buff.pRcvMsgBuff;
 //	ets_memcpy(map, base64map, 128);
-	uint8 *map = base64map;
+	uint8 *map = (uint8 *) base64map;
     int g, t, x, y, z;
     uint8_t c;
     g = 3;

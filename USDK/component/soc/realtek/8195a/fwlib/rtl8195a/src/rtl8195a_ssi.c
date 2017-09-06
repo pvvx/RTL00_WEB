@@ -245,7 +245,7 @@ HAL_Status HalSsiInitRtl8195a_Patch(VOID *Adaptor)
     u32  IRQ_UNKNOWN  = 999;
     u32  Ctrlr0Value  = 0;
     u32  Ctrlr1Value  = 0;
-    u32  SerValue     = 0;
+    u32  SerValue;
     u32  BaudrValue   = 0;
     u32  TxftlrValue  = 0;
     u32  RxftlrValue  = 0;
@@ -617,7 +617,7 @@ HAL_Status HalSsiSetFormatRtl8195a(VOID *Adaptor)
     u32 RxftlrValue = 0;
     u8   Index = pHalSsiAdaptor->Index;
     u8   Role  = pHalSsiAdaptor->Role;
-	u32 Spi_mode = 0;
+	u32 Spi_mode;
 
     if (Index > 2) {
         DBG_SSI_ERR("HalSsiSetFormatRtl8195a: Invalid SSI Idx %d\r\n", Index);
@@ -741,7 +741,7 @@ HAL_Status HalSsiIntReadRtl8195a(VOID *Adapter, VOID *RxData, u32 Length)
 {
     PHAL_SSI_ADAPTOR pHalSsiAdapter = (PHAL_SSI_ADAPTOR) Adapter;
     u32 RxFifoThresholdLevel;
-    u8  Index = pHalSsiAdapter->Index;
+//    u8  Index = pHalSsiAdapter->Index;
 
     DBG_SSI_INFO("HalSsiIntReadRtl8195a: Idx=%d, RxData=0x%x, Len=0x%x\r\n", Index, RxData, Length);
 //    if (HalSsiBusyRtl8195a(Adapter)) {

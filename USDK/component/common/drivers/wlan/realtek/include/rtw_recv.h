@@ -846,7 +846,7 @@ __inline static union recv_frame *rxmem_to_recvframe(u8 *rxmem)
 
 __inline static union recv_frame *pkt_to_recvframe(_pkt *pkt)
 {
-
+	(void) pkt;
 	u8 * buf_star = NULL;
 	union recv_frame * precv_frame = NULL;
 #ifdef PLATFORM_WINDOWS

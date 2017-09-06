@@ -24,10 +24,10 @@
 #include "hal_adc.h"
 #include "analogin_api.h"
 #include "timer_api.h"
-//#include "strproc.h"
 
 #include "web_srv.h"
 #include "websock.h"
+#include "web_websocket.h"
 #include "driver/adc_drv.h"
 #include "rtl8195a/rtl_libc.h"
 
@@ -39,8 +39,14 @@
 
 
 #ifndef CONFIG_MBED_ENABLED
+extern void *pvPortZalloc(size_t xWantedSize);
+extern void vPortFree(void *pv);
+extern void *pvPortMalloc(size_t xWantedSize);
+#undef malloc
 #define malloc                  pvPortMalloc
+#undef zalloc
 #define zalloc                  pvPortZalloc
+#undef free
 #define free                    vPortFree
 #endif
 
@@ -65,8 +71,8 @@ typedef struct _adc_drv {
 #endif
 } ADC_DRV, *PADC_DRV;
 
-#define mMIN(a, b)  ((a<b)?a:b)
-#define mMAX(a, b)  ((a>b)?a:b)
+//#define mMIN(a, b)  ((a<b)?a:b)
+//#define mMAX(a, b)  ((a>b)?a:b)
 
 ADC_DRV adc_drv = {
 		.buf_idx = (1460*2 - 80)/(sizeof(ADC_DATA)/2)	// циклический буфер на ~1420 замеров (см. sizeof(ADC_DATA))

@@ -1044,7 +1044,7 @@ Sdr_Rand2(
 }
 
 */
-
+extern __attribute__ ((long_call)) unsigned int Rand(void);
 HAL_SDRC_TEXT_SECTION 
 s32 
 MemTest(

@@ -134,8 +134,8 @@ extern uint32_t SystemCoreClock;
 
 #if (__IASMARM__ != 1)
 
-extern void freertos_pre_sleep_processing(unsigned int *expected_idle_time);
-extern void freertos_post_sleep_processing(unsigned int *expected_idle_time);
+extern void freertos_pre_sleep_processing(uint32_t *expected_idle_time);
+extern void freertos_post_sleep_processing(uint32_t *expected_idle_time);
 extern int  freertos_ready_to_sleep();
 
 /* Enable tickless power saving. */
