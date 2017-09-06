@@ -373,7 +373,7 @@ llatob(u_quad_t *vp, char *p, int base)
 char *
 btoa(char *dst, u_int value, int base)
 {
-    char buf[34], digit;
+    char buf[34], digit = 0;
     int i, j, rem, neg;
 
     if (value == 0) {
@@ -419,7 +419,7 @@ btoa(char *dst, u_int value, int base)
 char *
 llbtoa(char *dst, u_quad_t value, int base)
 {
-    char buf[66], digit;
+    char buf[66], digit = 0;
     int i, j, rem, neg;
 
     if (value == 0) {
@@ -538,7 +538,7 @@ c_vsprintf (char *d, const char *s, va_list ap)
     const char *t;
     char *p, *dst, tmp[40];
     unsigned int n;
-    int fmt, trunc, haddot, width, base, longlong;
+    int fmt, trunc, haddot, width, base = 0, longlong;
     double dbl;
 #ifndef NEWFP
     EP ex;
@@ -1081,6 +1081,7 @@ int puts (const char *s)
 	while(*s) {
 		HalSerialPutcRtl8195a(*s++);
 	}
+	return 0; // -1 -> EOF
 }
 
 void vTaskDelete(void *);

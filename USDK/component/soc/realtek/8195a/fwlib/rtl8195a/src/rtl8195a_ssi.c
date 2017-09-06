@@ -245,7 +245,6 @@ HAL_Status HalSsiInitRtl8195a_Patch(VOID *Adaptor)
     u32  IRQ_UNKNOWN  = 999;
     u32  Ctrlr0Value  = 0;
     u32  Ctrlr1Value  = 0;
-    u32  SerValue;
     u32  BaudrValue   = 0;
     u32  TxftlrValue  = 0;
     u32  RxftlrValue  = 0;
@@ -318,8 +317,7 @@ HAL_Status HalSsiInitRtl8195a_Patch(VOID *Adaptor)
                     HAL_SSI_READ32(Index, REG_DW_SSI_CTRLR1));
         }
 
-        SerValue = BIT_SER_SER(1 << (pHalSsiAdaptor->SlaveSelectEnable));
-        SSI_DBG_INIT("[1] Set SSI%d REG_DW_SSI_SER Value: %X\n", Index, SerValue);
+        SSI_DBG_INIT("[1] Set SSI%d REG_DW_SSI_SER Value: %X\n", Index, BIT_SER_SER(1 << (pHalSsiAdaptor->SlaveSelectEnable)));
 
         //HAL_SSI_WRITE32(Index, REG_DW_SSI_SER, SerValue);
         HalSsiSetSlaveEnableRegisterRtl8195a(Adaptor, pHalSsiAdaptor->SlaveSelectEnable);
@@ -617,7 +615,6 @@ HAL_Status HalSsiSetFormatRtl8195a(VOID *Adaptor)
     u32 RxftlrValue = 0;
     u8   Index = pHalSsiAdaptor->Index;
     u8   Role  = pHalSsiAdaptor->Role;
-	u32 Spi_mode;
 
     if (Index > 2) {
         DBG_SSI_ERR("HalSsiSetFormatRtl8195a: Invalid SSI Idx %d\r\n", Index);
@@ -639,10 +636,9 @@ HAL_Status HalSsiSetFormatRtl8195a(VOID *Adaptor)
 
     HAL_SSI_WRITE32(Index, REG_DW_SSI_CTRLR0, Ctrlr0Value);
 
-    Spi_mode = (HAL_SSI_READ32(Index, REG_DW_SSI_CTRLR0) >>6) & 0x3;
     SSI_DBG_INIT("[2] SSI%d REG_DW_SSI_CTRLR0(%X) = %X, SPI Mode = %X\n", Index,
             SSI0_REG_BASE + (SSI_REG_OFF * Index) + REG_DW_SSI_CTRLR0,
-            HAL_SSI_READ32(Index, REG_DW_SSI_CTRLR0), Spi_mode);
+            HAL_SSI_READ32(Index, REG_DW_SSI_CTRLR0), (HAL_SSI_READ32(Index, REG_DW_SSI_CTRLR0) >>6) & 0x3);
     //The tx threshold and rx threshold value will be reset after the spi changes its role
     /* REG_DW_SSI_TXFTLR */
     TxftlrValue = BIT_TXFTLR_TFT(pHalSsiAdaptor->TxThresholdLevel);

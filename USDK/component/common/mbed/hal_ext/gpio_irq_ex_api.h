@@ -23,11 +23,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+/*
 typedef enum {
     IRQ_LOW = 3,
     IRQ_HIGH =4
 } gpio_irq_event_ex;
+*/
 
 void gpio_irq_deinit(gpio_irq_t *obj);
 void gpio_irq_pull_ctrl(gpio_irq_t *obj, PinMode pull_type);

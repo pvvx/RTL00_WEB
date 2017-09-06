@@ -85,7 +85,7 @@ HAL_GPIO_Init(
     u8 port_num;
     u8 pin_num;
     u32 chip_pin;
-    HAL_Status ret;
+
 
     if (_pHAL_Gpio_Adapter == NULL) {
         _pHAL_Gpio_Adapter = &gHAL_Gpio_Adapter;
@@ -107,7 +107,8 @@ HAL_GPIO_Init(
     // Make the pin pull control default as High-Z
     GPIO_PullCtrl_8195a(chip_pin, HAL_GPIO_HIGHZ);
 
-    ret = HAL_GPIO_Init_8195a(GPIO_Pin);
+    //    HAL_Status ret =
+    HAL_GPIO_Init_8195a(GPIO_Pin);
 #if CONFIG_DEBUG_LOG > 3
     if (ret != HAL_OK) {
         GpioFunctionChk(chip_pin, DISABLE);
@@ -127,11 +128,6 @@ HAL_GPIO_Irq_Init(
     HAL_GPIO_PIN  *GPIO_Pin
 )
 {
-    u8 port_num;
-    u8 pin_num;
-    u32 chip_pin;
-    HAL_Status ret;
-    
     if (_pHAL_Gpio_Adapter == NULL) {
         _pHAL_Gpio_Adapter = &gHAL_Gpio_Adapter;
 //        DBG_GPIO_INFO("%s: Initial GPIO Adapter\n ", __FUNCTION__);
@@ -145,10 +141,10 @@ HAL_GPIO_Irq_Init(
 //        DBG_GPIO_INFO("%s: Initial GPIO IRQ Adapter\n ", __FUNCTION__);
     }
 
-    port_num = HAL_GPIO_GET_PORT_BY_NAME(GPIO_Pin->pin_name);
-    pin_num = HAL_GPIO_GET_PIN_BY_NAME(GPIO_Pin->pin_name);
-    chip_pin = GPIO_GetChipPinName_8195a(port_num, pin_num);
 #if CONFIG_DEBUG_LOG > 3
+    u8 port_num = HAL_GPIO_GET_PORT_BY_NAME(GPIO_Pin->pin_name);
+    u8 pin_num = HAL_GPIO_GET_PIN_BY_NAME(GPIO_Pin->pin_name);
+    u32 chip_pin = GPIO_GetChipPinName_8195a(port_num, pin_num);
     if (GpioFunctionChk(chip_pin, ENABLE) == _FALSE) {
         DBG_GPIO_ERR("HAL_GPIO_Irq_Init: GPIO Pin(%x) Unavailable\n ", chip_pin);
         return;
@@ -157,7 +153,8 @@ HAL_GPIO_Irq_Init(
     DBG_GPIO_INFO("HAL_GPIO_Irq_Init: GPIO(name=0x%x)(mode=%d)\n ", GPIO_Pin->pin_name, 
         GPIO_Pin->pin_mode);
     HAL_GPIO_MaskIrq_8195a(GPIO_Pin);
-    ret = HAL_GPIO_Init_8195a(GPIO_Pin);
+//    HAL_Status ret =
+    HAL_GPIO_Init_8195a(GPIO_Pin);
 #if CONFIG_DEBUG_LOG > 3
     if (ret != HAL_OK) {
         GpioFunctionChk(chip_pin, DISABLE);
@@ -196,16 +193,13 @@ HAL_GPIO_DeInit(
     HAL_GPIO_PIN  *GPIO_Pin
 )
 {
-    u8 port_num;
-    u8 pin_num;
-    u32 chip_pin;
-    
-    port_num = HAL_GPIO_GET_PORT_BY_NAME(GPIO_Pin->pin_name);
-    pin_num = HAL_GPIO_GET_PIN_BY_NAME(GPIO_Pin->pin_name);
-    chip_pin = GPIO_GetChipPinName_8195a(port_num, pin_num);
+#if CONFIG_DEBUG_LOG > 3
+    u8 port_num = HAL_GPIO_GET_PORT_BY_NAME(GPIO_Pin->pin_name);
+    u8 pin_num = HAL_GPIO_GET_PIN_BY_NAME(GPIO_Pin->pin_name);
+#endif
     HAL_GPIO_DeInit_8195a(GPIO_Pin);
 #if CONFIG_DEBUG_LOG > 3
-    GpioFunctionChk(chip_pin, DISABLE);
+    GpioFunctionChk(GPIO_GetChipPinName_8195a(port_num, pin_num), DISABLE);
 #endif
 }
 

@@ -152,9 +152,8 @@ HalRuartGenBaudRateRtl8195a(
     u32 min_divisor=0;
     u32 min_err=0xffffffff;
     u32 uart_ovsr;
-    u32 uart_ovsr_mod;
-    u32 min_uart_ovsr;  // ovsr with mini err
-    u32 min_uart_ovsr_mod;
+    u32 min_uart_ovsr = 0;  // ovsr with mini err
+    u32 min_uart_ovsr_mod = 0;
     u64 uart_clock;
     u32 divisor_temp;
     u32 max_jitter_temp;
@@ -201,7 +200,7 @@ HalRuartGenBaudRateRtl8195a(
                         min_uart_ovsr = uart_ovsr/100;
                         min_uart_ovsr_mod = uart_ovsr%100;
                     } else if (err_temp == min_err) {
-                        uart_ovsr_mod = uart_ovsr%100;
+                        u32 uart_ovsr_mod = uart_ovsr%100;
                         // we perfer OVSR bigger and adj bits smaller
                         if (((uart_ovsr/100) >= min_uart_ovsr) && (uart_ovsr_mod < min_uart_ovsr_mod)) {
                             min_err = err_temp;
@@ -1284,7 +1283,7 @@ HalRuartStopRecvRtl8195a_Patch(
     if (NULL != pUartGdmaConfig) {
         PHAL_GDMA_ADAPTER pHalGdmaAdapter;
         PHAL_GDMA_OP pHalGdmaOp;
-        u8  IsrTypeMap;
+
 
         pHalGdmaAdapter = (PHAL_GDMA_ADAPTER)pUartGdmaConfig->pRxHalGdmaAdapter;
         pHalGdmaOp = (PHAL_GDMA_OP)pUartGdmaConfig->pHalGdmaOp;
@@ -1294,7 +1293,8 @@ HalRuartStopRecvRtl8195a_Patch(
             // Clean Auto Reload Bit
             pHalGdmaOp->HalGdmaChCleanAutoDst((VOID*)pHalGdmaAdapter);
             // Clear Pending ISR
-            IsrTypeMap = pHalGdmaOp->HalGdmaChIsrClean((VOID*)pHalGdmaAdapter);
+//            u8  IsrTypeMap =
+            		pHalGdmaOp->HalGdmaChIsrClean((VOID*)pHalGdmaAdapter);
             pHalGdmaOp->HalGdmaChDis((VOID*)(pHalGdmaAdapter));
 
             DMA_Dar = HalGdmaQueryDArRtl8195a((VOID*)pHalGdmaAdapter);
@@ -1359,7 +1359,7 @@ HalRuartStopSendRtl8195a_Patch(
     if (NULL != pUartGdmaConfig) {
         PHAL_GDMA_ADAPTER pHalGdmaAdapter;
         PHAL_GDMA_OP pHalGdmaOp;
-        u8  IsrTypeMap;
+
 
         pHalGdmaAdapter = (PHAL_GDMA_ADAPTER)pUartGdmaConfig->pTxHalGdmaAdapter;
         pHalGdmaOp = (PHAL_GDMA_OP)pUartGdmaConfig->pHalGdmaOp;
@@ -1369,7 +1369,8 @@ HalRuartStopSendRtl8195a_Patch(
             // Clean Auto Reload Bit
             pHalGdmaOp->HalGdmaChCleanAutoDst((VOID*)pHalGdmaAdapter);
             // Clear Pending ISR
-            IsrTypeMap = pHalGdmaOp->HalGdmaChIsrClean((VOID*)pHalGdmaAdapter);
+//            u8  IsrTypeMap =
+            		pHalGdmaOp->HalGdmaChIsrClean((VOID*)pHalGdmaAdapter);
             pHalGdmaOp->HalGdmaChDis((VOID*)(pHalGdmaAdapter));
 
             DMA_Sar = HalGdmaQuerySArRtl8195a((VOID*)pHalGdmaAdapter);

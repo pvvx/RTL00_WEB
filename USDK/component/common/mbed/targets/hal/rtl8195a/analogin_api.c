@@ -118,7 +118,7 @@ void analogin_init (analogin_t *obj, PinName pin){
 }
 
 float analogin_read(analogin_t *obj){
-    float value;
+//    float value;
 	union {
 		unsigned int 	ui[2];
 		unsigned short 	us[4];

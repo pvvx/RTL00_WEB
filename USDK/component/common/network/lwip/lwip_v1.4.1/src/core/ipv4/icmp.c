@@ -77,9 +77,6 @@ void
 icmp_input(struct pbuf *p, struct netif *inp)
 {
   u8_t type;
-#ifdef LWIP_DEBUG
-  u8_t code;
-#endif /* LWIP_DEBUG */
   struct icmp_echo_hdr *iecho;
   struct ip_hdr *iphdr;
   s16_t hlen;
@@ -96,8 +93,8 @@ icmp_input(struct pbuf *p, struct netif *inp)
   }
 
   type = *((u8_t *)p->payload);
-#ifdef LWIP_DEBUG
-  code = *(((u8_t *)p->payload)+1);
+#if defined(LWIP_DEBUG) && (LWIP_DEBUG != 0)
+  u8_t code = *(((u8_t *)p->payload)+1);
 #endif /* LWIP_DEBUG */
   switch (type) {
   case ICMP_ER:

@@ -376,7 +376,7 @@ LOCAL signed short FLASH_EEP_ATTR _flash_write_cfg(void *ptr, unsigned short id,
 	fobj_head fobj;
 	fobj.n.id = id;
 	fobj.n.size = size;
-	bool retb = false;
+//	bool retb = false;
 	unsigned int faddr = get_addr_bscfg(false);
 
 	if(faddr >= FMEM_ERROR_MAX)  {

@@ -253,7 +253,7 @@ extern int sprintf(char* str, const char* fmt, ...);
 extern size_t strlen(const char *str);
 //#define sprintf rtl_sprintf
 void pmu_get_wakelock_hold_stats( char *pcWriteBuffer ) {
-    uint32_t i;
+    int i;
     uint32_t current_timestamp = osKernelSysTick();
 
     *pcWriteBuffer = 0x00;
@@ -265,15 +265,15 @@ void pmu_get_wakelock_hold_stats( char *pcWriteBuffer ) {
 
         for (i=0; i<32; i++) {
             if (last_wakelock_state[i] == 1) {
-                sprintf(pcWriteBuffer, "%x\t\t%d\r\n", i, hold_wakelock_time[i] + (current_timestamp - last_acquire_wakelock_time[i]));
+                sprintf(pcWriteBuffer, "%x\t\t%u\r\n", i, (unsigned int)( hold_wakelock_time[i] + (current_timestamp - last_acquire_wakelock_time[i])));
             } else {
                 if (hold_wakelock_time[i] > 0) {
-                    sprintf(pcWriteBuffer, "%x\t\t%d\r\n", i, hold_wakelock_time[i]);
+                    sprintf(pcWriteBuffer, "%x\t\t%u\r\n", i, (unsigned int)hold_wakelock_time[i]);
                 }
             }
             pcWriteBuffer += strlen( pcWriteBuffer );
         }
-        sprintf(pcWriteBuffer, "time passed: %d ms, system sleep %d ms\r\n", current_timestamp - base_sys_time, sys_sleep_time);
+        sprintf(pcWriteBuffer, "time passed: %u ms, system sleep %u ms\r\n", (unsigned int)(current_timestamp - base_sys_time), (unsigned int)sys_sleep_time);
     }
 }
 

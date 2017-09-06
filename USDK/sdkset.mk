@@ -21,10 +21,10 @@
 CFLAGS = -DM3 -DCONFIG_PLATFORM_8195A -DGCC_ARMCM3 -DARDUINO_SDK -DF_CPU=166666666L -DNDEBUG
 CFLAGS += -mcpu=cortex-m3 -mthumb -g2 -Os -std=gnu99 
 CFLAGS += -fno-common -fmessage-length=0 -ffunction-sections -fdata-sections -fomit-frame-pointer -fno-short-enums -fsigned-char 
-CFLAGS += -Wall 
-CFLAGS +=  -Wno-old-style-declaration -Wno-pointer-sign  -Wno-strict-aliasing
-CFLAGS += -Wno-variadic-macros -Wno-empty-body
-#CFLAGS += -Werror -Wpedantic -Wno-char-subscripts -Wno-unused-parameter
+CFLAGS += -Wall -Werror 
+CFLAGS += -Wno-old-style-declaration -Wno-pointer-sign -Wno-strict-aliasing
+CFLAGS += -Wno-variadic-macros -Wno-empty-body 
+#CFLAGS +=  -Wno-char-subscripts -Wno-unused-parameter
 
 ifdef USE_GCC_LIB 
 LFLAGS = -mcpu=cortex-m3 -mthumb -g -Os -nostartfiles --specs=nano.specs
