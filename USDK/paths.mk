@@ -3,7 +3,7 @@
 #---------------------------
 SDK_PATH ?= ../SDKRTLA/USDK/
 #GCC_PATH = d:/MCU/GNU_Tools_ARM_Embedded/6.2017-q1-update/bin/# + or set in PATH
-OPENOCD_PATH = d:/MCU/OpenOCD/bin/
+OPENOCD_PATH ?= d:/MCU/OpenOCD/bin/
 TOOLS_PATH ?= $(SDK_PATH)component/soc/realtek/8195a/misc/iar_utility/common/tools/
 FLASHER_TYPE ?= Jlink
 #FLASHER_TYPE ?= OCD
