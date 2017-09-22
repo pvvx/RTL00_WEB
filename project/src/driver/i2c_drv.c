@@ -5,6 +5,7 @@
  *      Author: pvvx
  */
 #include "driver/i2c_drv.h"
+#include "rtl_lib.h"
 
 #if CONFIG_I2C_EN
 
@@ -44,14 +45,14 @@ static const PinMapI2C PinMap_I2C[] = {
 };
 
 static void * i2c_base_reg[4] = {
-		I2C0_REG_BASE,
-		I2C1_REG_BASE,
-		I2C2_REG_BASE,
-		I2C3_REG_BASE
+		(void *)I2C0_REG_BASE,
+		(void *)I2C1_REG_BASE,
+		(void *)I2C2_REG_BASE,
+		(void *)I2C3_REG_BASE
 };
 
 #if 1
-#define test_printf
+#define test_printf(...)
 #define i2c_dump_regs(p)
 #else
 #define test_printf rtl_printf
@@ -87,9 +88,9 @@ LOCAL int i2c_ready(i2c_drv_t *pi2c, unsigned char flg)
 		if(i2c_reg(REG_DW_I2C_IC_RAW_INTR_STAT) & BIT_IC_RAW_INTR_STAT_TX_ABRT) {
 			error_printf("I2C%d Abort!\n", pi2c->idx);
 			// Clear abort status.
-			(volatile)i2c_reg(REG_DW_I2C_IC_CLR_TX_ABRT);
+			i2c_reg(REG_DW_I2C_IC_CLR_TX_ABRT);
 			// Be sure that all interrupts flag are cleared.
-//			(volatile)i2c_reg(REG_DW_I2C_IC_CLR_INTR);
+//			i2c_reg(REG_DW_I2C_IC_CLR_INTR);
 			pi2c->status = DRV_I2C_ABORT;
 			return DRV_I2C_ABORT;
 		}
@@ -116,7 +117,7 @@ LOCAL int i2c_ready(i2c_drv_t *pi2c, unsigned char flg)
 int _i2c_break(i2c_drv_t *pi2c)
 {
 	test_printf("%s\n", __func__);
-//	(volatile)i2c_reg(REG_DW_I2C_IC_CLR_INTR);
+//	i2c_reg(REG_DW_I2C_IC_CLR_INTR);
 	// ABORT operation
 	int poll_count = DRV_I2C_POOL_TIMEOUT;
 	i2c_reg(REG_DW_I2C_IC_ENABLE) |= 2;
@@ -130,7 +131,7 @@ int _i2c_break(i2c_drv_t *pi2c)
 	};
 	pi2c->status = DRV_I2C_OFF;
 	// All interrupts flag are cleared.
-	(volatile)i2c_reg(REG_DW_I2C_IC_CLR_INTR);
+	i2c_reg(REG_DW_I2C_IC_CLR_INTR);
 	return DRV_I2C_OK;
 }
 
@@ -225,7 +226,7 @@ LOCAL int i2c_enable(i2c_drv_t *pi2c)
 		};
 	};
 	// Be sure that all interrupts flag are cleared.
-	(volatile)i2c_reg(REG_DW_I2C_IC_CLR_INTR);
+	i2c_reg(REG_DW_I2C_IC_CLR_INTR);
 	pi2c->status = DRV_I2C_IC_ENABLE;
 	return DRV_I2C_OK;
 }
@@ -286,7 +287,7 @@ int _i2c_setup(i2c_drv_t *pi2c, PinName sda, PinName scl, unsigned char mode)
 	    return DRV_I2C_ERR;
 	}
 	// Pins -> index
-	PinMapI2C *p =  PinMap_I2C;
+	PinMapI2C *p =  (PinMapI2C *)PinMap_I2C;
 	while(p->sda != 0xFF) {
 		if(p->sda == sda && p->scl == scl) {
 			pi2c->io_sel = RTL_GET_PERI_SEL(p->sel);
@@ -432,7 +433,7 @@ int _i2c_read(i2c_drv_t *pi2c, uint32 address, const char *data, int length, int
 				*d++ = i2c_reg(REG_DW_I2C_IC_DATA_CMD);
 				length--;
 			}
-			else (volatile) i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+			else i2c_reg(REG_DW_I2C_IC_DATA_CMD);
 		};
 	}
 	while(length) {

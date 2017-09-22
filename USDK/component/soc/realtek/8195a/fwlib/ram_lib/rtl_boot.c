@@ -414,7 +414,7 @@ LOCAL uint32 BOOT_RAM_TEXT_SECTION get_seg_id(uint32 addr, int32 size) {
 			ptr += 2;
 		} while (ret < SEG_ID_MAX);
 	};
-	return 0;
+	return 0;	// UNK
 }
 
 LOCAL uint32 BOOT_RAM_TEXT_SECTION load_img2_head(uint32 faddr, PIMG2HEAD hdr) {
@@ -422,13 +422,13 @@ LOCAL uint32 BOOT_RAM_TEXT_SECTION load_img2_head(uint32 faddr, PIMG2HEAD hdr) {
 	uint32 ret = get_seg_id(hdr->seg.ldaddr, hdr->seg.size);
 	if (hdr->sign[1] == IMG_SIGN2_RUN) {
 		if (hdr->sign[0] == IMG_SIGN1_RUN) {
-			ret |= 1 << 9;
+			ret |= 1 << 9;	// есть сигнатура RUN
 		} else if (hdr->sign[0] == IMG_SIGN1_SWP) {
-			ret |= 1 << 8;
+			ret |= 1 << 8;  // есть сигнатура SWP
 		};
 	}
 	if (*(u32 *) (&hdr->rtkwin) == IMG2_SIGN_DW1_TXT) {
-		ret |= 1 << 10;
+		ret |= 1 << 10;	// есть подпись "RTKW"
 	};
 	return ret;
 }
@@ -474,21 +474,23 @@ LOCAL int BOOT_RAM_TEXT_SECTION loadUserImges(int imgnum) {
 
 	while (1) {
 		faddr = (faddr + FLASH_SECTOR_SIZE - 1) & (~(FLASH_SECTOR_SIZE - 1));
-		uint32 img_id = load_img2_head(faddr, &hdr);
-		if ((img_id >> 8) > 4 || (uint8) img_id != 0) {
-			faddr = load_segs(faddr + 0x10, (PIMG2HEAD) &hdr.seg, imagenum == imgnum);
-			if (imagenum == imgnum) {
+		uint32 img_id = load_img2_head(faddr, &hdr); // проверить заголовки запись
+		if ((img_id >> 8) > 4 && (uint8) img_id != 0) { // есть подпись  "RTKW" + RUN или SWP, сегмент != unknown
+			// загрузить, если imagenum == imgnum
+			faddr = load_segs(faddr + 0x10, (PIMG2HEAD) &hdr.seg, imagenum == imgnum); // faddr == fnextaddr
+			if (imagenum == imgnum) { // если искомая img
 //				DBG_8195A("Image%d: %s\n", imgnum, hdr.name);
 				break;
 			}
-			imagenum++;
-		} else if (imagenum) {
+			imagenum++; // перейти к следующей
+		} else if (imagenum) { // нет подписей у заданной imgnum
 			DBG_8195A("No Image%d! Trying Image0...\n", imgnum);
 			// пробуем загрузить image по умолчанию, по записи в секторе установок
 			flashcpy(FLASH_SYSTEM_DATA_ADDR, &faddr, sizeof(faddr));
 			if (faddr < 0x8000000)
 				faddr += SPI_FLASH_BASE;
-			if (get_seg_id(faddr, 0x100) == SEG_ID_FLASH) {
+			if (get_seg_id(faddr, 0x100) == SEG_ID_FLASH) { // указывает в Flash?
+				// будем пробовать грузить
 				imagenum = 0;
 				imgnum = 0;
 			} else {
@@ -497,7 +499,7 @@ LOCAL int BOOT_RAM_TEXT_SECTION loadUserImges(int imgnum) {
 				break;
 			};
 		} else {
-			imagenum = -1;
+			imagenum = -1; // нет записей image
 			break;
 		}
 	};
@@ -605,6 +607,15 @@ LOCAL void BOOT_RAM_TEXT_SECTION EnterImage15(int flg) {
 			};
 			DBG_8195A("SDR tst end\n");
 		};
+#endif // test
+#ifdef CONFIG_SDR_EN
+		// Тест и ожидание загрузки Jlink-ом sdram.bin (~7 sec)
+		if(flg && *((uint32 *)0x1FFF0000) == 0x12345678) {
+			*((volatile uint32 *)0x1FFF0000) = 0x87654321;
+			uint32 tt = 0x03ffffff; // ~7 sec
+			DBG_8195A("Waiting for SDRAM to load...\n");
+			while(*((volatile uint32 *)0x1FFF0000) == 0x87654321 && tt--);
+		}
 #endif // test
 		HAL_PERI_ON_WRITE32(REG_SOC_FUNC_EN, HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) | BIT(21)); // Flag SDRAM Init
 	};

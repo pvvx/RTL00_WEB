@@ -19,9 +19,8 @@
 extern void _promisc_deinit(_adapter *padapter);
 extern int _promisc_recv_func(_adapter *padapter, recv_frame *rframe);
 extern int _promisc_set(rtw_rcr_level_t enabled, void (*callback)(unsigned char *, unsigned int, void *), unsigned char len_used);
-extern unsigned char is_promisc_enabled(void);
-extern int promisc_get_fixed_channel(void *fixed_bssid, unsigned char *ssid, int *ssid_length);
-extern unsigned char is_promisc_enabled(void);
+extern unsigned char _is_promisc_enabled(void);
+extern int _promisc_get_fixed_channel(void *fixed_bssid, unsigned char *ssid, int *ssid_length);
 
 #endif
 

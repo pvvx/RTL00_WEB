@@ -21,6 +21,8 @@
 #include "rtl8195a/rtl_libc.h"
 #include "driver/i2c_drv.h"
 #include "platform_stdlib.h"
+#include "web_websocket.h"
+#include "tcpsrv/tcp_srv_conn.h"
 
 #include "hal_com_reg.h"
 
@@ -101,7 +103,7 @@ void ina_tick_handler(void *par) {
 		break;
 	case 4:
 		if (i2c_reg(REG_DW_I2C_IC_RAW_INTR_STAT) &	BIT_IC_RAW_INTR_STAT_TX_ABRT) {
-			uint32 tmp = i2c_reg(REG_DW_I2C_IC_CLR_INTR);
+			i2c_reg(REG_DW_I2C_IC_CLR_INTR);
 			p->errs++;
 			p->status = 0;
 			break;
@@ -121,10 +123,10 @@ void ina_tick_handler(void *par) {
 					else p->buf_rx++;
 				};
 			} else {
-				(volatile)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
-				(volatile)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
-				(volatile)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
-				(volatile)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+				i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+				i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+				i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+				i2c_reg(REG_DW_I2C_IC_DATA_CMD);
 			};
 		}
 	case 3:
@@ -183,7 +185,8 @@ size_t ina219_getdata(void *pd, uint16 cnt)
 	taskENABLE_INTERRUPTS();
 	return cnt * sizeof(INA219DATA) + 4;
 }
-#define mMIN(a, b)  ((a<b)?a:b)
+
+//#define mMIN(a, b)  ((a<b)?a:b)
 #define mMAX(a, b)  ((a>b)?a:b)
 
 #include "web_srv.h"
@@ -390,14 +393,14 @@ LOCAL void fATI2C(int argc, char *argv[])
 					if(argv[1][0] == 'w') {
 						_i2c_write(pi2c, buf[0], &buf[1], i-1, 1);
 						rtl_printf("I2C%d write[%d]:\n", pi2c->idx, i-1);
-						dump_bytes(&buf[0], i);
+						dump_bytes((uint32)&buf[0], i);
 					}
 					else if(argv[1][0] == 'r') {
 						i = buf[1];
 						if(i > sizeof(buf) - 1) i = sizeof(buf) - 1;
 						_i2c_read(pi2c, buf[0], &buf[1], i, 1);
 						rtl_printf("I2C%d read[%d]:\n", pi2c->idx, i);
-						dump_bytes(&buf[0], i+1);
+						dump_bytes((uint32)&buf[0], i+1);
 					};
 
 				};

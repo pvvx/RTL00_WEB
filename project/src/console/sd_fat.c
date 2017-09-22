@@ -243,7 +243,6 @@ LOCAL void fATHF(int argc, char *argv[]) {
 		if (pbuf != NULL) {
 			DIR dir;
 			FILINFO fno;
-			struct os_tm tm;
 			fno.lfname = (TCHAR*) pbuf;
 			fno.lfsize = 512;
 			u8 * sdir;
@@ -270,7 +269,7 @@ LOCAL void fATHF(int argc, char *argv[]) {
 			} else
 				printf("FATFS: Open dir fail!\n");
 			free(pbuf);
-			if(sdir != logical_drv) free(sdir);
+			if((void *)sdir != (void *)logical_drv) free(sdir);
 		}
 	}
 	sd_unmount(fs);
@@ -348,7 +347,7 @@ LOCAL void fATHS(int argc, char *argv[]) {
 			} else
 				printf("FATFS: Open dir fail!\n");
 			free(pbuf);
-			if(sdir != logical_drv) free(sdir);
+			if((void *)sdir != (void *)logical_drv) free(sdir);
 		}
 	}
 	sd_unmount(fs);

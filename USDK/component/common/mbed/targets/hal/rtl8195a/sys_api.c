@@ -167,7 +167,7 @@ void sys_adc_calibration(u8 write, u16 *offset, u16 *gain)
 extern flash_t	flash;
     if(write){
     	// backup
-        u8 *pbuf = RtlMalloc(FLASH_SECTOR_SIZE);
+        u8 *pbuf = malloc(FLASH_SECTOR_SIZE);
     	if(!pbuf) return;
 		device_mutex_lock(RT_DEV_LOCK_FLASH);
     	flash_stream_read(&flash, FLASH_SYSTEM_DATA_ADDR, FLASH_SECTOR_SIZE, pbuf);
@@ -180,7 +180,7 @@ extern flash_t	flash;
     	flash_erase_sector(&flash, FLASH_SYSTEM_DATA_ADDR);
     	flash_stream_write(&flash, FLASH_SYSTEM_DATA_ADDR, FLASH_SECTOR_SIZE, pbuf);
 		device_mutex_unlock(RT_DEV_LOCK_FLASH);
-    	RtlMfree(pbuf, FLASH_SECTOR_SIZE);
+    	free(pbuf);
     	printf("Store ADC calibration success.\n");
     }
 	device_mutex_lock(RT_DEV_LOCK_FLASH);

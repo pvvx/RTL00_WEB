@@ -73,7 +73,7 @@ HAL_Status SdioHostSdClkCtrl(void *Data, int En, u8 Divisor) { // SD_CLK_DIVISOR
 static HAL_Status CheckSramAddress(void* address)
 {
 	// SRAM: 0x10000000... 0x1006ffff
-	if (address >= 0x10070000 || address < 0x10000000 || ((uint32_t)address & 3) !=0)
+	if ((uint32_t)address >= 0x10070000 || (uint32_t)address < 0x10000000 || ((uint32_t)address & 3) !=0)
 		return HAL_ERR_PARA;
 	return HAL_OK;
 }
@@ -351,7 +351,7 @@ void SdioHostIsrHandle(void *Data) {
 			 */
 		}
 	}
-	ir_end:
+//	ir_end:
 	HAL_SDIOH_REG16(REG_SDIO_HOST_NORMAL_INT_SIG_EN)
 	= NOR_INT_SIG_EN_CMD_COMP
 	| NOR_INT_SIG_EN_XFER_COMP
@@ -485,7 +485,7 @@ HAL_Status SdioHostSwitchFunction(void *Data, int Mode, int Fn2Sel, int Fn1Sel,
 	if (result)
 		return result;
 
-	HAL_SDIOH_REG32(REG_SDIO_HOST_ADMA_SYS_ADDR) = pAdmaDescTbl;
+	HAL_SDIOH_REG32(REG_SDIO_HOST_ADMA_SYS_ADDR) = (uint32_t)pAdmaDescTbl;
 	HAL_SDIOH_REG16(REG_SDIO_HOST_BLK_SIZE) = 64;
 	HAL_SDIOH_REG16(REG_SDIO_HOST_BLK_CNT) =1;
 	HAL_SDIOH_REG16(REG_SDIO_HOST_XFER_MODE) =
@@ -610,7 +610,7 @@ HAL_Status HalSdioHostChangeSdClockRtl8195a(IN VOID *Data, IN uint8_t Frequency)
 	// а malloc не гарантирует размещение в SRAM в любых ситуациях
 	StatusData = (uint8_t*)pAdmaDescTbl + sizeof(ADMA2_DESC_FMT);
 
-	HAL_SDIOH_REG32(REG_SDIO_HOST_ADMA_SYS_ADDR) = pAdmaDescTbl;
+	HAL_SDIOH_REG32(REG_SDIO_HOST_ADMA_SYS_ADDR) = (uint32_t)pAdmaDescTbl;
 	HAL_SDIOH_REG16(REG_SDIO_HOST_BLK_SIZE) = 8; //	v40058004 = 8;
 	HAL_SDIOH_REG16(REG_SDIO_HOST_BLK_CNT) =1;
 	HAL_SDIOH_REG16(REG_SDIO_HOST_XFER_MODE) =
@@ -625,7 +625,7 @@ HAL_Status HalSdioHostChangeSdClockRtl8195a(IN VOID *Data, IN uint8_t Frequency)
 	pAdmaDescTbl->Attrib1.Int = 0;
 	pAdmaDescTbl->Attrib1.Act1= 0;
 	pAdmaDescTbl->Attrib1.Act2=1;
-	pAdmaDescTbl->Addr1 = StatusData;
+	pAdmaDescTbl->Addr1 = (uint32_t)StatusData;
 	pAdmaDescTbl->Len1 = 8;
 
 	result = SdioHostChkCmdInhibitCMD();
@@ -797,8 +797,8 @@ HAL_Status HalSdioHostReadBlocksDmaRtl8195a(IN VOID *Data, IN u64 ReadAddr,
 
 	admadesc_ptr = psha->AdmaDescTbl;
 	// проверка валидности адреса и дескриптора ADMA2
-	result = CheckSramAddress(admadesc_ptr) |
-			CheckSramAddress(admadesc_ptr->Addr1);
+	result = CheckSramAddress((void*)admadesc_ptr) |
+			CheckSramAddress((void*)admadesc_ptr->Addr1);
 	if (result)
 		return result;
 
@@ -807,7 +807,7 @@ HAL_Status HalSdioHostReadBlocksDmaRtl8195a(IN VOID *Data, IN u64 ReadAddr,
 		sd_read_addr =ReadAddr >> 9;  // sdhc: адрес в блоках
 
 
-	HAL_SDIOH_REG32(REG_SDIO_HOST_ADMA_SYS_ADDR) =admadesc_ptr;
+	HAL_SDIOH_REG32(REG_SDIO_HOST_ADMA_SYS_ADDR) = (uint32_t)admadesc_ptr;
 	HAL_SDIOH_REG16(REG_SDIO_HOST_BLK_SIZE) = DATA_BLK_LEN;
 	result = SdioHostChkCmdInhibitCMD();
 	if (result) {
@@ -1058,7 +1058,7 @@ HAL_Status HalSdioHostWriteBlocksDmaRtl8195a(IN VOID *Data, IN uint64 WriteAddr,
 	// проверка валидности адреса и дескриптора ADMA2
 	admadesc_ptr = psha->AdmaDescTbl;
 	// проверим адрес дескриптора ADMA2
-	if (CheckSramAddress(admadesc_ptr) || CheckSramAddress(admadesc_ptr->Addr1))
+	if (CheckSramAddress((void *)admadesc_ptr) || CheckSramAddress((void *)admadesc_ptr->Addr1))
 		return HAL_ERR_PARA;
 	// адрес в байтах или блоках ?
 	if (psha->IsSdhc)
@@ -1220,7 +1220,7 @@ HAL_Status HalSdioHostGetCardStatusRtl8195a(IN VOID *Data) {
 		if (result)
 			return result;
 		// Send Status command
-		Cmd.Arg = Cmd.Arg = psha->RCA << 16;
+		Cmd.Arg = psha->RCA << 16;
 		Cmd.CmdFmt.CmdIdx = CMD_SEND_STATUS;
 		Cmd.CmdFmt.RespType = RSP_LEN_48;
 		Cmd.CmdFmt.CmdCrcChkEn = 1;
@@ -1280,7 +1280,7 @@ HAL_Status HalSdioHostGetSdStatusRtl8195a(IN VOID *Data) {
 	pAdmaDescTbl->Attrib1.End=1;
 	pAdmaDescTbl->Attrib1.Act1=0;
 	pAdmaDescTbl->Attrib1.Act2=1;
-	pAdmaDescTbl->Addr1 = &psha->SdStatus[0];
+	pAdmaDescTbl->Addr1 = (uint32_t) &psha->SdStatus[0];
 	pAdmaDescTbl->Attrib1.Valid =1;
 
 	//memset(&psha->SdStatus[0], 0x55, SD_STATUS_LEN);
@@ -1325,7 +1325,7 @@ HAL_Status HalSdioHostGetSdStatusRtl8195a(IN VOID *Data) {
 	if (result)
 		return result;
 
-	HAL_SDIOH_REG32(REG_SDIO_HOST_ADMA_SYS_ADDR) = pAdmaDescTbl;
+	HAL_SDIOH_REG32(REG_SDIO_HOST_ADMA_SYS_ADDR) = (uint32_t)pAdmaDescTbl;
 	HAL_SDIOH_REG16(REG_SDIO_HOST_BLK_SIZE) = 64;
 
 	HAL_SDIOH_REG16(REG_SDIO_HOST_XFER_MODE) =
@@ -1388,7 +1388,7 @@ HAL_Status HalSdioHostIrqInitRtl8195a(IN VOID *Data) // PIRQ_HANDLE Data
 	HAL_Status result;
 	PIRQ_HANDLE pih = (PIRQ_HANDLE)Data;
 	if (pih) {
-		pih->Data = Data;
+		pih->Data = (uint32_t)Data;
 		pih->IrqNum = SDIO_HOST_IRQ;
 		pih->IrqFun = SdioHostIsrHandle;
 		pih->Priority = 6;
@@ -1516,7 +1516,7 @@ HAL_Status HalSdioHostDeInitRtl8195a(IN VOID *Data) {
 
 //----- HalSdioHostStopTransferRtl8195a
 HAL_Status HalSdioHostStopTransferRtl8195a(IN VOID *Data) {
-	HAL_Status result;
+//	HAL_Status result;
 	SDIO_HOST_CMD Cmd;
 	PHAL_SDIO_HOST_ADAPTER psha = (PHAL_SDIO_HOST_ADAPTER)Data;
 	uint32_t x;
@@ -1757,7 +1757,7 @@ IN uint64_t EndAddr) {
 HAL_Status HalSdioHostGetWriteProtectRtl8195a(IN VOID *Data) {
 	PHAL_SDIO_HOST_ADAPTER psha = (PHAL_SDIO_HOST_ADAPTER)Data;
 	HAL_Status result;
-	SDIO_HOST_CMD Cmd; // [sp+0h] [bp-18h]@1
+//	SDIO_HOST_CMD Cmd; // [sp+0h] [bp-18h]@1
 
 	if (!psha)
 		return HAL_ERR_PARA;

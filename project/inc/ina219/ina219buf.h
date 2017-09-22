@@ -31,7 +31,7 @@ typedef struct _ina219drv {
 		signed short	ss[2];
 		unsigned int	ui;
 	} buf_i2c;
-	volatile i2c_drv_t   i2c;
+	i2c_drv_t i2c;
 } INA219DRV, *PINA219DRV;
 
 

@@ -6,6 +6,8 @@
 
 #ifndef _WEBSOCK_H_
 #define _WEBSOCK_H_
+#include "lwip/err.h"
+#include "tcpsrv/tcp_srv_conn.h"
 
 //#define WS_NONBLOCK 0x02
 

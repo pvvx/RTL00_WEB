@@ -33,7 +33,7 @@
 		 RTW_SECURITY_WPA_TKIP_PSK   - WPA Security
 		 RTW_SECURITY_WPA2_AES_PSK   - WPA2 Security using AES cipher
 		 RTW_SECURITY_WPA2_MIXED_PSK - WPA2 Security using AES and/or TKIP ciphers */
-#define DEF_AP_SECURITY		RTW_SECURITY_WPA2_AES_PSK // WEP security is NOT IMPLEMENTED. It is NOT SECURE!
+#define DEF_AP_SECURITY		RTW_ENCRYPTION_WPA2_MIXED // WEP security is NOT IMPLEMENTED. It is NOT SECURE!
 #define DEF_AP_BEACON		100 	// 100...6000 ms
 #define DEF_AP_CHANNEL		1		// 1..14
 #define DEF_AP_CHANNEL		1		// 1..14
@@ -54,7 +54,7 @@
 #define DEF_ST_AUTORECONNECT   1 		// 0 - none, 1..254 - count, 255 - all
 #define DEF_ST_RECONNECT_PAUSE 1 		// 5 sec
 #define DEF_ST_SLEEP		3			// 0 - Off, 1 - IPS, 2 - LPS, 3 - IPS/LPS mode
-#define DEF_ST_LPS_DTIM		0			// LPS DTIM
+#define DEF_ST_LPS_DTIM		1			// LPS DTIM
 #define DEF_ST_DHCP_MODE	1 			// =0 dhcp off,
 										// =1 - dhcp on, - динамический ip
 										// =2 Static ip, - fixed ip

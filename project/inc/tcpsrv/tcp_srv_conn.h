@@ -12,8 +12,10 @@
 
 #include "lwip/err.h"
 
+#undef mMIN
 #define mMIN(a, b)  ((a < b)? a : b)
 #define mMAX(a, b)  ((a>b)?a:b)
+
 
 enum srvconn_state {
     SRVCONN_NONE =0,
