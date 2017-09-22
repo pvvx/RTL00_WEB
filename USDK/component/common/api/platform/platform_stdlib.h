@@ -157,13 +157,22 @@
 //
 // memory management
 //
-#ifndef CONFIG_MBED_ENABLED
-extern void *pvPortMalloc( size_t xWantedSize );
-extern void vPortFree( void *pv );
-#define malloc                  pvPortMalloc
-#define zalloc                  pvPortZalloc
-#define free                    vPortFree
-#endif
+#undef malloc
+extern void *pvPortMalloc(size_t xWantedSize);
+#define malloc   pvPortMalloc
+
+#undef zalloc
+extern void *pvPortZalloc(size_t xWantedSize);
+#define zalloc   pvPortZalloc
+
+#undef realloc
+extern void *pvPortReAlloc(void *pv, size_t xWantedSize);
+#define realloc  pvPortReAlloc
+
+#undef free
+extern void vPortFree(void *pv);
+#define free     vPortFree
+
 #elif defined (CONFIG_PLATFORM_8711B)
 
 #if defined (__IARSTDLIB__)

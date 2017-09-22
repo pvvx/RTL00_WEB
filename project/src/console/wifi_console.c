@@ -193,7 +193,9 @@ LOCAL void fATWI(int argc, char *argv[]) {
 	show_wifi_st_cfg();
 	printf("\nWIFI AP clients:\n");
 	printf(&str_rom_57ch3Dch0A[25]); // "================================\n"
+#if SDK_VER_NUM > 0x4000
 	show_wifi_ap_clients();
+#endif
 	printf("\n");
 }
 

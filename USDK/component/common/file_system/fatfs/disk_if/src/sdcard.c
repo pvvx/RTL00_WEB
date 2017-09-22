@@ -6,12 +6,11 @@
  *  This module is a confidential and proprietary property of RealTek and
  *  possession or use of this module requires written permission of RealTek.
  */
-#include "integer.h"
-#include <disk_if/inc/sdcard.h>
-
-#if	FATFS_DISK_SD
+//#if	FATFS_DISK_SD
 
 #include "sd.h" // sd card driver with sdio interface
+#include "integer.h"
+#include <disk_if/inc/sdcard.h>
 
 #define SD_BLOCK_SIZE	512
 
@@ -53,7 +52,7 @@ DRESULT SD_disk_read(BYTE *buff, DWORD sector, UINT count){
 
 /* Write sector(s) --------------------------------------------*/
 #if _USE_WRITE == 1
-DRESULT SD_disk_write(const BYTE *buff, DWORD sector, UINT count){
+DRESULT SD_disk_write(const BYTE * buff, DWORD sector, UINT count){
 	SD_RESULT res;
 	res = SD_WriteBlocks(sector, buff, count);
 	
@@ -66,7 +65,6 @@ DRESULT SD_disk_write(const BYTE *buff, DWORD sector, UINT count){
 DRESULT SD_disk_ioctl (BYTE cmd, void* buff){
 	DRESULT res = RES_ERROR;
 	SD_RESULT result;
-	DWORD last_blk_addr, block_size;
 
 	switch(cmd){
 		/* Generic command (used by FatFs) */
@@ -118,7 +116,8 @@ DRESULT SD_disk_ioctl (BYTE cmd, void* buff){
 }
 #endif
 
-ll_diskio_drv SD_disk_Driver ={
+
+ll_diskio_drv SD_disk_Driver = {
 	.disk_initialize = SD_disk_initialize,
 	.disk_status = SD_disk_status,
 	.disk_read = SD_disk_read,
@@ -130,4 +129,5 @@ ll_diskio_drv SD_disk_Driver ={
 #endif
 	.TAG	= "SD"
 };
-#endif
+
+//#endif // FATFS_DISK_SD

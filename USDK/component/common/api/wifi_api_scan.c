@@ -127,7 +127,7 @@ LOCAL int _wifi_scan_networks(rtw_scan_result_handler_t results_handler) {
 		pscan_rec->user_data = NULL;
 		wifi_reg_event_handler(WIFI_EVENT_SCAN_RESULT_REPORT, wifi_scan_each_report_hdl, NULL);
 		wifi_reg_event_handler(WIFI_EVENT_SCAN_DONE, _wifi_scan_done_hdl, NULL);
-		if(wext_set_scan(WLAN0_NAME, NULL, 0, RTW_SCAN_TYPE_ACTIVE | (RTW_SCAN_COMMAMD << 4) | (RTW_BSS_TYPE_ANY << 8)) == RTW_SUCCESS) {
+		if(wext_set_scan(WLAN0_NAME, NULL, 0, RTW_SCAN_TYPE_ACTIVE | (RTW_SCAN_COMMAMD << 4) | (RTW_BSS_TYPE_ANY << 8)) == RTW_SUCCESS) { // Только RTW_SCAN_TYPE_ACTIVE ?
 			return RTW_SUCCESS;
 		}
 	};

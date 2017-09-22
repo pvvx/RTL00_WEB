@@ -47,9 +47,13 @@ ifdef USE_SDIOH
 #LIBS += _sdcard_v2
 CFLAGS += -DCONFIG_FATFS_EN=1
 endif
+ifdef USE_UVC
+all: LIBS +=_rtsp _usbh _usbd
+mp: LIBS +=_rtsp _usbh _usbd
+endif
 # m c nosys gcc
 PATHLIBS = sdk/component/soc/realtek/8195a/misc/bsp/lib/common/gcc
-LDFILE = rlx8195A-symbol-v04-img2.ld
+LDFILE ?= rlx8195A-symbol-v04-img2.ld
 BOOTS = sdk/component/soc/realtek/8195a/misc/bsp/image
 
 # Include folder list
@@ -376,6 +380,7 @@ SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/diskio.c
 SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/ff.c
 SRC_C += sdk/component/common/file_system/fatfs/r0.10c/src/option/ccsbcs.c
 endif
+
 ifdef USE_SDIOH
 INCLUDES += sdk/component/common/file_system/fatfs/disk_if/inc
 SRC_C += sdk/component/common/file_system/fatfs/disk_if/src/sdcard.c

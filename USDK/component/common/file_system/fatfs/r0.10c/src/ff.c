@@ -119,8 +119,6 @@
 #include "diskio.h"		/* Declarations of disk I/O functions */
 
 
-
-
 /*--------------------------------------------------------------------------
 
    Module Private Definitions
@@ -595,9 +593,14 @@ int mem_cmp (const void* dst, const void* src, UINT cnt) {
 	return r;
 }
 #else
-#define mem_cpy memcpy
-#define mem_set memset
-#define mem_cmp memcmp
+typedef unsigned int        size_t;
+extern int rtl_memcmp(const void * m1 , const void * m2 , size_t n);
+extern void * rtl_memcpy(void * dst0 , const void * src0 , size_t len0);
+extern void * rtl_memset(void * m , int c , size_t n);
+
+#define mem_cpy rtl_memcpy
+#define mem_set rtl_memset
+#define mem_cmp rtl_memcmp
 #endif
 
 /* Check if chr is contained in the string */

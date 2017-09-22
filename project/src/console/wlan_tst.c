@@ -20,12 +20,12 @@
 //#include "hal_diag.h"
 #include "rtl8195a/rtl_libc.h"
 
-void dump_bytes(uint32 addr, int size);
+extern void dump_bytes(uint32 addr, int size);
 extern Rltk_wlan_t rltk_wlan_info[2]; // in wrapper.h
 
 LOCAL void tst_wlan_struct(int argc, char *argv[])
 {
-	(void) argc; (void) argv;
+	(void)argc; (void)argv;
 	printf("Test: sizeof(struct _ADAPTER) = %d\n", sizeof(struct _ADAPTER)); //6088
 	printf("mlmeextpriv\t+%d\n", offsetof(struct _ADAPTER, mlmeextpriv)); //+1256
 	printf("TSFValue\t+%d\n", offsetof(struct _ADAPTER, mlmeextpriv.TSFValue)); //+1992
@@ -55,6 +55,21 @@ LOCAL void tst_wlan_struct(int argc, char *argv[])
 	};
 }
 
+LOCAL void show_wlan_param(int argc, char *argv[]) {
+	(void)argc; (void)argv;
+	_adapter * ad = *(_adapter **)((rltk_wlan_info[0].dev)->priv);
+#if 1
+	printf("reconnect_deauth_filtered\t%u\n", ad->mlmeextpriv.reconnect_deauth_filtered);
+	printf("reconnect_times\t%u\n", ad->mlmeextpriv.reconnect_times);
+	printf("reconnect_cnt\t%u\n", ad->mlmeextpriv.reconnect_cnt);
+	printf("reconnect_timeout\t%u\n", ad->mlmeextpriv.reconnect_timeout);
+#endif
+
+}
+
+
+
 MON_RAM_TAB_SECTION COMMAND_TABLE console_wlan_tst[] = {
-		{"CHKWL", 0, tst_wlan_struct, ": Chk wlan struct"}
+		{"CHKWL", 0, tst_wlan_struct, ": Chk wlan struct"},
+		{"CHKAP", 0, show_wlan_param, ": Chow wlan parm"}
 };

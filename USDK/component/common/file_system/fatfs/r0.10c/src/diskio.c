@@ -87,7 +87,7 @@ DRESULT disk_write (
 )
 {       
 	DRESULT res = RES_PARERR;
-	int index = 0;
+//	int index = 0;
 	
 	if (pdrv < 0 || pdrv >= disk.nbr || buff == (void*)0 || count <= 0)
 		return RES_PARERR; // Return if the parameter is invalid
