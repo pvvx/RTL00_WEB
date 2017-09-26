@@ -127,6 +127,7 @@ void ina219_init(void)
 		p->count = 0;
 		p->errs = 0;
 // (!) Установки драйвера I2C заданы в структуре ina219drv
+//	    rtl_printf("INA219 control reg = 0x%04x\n", p->config);
 //		_i2c_setup(&p->i2c, INA219_I2C_PIN_SDA , INA219_I2C_PIN_SCL, DRV_I2C_FS_MODE); // == DRV_I2C_OK?
 		_i2c_init(&p->i2c);
 //		_i2c_set_speed(&p->i2c, INA219_I2C_BUS_CLK);
@@ -137,10 +138,10 @@ void ina219_init(void)
 		// Initial a periodical timer
 	    gtimer_init(&p->timer, INA219_TIMER);
 	    // Tick every 0.000532 sec (N*532 μs)
-	    uint32 tus = (1 << ((p->config >> 3) & 7));
+	    uint32 tus = 1 << ((p->config >> 3) & 7);
 	    tus *= 532;
-	    gtimer_start_periodical(&p->timer, tus, (void*)ina_tick_handler, (uint32_t)&ina219drv);
 	    rtl_printf("INA219 Read Period = %u us\n", tus);
+	    gtimer_start_periodical(&p->timer, tus, (void*)ina_tick_handler, (uint32_t)&ina219drv);
 	    p->init = 1;
 	}
 }

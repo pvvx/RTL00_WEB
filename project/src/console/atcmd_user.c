@@ -112,6 +112,9 @@ static void copy_align4_to_align1(unsigned char * pd, void * ps, unsigned int le
 	//	return size;
 }
 */
+/*
+ * int print_hex_dump(uint8_t *buf, int len, unsigned char k)
+ */
 int print_hex_dump(uint8_t *buf, int len, unsigned char k) {
 	uint32_t ss[2];
 	ss[0] = 0x78323025; // "%02x"

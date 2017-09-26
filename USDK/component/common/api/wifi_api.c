@@ -274,7 +274,7 @@ rtw_result_t _wext_enable_powersave(int adapter_num, uint8 ips_mode, uint8 lps_m
 	_adapter * pad = get_padaptern(adapter_num);
 	rtw_result_t ret = RTW_ERROR;
 	if(pad) {
-		ret = rtw_pm_set_ips(pad, ips_mode); // 2 режима 1,2 !
+		ret = rtw_pm_set_ips(pad, ips_mode); // 2 режима 1,2 ?
 		if(ret == RTW_SUCCESS) {
 			LeaveAllPowerSaveMode(pad);
 			ret = rtw_pm_set_lps(pad, lps_mode);
@@ -688,7 +688,6 @@ int wifi_run(rtw_mode_t mode) {
 			 case RTW_MODE_STA_AP:
 				 ret = wifi_run_ap() | wifi_run_st();
 //				 _wext_enable_powersave(0, 0, 0);
-//				 _wext_set_lps_dtim(0, 0);
 		 		 break;
 			 case RTW_MODE_STA:
 				 ret = wifi_run_st();

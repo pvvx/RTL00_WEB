@@ -19,8 +19,10 @@
 #include "esp_comp.h"
 
 #ifdef CONFIG_DEBUG_LOG
+#undef DEBUGSOO
 #define DEBUGSOO 2	// уровень вывода отладочной инфы по умолчанию = 2, =1 только error
 #else
+#undef DEBUGSOO
 #define DEBUGSOO 0
 #endif
 // Lwip funcs - http://www.ecoscentric.com/ecospro/doc/html/ref/lwip.html

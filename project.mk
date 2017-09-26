@@ -1,9 +1,10 @@
 #=============================================
 # SDK CONFIG
 #=============================================
-#WEB_INA219_DRV = 1
+WEB_INA219_DRV = 1
 #WEB_ADC_DRV = 1
 #USE_SDCARD = 1
+#USE_UVC = 1
 #USE_AT = 1
 #USE_FATFS = 1
 #USE_SDIOH = 1
@@ -26,6 +27,11 @@ endif
 RTOSDIR=freertos_v9.0.0
 LWIPDIR=lwip_v1.4.1
 
+ifdef USE_UVC
+USE_SDRAM = 1
+USE_GCC_LIB = 1
+endif
+
 include $(SDK_PATH)sdkset.mk
 #CFLAGS += -DDEFAULT_BAUDRATE=1562500
 CFLAGS += -DLOGUART_STACK_SIZE=1024
@@ -45,8 +51,13 @@ ifdef USE_SDCARD
 ADD_SRC_C += project/src/console/sd_fat.c
 endif
 
+ifdef USE_UVC
+ADD_SRC_C += project/src/console/uvc_capture_tst.c
+endif
+
 ifdef WEB_INA219_DRV
 ADD_SRC_C += project/src/driver/i2c_drv.c
+CFLAGS += -DUSE_I2C_CONSOLE=1
 ADD_SRC_C += project/src/ina219/ina219drv.c
 CFLAGS += -DWEB_INA219_DRV=1
 endif
@@ -56,6 +67,7 @@ ADD_SRC_C += project/src/driver/adc_drv.c
 ADD_SRC_C += project/src/adc_ws/adc_ws.c
 CFLAGS += -DWEB_ADC_DRV=1
 endif
+
 
 #Web-������
 INCLUDES += project/inc/web
@@ -68,4 +80,5 @@ ADD_SRC_C += project/src/web/websock.c
 ADD_SRC_C += project/src/web/web_int_callbacks.c
 ADD_SRC_C += project/src/web/web_int_vars.c
 ADD_SRC_C += project/src/web/web_auth.c
+
 

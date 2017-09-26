@@ -2,6 +2,7 @@
 # pvvx 21.09.2016
 include userset.mk
 include $(SDK_PATH)paths.mk
+include project.mk
 #---------------------------
 #FLASHER = stlink-v2-1
 #FLASHER = stlink-v2
@@ -113,7 +114,11 @@ reset:
 	@$(JLINK_PATH)$(JLINK_EXE) -Device CORTEX-M3 -If SWD -Speed 1000 $(FLASHER_PATH)RTL_Reset.JLinkScript
 
 runram:
-	@$(JLINK_PATH)$(JLINK_EXE) -Device CORTEX-M3 -If SWD -Speed 1000 $(FLASHER_PATH)RTL_RunRAM.JLinkScript
+ifdef USE_SDRAM
+	$(JLINK_PATH)$(JLINK_EXE) -Device CORTEX-M3 -If SWD -Speed 1000 $(FLASHER_PATH)RTL_RunRAM_SDR.JLinkScript
+else	
+	$(JLINK_PATH)$(JLINK_EXE) -Device CORTEX-M3 -If SWD -Speed 1000 $(FLASHER_PATH)RTL_RunRAM.JLinkScript
+endif
 
 readfullflash:
 	@$(JLINK_PATH)$(JLINK_EXE) -Device CORTEX-M3 -If SWD -Speed 1000 $(FLASHER_PATH)RTL_FFlash.JLinkScript

@@ -64,7 +64,7 @@ void spi_init (spi_t *obj, PinName mosi, PinName miso, PinName sclk, PinName sse
     /* SsiClockDivider doesn't support odd number */
 
     DBG_SSI_INFO("SystemClock: %d\n", SystemGetCpuClk());
-    DBG_SSI_INFO("MaxSsiFreq : %d\n", (SystemClock >> 2) >> 1);
+    DBG_SSI_INFO("MaxSsiFreq : %d\n", (SystemGetCpuClk() >> 2) >> 1);
 
     ssi_mosi = pinmap_peripheral(mosi, PinMap_SSI_MOSI);
     ssi_miso = pinmap_peripheral(miso, PinMap_SSI_MISO);

@@ -53,7 +53,13 @@ mp: LIBS +=_rtsp _usbh _usbd
 endif
 # m c nosys gcc
 PATHLIBS = sdk/component/soc/realtek/8195a/misc/bsp/lib/common/gcc
+
+ifdef USE_SDRAM
+LDFILE ?= rlx8195A-symbol-v04-img3.ld
+else
 LDFILE ?= rlx8195A-symbol-v04-img2.ld
+endif
+
 BOOTS = sdk/component/soc/realtek/8195a/misc/bsp/image
 
 # Include folder list
@@ -95,11 +101,14 @@ INCLUDES += sdk/component/common/drivers/wlan/realtek/src/hal/OUTSRC
 INCLUDES += sdk/component/common/drivers/sdio/realtek/sdio_host/inc
 INCLUDES += sdk/component/soc/realtek/8195a/fwlib/ram_lib/wlan/realtek/wlan_ram_map/rom
 INCLUDES += sdk/component/common/network/ssl/ssl_ram_map/rom
-#INCLUDES += sdk/component/common/media/codec
-#INCLUDES += sdk/component/common/drivers/usb_class/host/uvc/inc
-#INCLUDES += sdk/component/common/drivers/usb_class/device
-#INCLUDES += sdk/component/common/drivers/usb_class/device/class 
-#INCLUDES += sdk/component/soc/realtek/8195a/fwlib/ram_lib/usb_otg/include
+ifdef USE_UVC
+INCLUDES += sdk/component/common/media/codec
+INCLUDES += sdk/component/common/video/v4l2/inc 
+INCLUDES += sdk/component/common/drivers/usb_class/host/uvc/inc
+INCLUDES += sdk/component/common/drivers/usb_class/device
+INCLUDES += sdk/component/common/drivers/usb_class/device/class 
+INCLUDES += sdk/component/soc/realtek/8195a/fwlib/ram_lib/usb_otg/include
+endif
 
 # Source file list
 # -------------------------------------------------------------------
@@ -430,3 +439,4 @@ ADD_SRC_C += sdk/component/common/example/uart_atcmd/example_uart_atcmd.c
 ADD_SRC_C += sdk/component/common/example/example_entry.c
 ADD_SRC_C += sdk/component/common/application/xmodem/uart_fw_update.c
 endif
+

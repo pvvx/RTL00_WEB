@@ -11,22 +11,22 @@
 #include "device.h"
 
 typedef struct _I2C_HND_ {
-	signed char status;
-	unsigned char idx;
-	unsigned char io_sel;
-	unsigned char mode;	// if(I2C_FIXED_SPEED_MODE != 0) user set -> i2c_mode_e
+	signed char status;		// _i2c_status_e
+	unsigned char idx;		// Номер контроллера I2C
+	unsigned char io_sel; 	// Location Index(Pin Mux Selection): S0 -> PC_4, PC_5
+	unsigned char mode;		// _i2c_mode_e,  if(I2C_FIXED_SPEED_MODE != 0) user set -> i2c_mode_e
 	void * base_regs;
 } i2c_drv_t, *i2c_drv_p;
 
 typedef enum
 {
-	DRV_I2C_OFF = 0,	// IC I2C  DeInit
+	DRV_I2C_OFF = 0,		// IC I2C  DeInit
 	DRV_I2C_OK = 0,			// DRV ret Ok
-	DRV_I2C_IC_OFF = 1, // IC I2C Off
-	DRV_I2C_IC_ENABLE = 2, // IC I2C On
-	DRV_I2C_ERR = -1,	// DRV ret err
-	DRV_I2C_ABORT = -1, // IC I2C Abort
-	DRV_I2C_TIMEOUT = -3 // IC I2C / DRV ret Timeout
+	DRV_I2C_IC_OFF = 1, 	// IC I2C Off
+	DRV_I2C_IC_ENABLE = 2, 	// IC I2C On
+	DRV_I2C_ERR = -1,		// DRV ret err
+	DRV_I2C_ABORT = -1, 	// IC I2C Abort
+	DRV_I2C_TIMEOUT = -3 	// IC I2C / DRV ret Timeout
 } _i2c_status_e;
 
 

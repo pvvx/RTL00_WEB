@@ -103,7 +103,7 @@ void ina_tick_handler(void *par) {
 		break;
 	case 4:
 		if (i2c_reg(REG_DW_I2C_IC_RAW_INTR_STAT) &	BIT_IC_RAW_INTR_STAT_TX_ABRT) {
-			i2c_reg(REG_DW_I2C_IC_CLR_INTR);
+			(volatile uint32)i2c_reg(REG_DW_I2C_IC_CLR_INTR);
 			p->errs++;
 			p->status = 0;
 			break;
@@ -123,10 +123,10 @@ void ina_tick_handler(void *par) {
 					else p->buf_rx++;
 				};
 			} else {
-				i2c_reg(REG_DW_I2C_IC_DATA_CMD);
-				i2c_reg(REG_DW_I2C_IC_DATA_CMD);
-				i2c_reg(REG_DW_I2C_IC_DATA_CMD);
-				i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
 			};
 		}
 	case 3:
@@ -279,8 +279,9 @@ void ina219_init(void)
 	    // Tick every 0.000532 sec (N*532 μs)
 //	    uint32 tus = (1 << ((p->config >> 3) & 7));
 //	    tus *= 532;
-	    gtimer_start_periodical(&p->timer, 532*2, (void*)ina_tick_handler, (uint32_t)&ina219drv);
-	    rtl_printf("INA219 Timer Period = %u us\n", p->timer.hal_gtimer_adp.TimerLoadValueUs);
+	    uint32 tus = 532*2;
+	    gtimer_start_periodical(&p->timer, tus, (void*)ina_tick_handler, (uint32_t)&ina219drv);
+	    rtl_printf("INA219 Timer Period = %u us\n", tus);
 	    p->init = 1;
 	}
 }
@@ -340,94 +341,7 @@ LOCAL void fATINA(int argc, char *argv[])
 	ShowIna();
 }
 
-
-extern void dump_bytes(uint32 addr, int size);
-extern uint32 hextoul(uint8 *s);
-
-i2c_drv_t ti2c;
-/* Sample:
- * ati2c i
- * ati2c w 40 5
- * ati2c r 40 2
- */
-LOCAL void fATI2C(int argc, char *argv[])
-{
-	i2c_drv_t *pi2c = &ti2c;
-	uint8 buf[32];
-	if(argc > 1) {
-		if(argv[1][0] == 'i') {
-			if(!pi2c->status) {
-				uint8 sda = 0;
-				uint8 scl = 0;
-				uint8 mode = 0;
-				uint32 speed = 0;
-				if(argc > 2) sda = hextoul(argv[2]);
-				else if(argc > 3) scl = hextoul(argv[3]);
-				else if(argc > 4) mode = hextoul(argv[4]);
-				else if(argc > 5) speed = hextoul(argv[5]);
-				if(!sda) sda = PC_4;
-				if(!scl) scl = PC_5;
-				if(!mode) mode = DRV_I2C_FS_MODE;
-				if(!speed) speed = 400000;
-				if(_i2c_setup(pi2c, sda, scl, mode) == DRV_I2C_OK
-						&& _i2c_init(pi2c) == DRV_I2C_OK
-						&& _i2c_set_speed(pi2c, speed) == DRV_I2C_OK) {
-					rtl_printf("I2C%d Init\n", pi2c->idx);
-				};
-			} else {
-				rtl_printf("Already init!\n");
-				return;
-			};
-		} else {
-			if(pi2c->status) {
-				if(argv[1][0] == 'd') {
-					_i2c_ic_off(pi2c);
-					rtl_printf("I2C%d DeInit\n", pi2c->idx);
-					return;
-				};
-				int i;
-				for(i = 0; i + 2 < argc; i++) {
-					buf[i] = hextoul(argv[i+2]);
-				};
-				if(i) {
-					if(argv[1][0] == 'w') {
-						_i2c_write(pi2c, buf[0], &buf[1], i-1, 1);
-						rtl_printf("I2C%d write[%d]:\n", pi2c->idx, i-1);
-						dump_bytes((uint32)&buf[0], i);
-					}
-					else if(argv[1][0] == 'r') {
-						i = buf[1];
-						if(i > sizeof(buf) - 1) i = sizeof(buf) - 1;
-						_i2c_read(pi2c, buf[0], &buf[1], i, 1);
-						rtl_printf("I2C%d read[%d]:\n", pi2c->idx, i);
-						dump_bytes((uint32)&buf[0], i+1);
-					};
-
-				};
-			};
-		};
-	};
-	rtl_printf("I2C%d drvStatus = %d\n", pi2c->idx, pi2c->status);
-	return;
-}
-
-LOCAL void fATLED(int argc, char *argv[])
-{
-	if(argc > 1) {
-		EGTIM_FCTRL(1);
-		EGTIM_RSIG_SEL(atoi(argv[1]));
-		EGTIME_PIN_G0_OPT_SEL(atoi(argv[2]));
-		EGTIME_PIN_G1_OPT_SEL(atoi(argv[3]));
-		EGTIME_PIN_G1_OPT_SEL(atoi(argv[4]));
-	}
-	else {
-		EGTIM_FCTRL(0);
-	}
-}
-
 MON_RAM_TAB_SECTION COMMAND_TABLE console_commands_ina219[] = {
-		{"ATLED", 0, fATLED, ": Test LED"},
-		{"ATI2C", 0, fATI2C, ": Test I2C, <i>nit, <d>einit, <w>rite, <r>ead"},
 		{"ATINA", 0, fATINA, "=[0/1]: INA219 =1 start, =0 stop"}
 };
 

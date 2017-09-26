@@ -80,10 +80,10 @@ struct v4l2_file_operations {
 	   //ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);
 	   //ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);
 	   //unsigned int (*poll) (struct file *, struct poll_table_struct *);
-	   long (*ioctl) (unsigned int, unsigned long);
-	   long (*unlocked_ioctl) (unsigned int, unsigned long);
+	   long (*ioctl) (unsigned int, void *);
+	   long (*unlocked_ioctl) (unsigned int, void *);
 #ifdef CONFIG_COMPAT
-	   long (*compat_ioctl32) (unsigned int, unsigned long);
+	   long (*compat_ioctl32) (unsigned int, void *);
 #endif
 	   //unsigned long (*get_unmapped_area) (struct file *, unsigned long,
 	   //					   unsigned long, unsigned long, unsigned long);

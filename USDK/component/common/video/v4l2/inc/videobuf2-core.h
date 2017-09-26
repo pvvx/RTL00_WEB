@@ -22,7 +22,7 @@
 #include "videodev2.h"
 
 
-typedef int _LOCK_T;
+//typedef int _LOCK_T;
 struct vb2_alloc_ctx;
 struct vb2_fileio_data;
 

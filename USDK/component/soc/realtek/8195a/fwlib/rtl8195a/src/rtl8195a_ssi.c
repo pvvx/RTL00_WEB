@@ -739,7 +739,7 @@ HAL_Status HalSsiIntReadRtl8195a(VOID *Adapter, VOID *RxData, u32 Length)
     u32 RxFifoThresholdLevel;
 //    u8  Index = pHalSsiAdapter->Index;
 
-    DBG_SSI_INFO("HalSsiIntReadRtl8195a: Idx=%d, RxData=0x%x, Len=0x%x\r\n", Index, RxData, Length);
+    DBG_SSI_INFO("HalSsiIntReadRtl8195a: Idx=%d, RxData=0x%x, Len=0x%x\r\n", pHalSsiAdapter->Index, RxData, Length);
 //    if (HalSsiBusyRtl8195a(Adapter)) {
         // As a Slave mode, if the peer(Master) side is power off, the BUSY flag is always on
 //        DBG_SSI_WARN("HalSsiIntReadRtl8195a: SSI%d is busy\n", Index);
@@ -747,7 +747,7 @@ HAL_Status HalSsiIntReadRtl8195a(VOID *Adapter, VOID *RxData, u32 Length)
 //    }
 
     if (Length == 0) {
-        SSI_DBG_INT_READ("SSI%d RxData addr: 0x%X, Length: %d\n", Index, RxData, Length);
+        SSI_DBG_INT_READ("SSI%d RxData addr: 0x%X, Length: %d\n", pHalSsiAdapter->Index, RxData, Length);
         return HAL_ERR_PARA;
     }
 
@@ -774,7 +774,7 @@ HAL_Status HalSsiIntReadRtl8195a(VOID *Adapter, VOID *RxData, u32 Length)
     }
 
     pHalSsiAdapter->RxData = RxData;
-    DBG_SSI_INFO("SSI%d RxData addr: 0x%X, Length: %d\n", Index,
+    DBG_SSI_INFO("SSI%d RxData addr: 0x%X, Length: %d\n", pHalSsiAdapter->Index,
             pHalSsiAdapter->RxData, pHalSsiAdapter->RxLength);
 
     pHalSsiAdapter->InterruptMask |= BIT_IMR_RXFIM | BIT_IMR_RXOIM | BIT_IMR_RXUIM;

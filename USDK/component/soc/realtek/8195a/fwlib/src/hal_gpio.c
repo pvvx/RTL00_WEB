@@ -108,11 +108,13 @@ HAL_GPIO_Init(
     GPIO_PullCtrl_8195a(chip_pin, HAL_GPIO_HIGHZ);
 
     //    HAL_Status ret =
-    HAL_GPIO_Init_8195a(GPIO_Pin);
 #if CONFIG_DEBUG_LOG > 3
+    HAL_Status ret = HAL_GPIO_Init_8195a(GPIO_Pin);
     if (ret != HAL_OK) {
         GpioFunctionChk(chip_pin, DISABLE);
     }
+#else
+    HAL_GPIO_Init_8195a(GPIO_Pin);
 #endif
 }
 
@@ -154,11 +156,14 @@ HAL_GPIO_Irq_Init(
         GPIO_Pin->pin_mode);
     HAL_GPIO_MaskIrq_8195a(GPIO_Pin);
 //    HAL_Status ret =
-    HAL_GPIO_Init_8195a(GPIO_Pin);
+
 #if CONFIG_DEBUG_LOG > 3
+    HAL_Status ret = HAL_GPIO_Init_8195a(GPIO_Pin);
     if (ret != HAL_OK) {
         GpioFunctionChk(chip_pin, DISABLE);
     }
+#else
+    HAL_GPIO_Init_8195a(GPIO_Pin);
 #endif
 }
 

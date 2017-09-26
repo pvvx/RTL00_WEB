@@ -88,7 +88,7 @@ LOCAL int i2c_ready(i2c_drv_t *pi2c, unsigned char flg)
 		if(i2c_reg(REG_DW_I2C_IC_RAW_INTR_STAT) & BIT_IC_RAW_INTR_STAT_TX_ABRT) {
 			error_printf("I2C%d Abort!\n", pi2c->idx);
 			// Clear abort status.
-			i2c_reg(REG_DW_I2C_IC_CLR_TX_ABRT);
+			(volatile uint32)i2c_reg(REG_DW_I2C_IC_CLR_TX_ABRT);
 			// Be sure that all interrupts flag are cleared.
 //			i2c_reg(REG_DW_I2C_IC_CLR_INTR);
 			pi2c->status = DRV_I2C_ABORT;
@@ -131,7 +131,7 @@ int _i2c_break(i2c_drv_t *pi2c)
 	};
 	pi2c->status = DRV_I2C_OFF;
 	// All interrupts flag are cleared.
-	i2c_reg(REG_DW_I2C_IC_CLR_INTR);
+	(volatile uint32)i2c_reg(REG_DW_I2C_IC_CLR_INTR);
 	return DRV_I2C_OK;
 }
 
@@ -226,7 +226,7 @@ LOCAL int i2c_enable(i2c_drv_t *pi2c)
 		};
 	};
 	// Be sure that all interrupts flag are cleared.
-	i2c_reg(REG_DW_I2C_IC_CLR_INTR);
+	(volatile uint32)i2c_reg(REG_DW_I2C_IC_CLR_INTR);
 	pi2c->status = DRV_I2C_IC_ENABLE;
 	return DRV_I2C_OK;
 }
@@ -433,7 +433,7 @@ int _i2c_read(i2c_drv_t *pi2c, uint32 address, const char *data, int length, int
 				*d++ = i2c_reg(REG_DW_I2C_IC_DATA_CMD);
 				length--;
 			}
-			else i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+			else (volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
 		};
 	}
 	while(length) {
@@ -449,5 +449,122 @@ int _i2c_read(i2c_drv_t *pi2c, uint32 address, const char *data, int length, int
 	}
 	return DRV_I2C_OK;
 }
+
+#if defined(USE_I2C_CONSOLE) && USE_I2C_CONSOLE
+//extern void dump_bytes(uint32 addr, int size);
+extern int print_hex_dump(uint8_t *buf, int len, unsigned char k);
+extern uint32 hextoul(uint8 *s);
+
+i2c_drv_t ti2c;
+/* I2C Init:
+ *  ati2c i [sda_pin [scl_pin [mode [speed]]]]
+ * I2C Deinit:
+ *  ati2c d
+ * I2C Write:
+ *  iati2c W address data1 [data2 ... [data8]...]
+ * I2C write + stop:
+ *  iati2c w address data1 [data2 ... [data8]...]
+ * I2C Read:
+ *  ati2c R address count
+ * I2C read + stop:
+ *  ati2c r address count
+ */
+LOCAL void fATI2C(int argc, char *argv[])
+{
+	i2c_drv_t *pi2c = &ti2c;
+	uint8 buf[32];
+	if(argc > 1) {
+		if(argv[1][0] == 'i') {
+			//
+			if(!pi2c->status) {
+				uint8 sda = 0;
+				uint8 scl = 0;
+				uint8 mode = 0;
+				uint32 speed = 0;
+				if(argc > 2) sda = hextoul(argv[2]);
+				else if(argc > 3) scl = hextoul(argv[3]);
+				else if(argc > 4) mode = hextoul(argv[4]);
+				else if(argc > 5) speed = hextoul(argv[5]);
+				if(!sda) sda = PC_4;
+				if(!scl) scl = PC_5;
+				if(!mode) mode = DRV_I2C_FS_MODE;
+				if(!speed) speed = 50000;
+				if(_i2c_setup(pi2c, sda, scl, mode) == DRV_I2C_OK
+						&& _i2c_init(pi2c) == DRV_I2C_OK
+						&& _i2c_set_speed(pi2c, speed) == DRV_I2C_OK) {
+					rtl_printf("I2C%d Init: %02x %02x %02x %08x\n", pi2c->idx, sda, scl, mode, speed);
+				};
+			} else {
+				rtl_printf("Already init!\n");
+				return;
+			};
+		} else if(argv[1][0] == '?') {
+			rtl_printf("I2C Init:\n\tati2c i [sda_pin [scl_pin [mode [speed]]]]\n");
+			rtl_printf("I2C Deinit:\n\tati2c d\n");
+			rtl_printf("I2C Write:\n\tati2c W address data1 [data2 ... [data8]...]\n");
+			rtl_printf("I2C write + stop:\n\tati2c w address data1 [data2 ... [data8]...]\n");
+			rtl_printf("I2C Read:\n\tati2c R address count\n");
+			rtl_printf("I2C read + stop:\n\tati2c r address count\n");
+			rtl_printf("I2C get:\n\tati2c g address wrcount wrdata1 [..wrdata6] rdcount\n");
+		} else {
+			if(pi2c->status) {
+				if(argv[1][0] == 'd') {
+					_i2c_ic_off(pi2c);
+					rtl_printf("I2C%d DeInit\n", pi2c->idx);
+					return;
+				};
+				int i;
+				for(i = 0; i + 2 < argc; i++) {
+					buf[i] = hextoul(argv[i+2]);
+				};
+				if(i) {
+					if(argv[1][0] == 'w' || argv[1][0] == 'W') {
+						// >ati2c w 40 2
+						// I2C1 write[1]: 40 02 00
+						// I2C1 drvStatus = 1
+						_i2c_write(pi2c, buf[0], &buf[1], i-1, argv[1][0] == 'w');
+						rtl_printf("I2C%d write[%d]: ", pi2c->idx, i-1);
+						print_hex_dump(buf, i, ' ');
+						rtl_printf("\n");
+					} else if(argv[1][0] == 'r' || argv[1][0] == 'R') {
+						// >ati2c r 40 2
+						// I2C1 read[2]: 40 07 d8
+						// I2C1 drvStatus = 1
+						i = buf[1];
+						if(i > sizeof(buf) - 1) i = sizeof(buf) - 1;
+						_i2c_read(pi2c, buf[0], &buf[1], i, argv[1][0] == 'r');
+						rtl_printf("I2C%d read[%d]: ", pi2c->idx, i);
+						print_hex_dump(buf, i+1, ' ');
+						rtl_printf("\n");
+					} else if(argv[1][0] == 'g') {
+						// >ati2c g 5a 1 6 3
+						// I2C1 get[3]: 5a 5e 3a 6c
+						// I2C1 drvStatus = 1
+						if (argc < 5 || buf[1] == 0 || buf[1] > sizeof(buf) - 2) {
+							rtl_printf("Error command string!\n");
+							return;
+						}
+						if(_i2c_write(pi2c, buf[0], &buf[2], buf[1], 0) >= 0) {
+							i = buf[buf[1] + 2]; // кол-во байт чтения
+							if(i == 0 || i > sizeof(buf) - 1) i = sizeof(buf) - 1;
+							_i2c_read(pi2c, buf[0], &buf[1], i, 1);
+							rtl_printf("I2C%d get[%d]: ", pi2c->idx, i);
+							print_hex_dump(buf, i+1, ' ');
+						}
+						rtl_printf("\n");
+					};
+				};
+			};
+		};
+	};
+	rtl_printf("I2C%d Status = %d\n", pi2c->idx, pi2c->status);
+	return;
+}
+
+MON_RAM_TAB_SECTION COMMAND_TABLE console_commands_i2c[] = {
+		{"ATI2C", 0, fATI2C, ": Test I2C, <i>nit, <d>einit, <w/W>rite, <r/R>ead"},
+};
+#endif // USE_I2C_CONSOLE
+
 
 #endif // CONFIG_I2C_EN
