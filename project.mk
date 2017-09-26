@@ -1,7 +1,8 @@
 #=============================================
 # SDK CONFIG
 #=============================================
-WEB_INA219_DRV = 1
+#WEB_INA219_DRV = 1
+WEB_MLX90614_DRV = 1
 #WEB_ADC_DRV = 1
 #USE_SDCARD = 1
 #USE_UVC = 1
@@ -60,6 +61,13 @@ ADD_SRC_C += project/src/driver/i2c_drv.c
 CFLAGS += -DUSE_I2C_CONSOLE=1
 ADD_SRC_C += project/src/ina219/ina219drv.c
 CFLAGS += -DWEB_INA219_DRV=1
+endif
+
+ifdef WEB_MLX90614_DRV
+ADD_SRC_C += project/src/driver/i2c_drv.c
+CFLAGS += -DUSE_I2C_CONSOLE=1
+ADD_SRC_C += project/src/MLX90614/MLX90614.c
+CFLAGS += -DWEB_MLX90614_DRV=1
 endif
 
 ifdef WEB_ADC_DRV

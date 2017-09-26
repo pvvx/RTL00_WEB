@@ -136,6 +136,7 @@ websock_rx_data(TCP_SERV_CONN *ts_conn)
 				case sw_frs_text:
 #if DEBUGSOO > 1
 					os_printf("ws:txt ");
+
 #if DEBUGSOO > 2
 					if(ws->frame_len != 0) {
 						uint8 tt = pstr[len];

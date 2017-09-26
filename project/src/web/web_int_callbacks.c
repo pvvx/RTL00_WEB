@@ -455,6 +455,16 @@ extern int ina219_ws(TCP_SERV_CONN *ts_conn, char cmd);
         	  }
         }
 #endif
+#ifdef WEB_MLX90614_DRV
+        else ifcmp("mlx90614") {
+        	  if(CheckSCB(SCB_WEBSOC)) {
+extern int mlx90614_ws(TCP_SERV_CONN *ts_conn, char cmd);
+				  int x = mlx90614_ws(ts_conn, cstr[6]);
+        		  if(x < 0) SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
+        		  else tcp_puts("%d", x);
+        	  }
+        }
+#endif
 #ifdef WEB_ADC_DRV
         else ifcmp("adc") {
         	  if(CheckSCB(SCB_WEBSOC)) {
