@@ -1,6 +1,6 @@
 /*
  * MLX90614drv.c
- *
+ *  https://esp8266.ru/forum/threads/i2c-na-rtl.2450/
  *  Created on: 02/09/2017
  *      Author: pvvx
  */
@@ -91,9 +91,6 @@ typedef struct _MLX90614drv {
 #define MLX90614_I2C_BUS_CLK	50000  // The maximum frequency of the MLX90614 SMBus is 100 KHz and the minimum is 10 KHz.
 #define MLX90614_TIMER TIMER3	// используемый таймер
 
-//#define ReadTSF_Lo32() (*((volatile unsigned int *)(WIFI_REG_BASE + REG_TSFTR)))
-//#define ReadTSF_Hi32() (*((volatile unsigned int *)(WIFI_REG_BASE + REG_TSFTR1)))
-
 MLX90614DRV mlx90614drv = {
 		.addr = MLX90614_I2CADDR,
 		.timetik = 10000,		// Время опроса таймером: 10000 us
@@ -105,30 +102,20 @@ MLX90614DRV mlx90614drv = {
 		.i2c.io_sel = S0,			// PC_4, PC_5
 		.i2c.mode = DRV_I2C_SS_MODE // DRV_I2C_FS_MODE // DRV_I2C_HS_MODE
 };
-/*
-void  mlx90614_write(unsigned char reg, unsigned short data)
-{
-	PMLX90614DRV p = &mlx90614drv;
-	p->buf_i2c.uc[0] = reg;
-	p->buf_i2c.uc[1] = (unsigned char)((unsigned short)(data >> 8));
-	p->buf_i2c.uc[2] = (unsigned char)data;
-  	_i2c_write(&p->i2c, p->addr, (const char *)p->buf_i2c.uc, 3, 1);
-  	UBaseType_t f;
-  	portBASE_TYPE d;
-}
-
-unsigned int mlx90614_read(unsigned char reg)
-{
-	PMLX90614DRV p = &mlx90614drv;
-	p->buf_i2c.uc[0] = reg;
-    _i2c_write(&p->i2c, p->addr, (const char *)p->buf_i2c.uc, 1, 1);
-	p->buf_i2c.ui = 0;
-	_i2c_read(&p->i2c, p->addr, (const char *)p->buf_i2c.uc, 2, 1);
-	return (p->buf_i2c.uc[0] << 8) | p->buf_i2c.uc[1];
-}
-*/
 
 #define i2c_reg(r) *((volatile uint32 *)(pi2c->base_regs + r))
+
+#define MLX90614_USE_CRC
+
+#ifdef MLX90614_USE_CRC
+unsigned char crc8(unsigned char x) {
+	for (int i = 8; i; i--) {
+	    x = ( x << 1 ) ^ ( x & 128 ? 7 : 0 );
+	}
+	return x;
+}
+#endif
+
 
 /* Пример непрерывного чтения регистров Tobj1 и Tobj2
  * MLX90614 по прерыванию таймера */
@@ -146,28 +133,9 @@ void mlx_tick_handler(void *par) {
 		i2c_reg(REG_DW_I2C_IC_TAR) = p->addr;
 		// Enable controller.
 		i2c_reg(REG_DW_I2C_IC_ENABLE) = BIT_IC_ENABLE;
-		p->status = 3; // = 2;
+		p->status = 2;
 		break;
-	case 2:
-		// Заполним FIFO ic I2C командами инициализации MLX90614 ?
-/*
-		// Заполним FIFO ic I2C командами чтения RAW данных
-		//  Write Command.
-		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = MLX90614_RAWIR1  | BIT_IC_DATA_CMD_RESTART;
-		//  Read command & data (3 bytes).
-		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD;
-		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD;
-		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD | BIT_IC_DATA_CMD_STOP;
-		//  Write Command.
-		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = MLX90614_RAWIR2  | BIT_IC_DATA_CMD_RESTART;
-		//  Read command & data (3 bytes).
-		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD;
-		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD;
-		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD | BIT_IC_DATA_CMD_STOP; //  | BIT_IC_DATA_CMD_RESTART
-*/
-		p->status = 3;
-		break;
-	case 4:
+	case 3:
 		if (i2c_reg(REG_DW_I2C_IC_RAW_INTR_STAT) &	BIT_IC_RAW_INTR_STAT_TX_ABRT) {
 			(volatile uint32)i2c_reg(REG_DW_I2C_IC_CLR_INTR);
 			p->errs++;
@@ -179,10 +147,26 @@ void mlx_tick_handler(void *par) {
 				// Считаем готовые значения из FIFO ic I2C
 				pd->o.uc[0] = i2c_reg(REG_DW_I2C_IC_DATA_CMD);
 				pd->o.uc[1] = i2c_reg(REG_DW_I2C_IC_DATA_CMD);
-				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+#ifdef MLX90614_USE_CRC
+				// B407B5 -> 0x28 (http://crccalc.com/)
+				if(crc8(pd->o.uc[1] ^ crc8(pd->o.uc[0] ^ 0x28)) != (uint8) i2c_reg(REG_DW_I2C_IC_DATA_CMD)) {
+					i2c_reg(REG_DW_I2C_IC_ENABLE) = 2; // ABORT
+					p->errs++;
+					p->status = 0;
+					break;
+				}
+#endif
 				pd->a.uc[0] = i2c_reg(REG_DW_I2C_IC_DATA_CMD);
 				pd->a.uc[1] = i2c_reg(REG_DW_I2C_IC_DATA_CMD);
-				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+#ifdef MLX90614_USE_CRC
+				// B406B5 -> 0x3D (http://crccalc.com/)
+				if(crc8(pd->a.uc[1] ^ crc8(pd->a.uc[0] ^ 0x3D)) != (uint8) i2c_reg(REG_DW_I2C_IC_DATA_CMD)) {
+					i2c_reg(REG_DW_I2C_IC_ENABLE) = 2; // ABORT
+					p->errs++;
+					p->status = 0;
+					break;
+				}
+#endif
 				if(p->buf_tx >= p->buf_idx) p->buf_tx = 0;
 				else p->buf_tx++;
 				if(p->buf_rx == p->buf_tx) {
@@ -191,30 +175,38 @@ void mlx_tick_handler(void *par) {
 					else p->buf_rx++;
 				};
 			} else {
-				// удаление из FIFO 6-ти байт данных
+				// удаление из FIFO блока данных
 				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
 				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+#ifdef MLX90614_USE_CRC
+				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+#endif
 				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
 				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+#ifdef MLX90614_USE_CRC
 				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
-				(volatile uint32)i2c_reg(REG_DW_I2C_IC_DATA_CMD);
+#endif
 			};
 		}
-	case 3:
+	case 2:
 		// Заполним FIFO ic I2C командами чтения
 		//  Write Command.
-		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = MLX90614_TOBJ1; //  | BIT_IC_DATA_CMD_RESTART;
+		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = MLX90614_TOBJ1;
 		//  Read command & data (3 bytes).
 		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD | BIT_IC_DATA_CMD_RESTART;
+#ifdef MLX90614_USE_CRC
 		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD;
+#endif
 		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD | BIT_IC_DATA_CMD_STOP;
 		//  Write Command.
-		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = MLX90614_TA; //  | BIT_IC_DATA_CMD_RESTART;
+		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = MLX90614_TA;
 		//  Read command & data (3 bytes).
 		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD | BIT_IC_DATA_CMD_RESTART;
+#ifdef MLX90614_USE_CRC
 		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD;
-		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD | BIT_IC_DATA_CMD_STOP; //  | BIT_IC_DATA_CMD_RESTART
-		p->status = 4;
+#endif
+		i2c_reg(REG_DW_I2C_IC_DATA_CMD) = BIT_IC_DATA_CMD_CMD | BIT_IC_DATA_CMD_STOP;
+		p->status = 3;
 		break;
 	}
 }
