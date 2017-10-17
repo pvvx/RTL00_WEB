@@ -91,7 +91,7 @@ mp: OTA_IMAGE = $(BIN_DIR)/ota_mp.bin
 
 TST_IMAGE = $(BIN_DIR)/ram_2.bin
 
-.PHONY: genbin1 genbin23 flashburn reset test readfullflash flashwebfs flash_OTA
+.PHONY: genbin1 genbin23 flashburn reset test readfullflash flashwebfs flash_OTA runram runsdram
 .NOTPARALLEL: all mp genbin1 genbin23 flashburn reset test readfullflash _endgenbin flashwebfs flash_OTA
 
 all: $(ELFFILE) $(OTA_IMAGE) $(FLASH_IMAGE) _endgenbin
@@ -114,11 +114,10 @@ reset:
 	@$(JLINK_PATH)$(JLINK_EXE) -Device CORTEX-M3 -If SWD -Speed 1000 $(FLASHER_PATH)RTL_Reset.JLinkScript
 
 runram:
-ifdef USE_SDRAM
-	$(JLINK_PATH)$(JLINK_EXE) -Device CORTEX-M3 -If SWD -Speed 1000 $(FLASHER_PATH)RTL_RunRAM_SDR.JLinkScript
-else	
 	$(JLINK_PATH)$(JLINK_EXE) -Device CORTEX-M3 -If SWD -Speed 1000 $(FLASHER_PATH)RTL_RunRAM.JLinkScript
-endif
+
+runsdram:
+	$(JLINK_PATH)$(JLINK_EXE) -Device CORTEX-M3 -If SWD -Speed 1000 $(FLASHER_PATH)RTL_RunRAM_SDR.JLinkScript
 
 readfullflash:
 	@$(JLINK_PATH)$(JLINK_EXE) -Device CORTEX-M3 -If SWD -Speed 1000 $(FLASHER_PATH)RTL_FFlash.JLinkScript

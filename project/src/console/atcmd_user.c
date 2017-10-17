@@ -41,6 +41,10 @@ void fATST(int argc, char *argv[]) {
 		(void) argc;
 		(void) argv;
 		ShowMemInfo();
+#if CONFIG_DEBUG_LOG > 1
+		extern int min_free_heap_size;
+		printf("\nMin free heap size %d bytes\n", min_free_heap_size);
+#endif
 #if 0 //CONFIG_DEBUG_LOG > 1
 		dump_mem_block_list();
 		tcm_heap_dump();

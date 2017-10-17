@@ -2,8 +2,7 @@
 * Copyright (c) 2014, Realtek Semiconductor Corp.
 * All rights reserved.
 *
-* This module is a confidential and proprietary property of RealTek and
-* possession or use of this module requires written permission of RealTek.
+ *
 *******************************************************************************/
 #ifndef MBED_EXT_TIMER_API_EXT_H
 #define MBED_EXT_TIMER_API_EXT_H

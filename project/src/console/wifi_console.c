@@ -174,13 +174,19 @@ LOCAL void fATWI(int argc, char *argv[]) {
 		&& wifi_get_setting(wlan_ap_name, &Setting) == 0) {
 		wifi_show_setting(wlan_ap_name, &Setting);
 //		show_wifi_ap_ip();
-		printf("\tIP: " IPSTR "\n", IP2STR(&xnetif[WLAN_AP_NETIF_NUM].ip_addr));
+		printf("\tIP: " IPSTR "\n\n", IP2STR(&xnetif[WLAN_AP_NETIF_NUM].ip_addr));
+//#if CONFIG_DEBUG_LOG > 1
+		show_wlan_info(WLAN_AP_NETIF_NUM);
+//#endif
 	}
 	if((wifi_run_mode & RTW_MODE_STA)
 		&& wifi_get_setting(wlan_st_name, &Setting) == 0) {
 		wifi_show_setting(wlan_st_name, &Setting);
 //		show_wifi_st_ip();
-		printf("\tIP: " IPSTR "\n", IP2STR(&xnetif[WLAN_ST_NETIF_NUM].ip_addr));
+		printf("\tIP: " IPSTR "\n\n", IP2STR(&xnetif[WLAN_ST_NETIF_NUM].ip_addr));
+//#if CONFIG_DEBUG_LOG > 1
+		show_wlan_info(WLAN_ST_NETIF_NUM);
+//#endif
 	}
 	printf("\nWIFI config:\n");
 	printf(&str_rom_57ch3Dch0A[25]); // "================================\n"
@@ -191,10 +197,12 @@ LOCAL void fATWI(int argc, char *argv[]) {
 	printf("\nWIFI ST config:\n");
 	printf(&str_rom_57ch3Dch0A[25]); // "================================\n"
 	show_wifi_st_cfg();
-	printf("\nWIFI AP clients:\n");
-	printf(&str_rom_57ch3Dch0A[25]); // "================================\n"
 #if SDK_VER_NUM > 0x4000
-	show_wifi_ap_clients();
+	if(wifi_mode & RTW_MODE_AP) {
+		printf("\nWIFI AP clients:\n");
+		printf(&str_rom_57ch3Dch0A[25]); // "================================\n"
+		show_wifi_ap_clients();
+	}
 #endif
 	printf("\n");
 }

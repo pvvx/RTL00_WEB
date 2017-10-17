@@ -171,12 +171,16 @@ extern HAL_GPIO_ADAPTER gBoot_Gpio_Adapter;
 	uint8 ChipId = HalGetChipId();
 	if (ChipId >= CHIP_ID_8195AM) {
 #ifdef CONFIG_SDR_EN
-		if((HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) & BIT(21)) == 0) { // уже загружена?
+		if((HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) & BIT(21)) == 0) { // ещё не инициализирована?
 			SdrCtrlInit();
-			if(SdrControllerInit()) {
+			if(!SdrControllerInit()) {
 				DBG_8195A("SDR Controller Init fail!\n");
 			};
-		};
+		} else if (CPU_CLOCK_SEL_DIV5_3) { // clk 5/6
+			if(((HAL_PERI_ON_READ32(REG_PESOC_MEM_CTRL) >> BIT_SHIFT_PESOC_SDR_DDL_CTRL) & 0xFF) < 0x15) {
+				SDR_DDL_FCTRL(0x23);
+			}
+		}
 #endif
 		// clear SDRAM bss
 		extern uint8 __sdram_bss_start__[];

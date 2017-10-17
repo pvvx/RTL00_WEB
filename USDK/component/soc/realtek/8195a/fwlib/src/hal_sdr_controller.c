@@ -3,8 +3,6 @@
  *
  *  Copyright (c) 2013 Realtek Semiconductor Corp.
  *
- *  This module is a confidential and proprietary property of RealTek and
- *  possession or use of this module requires written permission of RealTek.
  */
 #include "rtl8195a.h"
 #include "platform_opts.h"
@@ -109,7 +107,7 @@ DRAM_DEVICE_INFO SdrDramInfo = {
 
 #ifdef FPGA
 #ifdef FPGA_TEMP
-#define MAX_TAP_DLY 0xC
+#define MAX_TAP_DLY 0x22
 #else
 #define MAX_TAP_DLY 0x7F
 #define SPEC_MAX_TAP 0xFF
@@ -398,7 +396,7 @@ SdrControllerInit(
 VOID
 )
 {
-//	ConfigDebugErr |=  _DBG_MISC_;
+// ConfigDebugErr |=  _DBG_MISC_;
     DBG_8195A("SDR Controller Init\n");
 
     HAL_SYS_CTRL_WRITE32(REG_SYS_REGU_CTRL0,
@@ -406,9 +404,9 @@ VOID
 
     SRAM_MUX_CFG(0x2);
 
-    SDR_CLK_SEL(SDR_CLOCK_SEL_VALUE);
+    SDR_CLK_SEL(SDR_CLOCK_SEL_VALUE); //  REG_PESOC_CLK_SEL
 
-    HAL_PERI_ON_WRITE32(REG_GPIO_PULL_CTRL4,0);
+    HAL_PERI_ON_WRITE32(REG_GPIO_PULL_CTRL4, 0);
 
     ACTCK_SDR_CCTRL(ON);
 
@@ -416,22 +414,20 @@ VOID
 
     PinCtrl(SDR, 0, ON);
 
-    HAL_PERI_ON_WRITE32(REG_GPIO_PULL_CTRL4,0);
+    HAL_PERI_ON_WRITE32(REG_GPIO_PULL_CTRL4, 0);
 
     MEM_CTRL_FCTRL(ON);
      
-    HalDelayUs(3000);
+    HalDelayUs(1000); // 3000
      
     // sdr initialization
     DramInit(&SdrDramInfo);
 
     // sdr calibration
-    if(!SdrCalibration()) {
-        return 0;
-    }
-    else {
-        return 1;
-    }
+    if(!SdrCalibration())
+        return 0;	// error!
+    else
+        return 1; // ok
 }
 
 
@@ -441,7 +437,7 @@ DramInit (
     IN  DRAM_DEVICE_INFO *DramInfo
 )
 {
-	DBG_8195A("%s(%p)\n", __func__, DramInfo);
+//	DBG_8195A("%s(%p)\n", __func__, DramInfo);
     u32 CsBstLen = 0;            // 0:bst_4, 1:bst_8
     u32 CasWr = 0;//, CasWrT;       // cas write latency
     u32 CasRd = 0, CasRdT = 0, CrlSrt = 0;  // cas read latency
@@ -774,8 +770,8 @@ SdrCalibration(
 	if(fspic_isinit == 0) flash_init(&flashobj);
 #endif
 ////
-
-	u32 CpuType = ((HAL_READ32(SYSTEM_CTRL_BASE, REG_SYS_CLK_CTRL1) & (0x70)) >> 4);
+	valid = HAL_READ32(SYSTEM_CTRL_BASE, REG_SYS_CLK_CTRL1);
+	u32 CpuType = ((valid & (0x70)) >> 4) + ((valid & BIT17) >> 17) * 8;
 	
 	valid = RdPipe = TapCnt = 0xFFFFFFFF;
 	value.l	= HAL_READ32(SPI_FLASH_BASE, FLASH_SDRC_PARA_BASE+8*CpuType);
@@ -967,7 +963,7 @@ SdrCalibration(
 			value.b[2] = (u8)TapCnt;
 			value.b[3] = ~value.b[2];
 #if DEBUG_SDRAM > 1
-			DiagPrintf("dump1w %x, %x %x %x %x \n\r", value.l, value.b[0], value.b[1], value.b[2], value.b[3]);
+			DiagPrintf("dump2w %x, %x %x %x %x \n\r", value.l, value.b[0], value.b[1], value.b[2], value.b[3]);
 #endif
 			if( HAL_READ32(SPI_FLASH_BASE, FLASH_SDRC_PARA_BASE+8*CpuType+4) == 0xFFFFFFFF)
 			{

@@ -23,7 +23,7 @@
 #define RESCHK_SEND_SIZE (RESCHKS_SEND_SIZE + RESCHKE_SEND_SIZE)
 
 #define MIN_SEND_SIZE (256 + RESCHK_SEND_SIZE) // минимальный размер буфера для передачи файла
-#define MAX_SEND_SIZE ((TCP_MSS*4) + RESCHK_SEND_SIZE) // максимальный размер буфера для передачи 4*MSS = 5840 (MSS=1460)
+#define MAX_SEND_SIZE ((TCP_SND_BUF) + RESCHK_SEND_SIZE) // ((TCP_MSS*4) + RESCHK_SEND_SIZE) // максимальный размер буфера для передачи 4*MSS = 5840 (MSS=1460)
 
 #define HTTP_SEND_SIZE 384 // минимальный размер буфера для передачи заголовка HTTP
 #define SCB_SEND_SIZE  128 // минимальный резерв в буфере для callback

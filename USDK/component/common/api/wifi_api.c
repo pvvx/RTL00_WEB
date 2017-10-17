@@ -552,13 +552,21 @@ LOCAL int _wifi_on(rtw_mode_t mode) {
 	chk_ap_netif_num();
 
 	// set wifi mib
-	wext_set_adaptivity(wifi_cfg.adaptivity & 3); // rtw_adaptivity_mode_t
+//	extern uint8_t rtw_adaptivity_en;
+//	rtw_adaptivity_en = 0;
+//	wext_set_adaptivity(RTW_ADAPTIVITY_DISABLE); // rtw_adaptivity_mode_t
+	wext_set_adaptivity(wifi_cfg.adaptivity & 3);
+
+	debug_printf("Wlan0 init...\n");
 
 	ret = rltk_wlan_init(WLAN0_IDX, mode); // rtw_mode_t
+
+	debug_printf("netif_set_up 0...\n");
 
 	netif_set_up(&xnetif[0]);
 	if (ret < 0) return ret;
 	if(devnum) {
+		debug_printf("Wlan1 init...\n");
 		ret = rltk_wlan_init(WLAN1_IDX, mode);
 		if (ret < 0) return ret;
 		netif_set_up(&xnetif[1]);
@@ -567,15 +575,17 @@ LOCAL int _wifi_on(rtw_mode_t mode) {
 		netif_set_down(&xnetif[1]);
 	}
 
+	debug_printf("Wlan start...\n");
+
 	uint32 timeout = xTaskGetTickCount();
 	rltk_wlan_start(WLAN0_IDX);
 	if(devnum) rltk_wlan_start(WLAN1_IDX);
 	while (1) {
 		if (rltk_wlan_running(WLAN0_IDX)
 			&& rltk_wlan_running(devnum) ) {
-#if CONFIG_DEBUG_LOG > 2
-			printf("WIFI initialized (%d ms)\n", xTaskGetTickCount() - timeout);
-#endif
+//#if CONFIG_DEBUG_LOG > 2
+			debug_printf("WIFI initialized (%d ms)\n", xTaskGetTickCount() - timeout);
+//#endif
 			break;
 		}
 		if(xTaskGetTickCount() - timeout > wifi_test_timeout_ms/portTICK_RATE_MS) {
@@ -648,6 +658,10 @@ int wifi_run(rtw_mode_t mode) {
 			error_printf("Wifi On failed!\n");
 			goto error_end;
 		};
+/*
+		if(wifi_cfg.adaptivity)
+			wext_set_adaptivity(wifi_cfg.adaptivity & 3);
+*/
 		if(wifi_set_country(wifi_cfg.country_code) != RTW_SUCCESS) {
 			error_printf("WiFi: Error set tx country_code (%d)!", wifi_cfg.country_code);
 		};
@@ -692,9 +706,11 @@ int wifi_run(rtw_mode_t mode) {
 			 case RTW_MODE_STA:
 				 ret = wifi_run_st();
 		 		 if(_wext_set_lps_dtim(0, wifi_st_cfg.dtim)!= RTW_SUCCESS) {
-					error_printf("WiFi: Error set DTIM(%d)!", wifi_st_cfg.dtim);
+		 			 error_printf("WiFi: Error set DTIM(%d)!", wifi_st_cfg.dtim);
 		 		 };
 		 		 if(_wext_enable_powersave(0, wifi_st_cfg.sleep & 1, (wifi_st_cfg.sleep >> 1) & 1) != RTW_SUCCESS) {
+		 			 //	rtw_pm_set_ips(get_padaptern(0), wifi_st_cfg.sleep & 1 );
+		 			 //	rtw_pm_set_lps(get_padaptern(0), (wifi_st_cfg.sleep >> 1) & 1 );
 					error_printf("WiFi: Error set powersave mode!");
 		 		 };
 		 		 break;
@@ -886,4 +902,23 @@ int show_wifi_ap_clients(void) {
 	};
 	printf("Get AP clients error!\n");
 	return -1;
+}
+
+
+extern int max_skbbuf_used_num, skbbuf_used_num, max_skbdata_used_num, skbdata_used_num, max_timer_used_num;
+void show_wlan_info(int idx)
+{
+	if(rltk_wlan_info[idx].enable) {
+		struct net_device_stats * stats = rltk_wlan_info[idx].dev->get_stats(rltk_wlan_info[idx].dev);
+		if(stats) {
+			printf("\tTotal %d packets received (%d bytes), dropped %d\n", stats->rx_packets, stats->rx_bytes, stats->rx_dropped);
+			printf("\tTotal %d packets transmitted (%d bytes), dropped %d\n", stats->tx_packets, stats->tx_bytes, stats->tx_dropped);
+			printf("\tRX fifo overflow count %d\n", stats->rx_overflow);
+
+			printf("\tMax skb %d bufers used, buffers %d\n", max_skbbuf_used_num, skbbuf_used_num);
+			printf("\tMax skb %d data used, data %d\n", max_skbdata_used_num, skbdata_used_num);
+			printf("\tMax %d timers used\n", max_timer_used_num);
+//			printf("\tMax %d timers used, timers %d\n", max_timer_used_num, timer_used_num);
+		}
+	}
 }

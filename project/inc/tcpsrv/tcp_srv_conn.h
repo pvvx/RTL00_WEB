@@ -67,12 +67,12 @@ enum srvconn_state {
 
 // максимальный размер выделяемого буфера в heap для приема порции
 #ifndef TCP_SRV_SERVER_MAX_RXBUF
- #define TCP_SRV_SERVER_MAX_RXBUF (TCP_MSS*3) // 1460*2=2920, 1460*3=4380, 1460*4=5840
+ #define TCP_SRV_SERVER_MAX_RXBUF TCP_WND // (TCP_MSS*3) // 1460*2=2920, 1460*3=4380, 1460*4=5840
 #endif
 
 // размер выделяемого буфера в heap для передачи при буферизированном выводе
 #ifndef TCP_SRV_SERVER_DEF_TXBUF
- #define TCP_SRV_SERVER_DEF_TXBUF (TCP_MSS*3) // 1460*2=2920, 1460*3=4380, 1460*4=5840
+ #define TCP_SRV_SERVER_DEF_TXBUF TCP_SND_BUF //(TCP_MSS*3) // 1460*2=2920, 1460*3=4380, 1460*4=5840
 #endif
 
 #define ID_CLIENTS_PORT 3 // до 3-х clients

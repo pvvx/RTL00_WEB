@@ -20,6 +20,8 @@
 #ifndef __IEEE80211_H
 #define __IEEE80211_H
 
+#include "wlan_bssdef.h"
+
 #ifndef CONFIG_RTL8711FW
 
 //	#include <drv_types.h>

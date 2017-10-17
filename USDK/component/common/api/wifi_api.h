@@ -154,6 +154,7 @@ void show_wifi_st_ip(void);
 void show_wifi_cfg(void);
 void show_wifi_st_cfg(void);
 void show_wifi_ap_cfg(void);
+void show_wlan_info(int idx);
 int show_wifi_ap_clients(void);
 uint32 read_wifi_cfg(uint32 flg);
 uint32 write_wifi_cfg(uint32 flg);

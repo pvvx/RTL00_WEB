@@ -40,6 +40,10 @@ runram:
 	#JLink-RunRAM.bat
 	@$(MAKE) --f $(SDK_PATH)flasher.mk runram
 
+runsdram: 
+	#JLink-RunRAM.bat
+	@$(MAKE) --f $(SDK_PATH)flasher.mk runsdram
+
 reset: 
 	#JLink-Reset.bat
 	@$(MAKE) -f $(SDK_PATH)flasher.mk reset 

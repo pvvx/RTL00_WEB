@@ -12,6 +12,8 @@
 #include "wps/wps_defs.h"
 #include <platform/platform_stdlib.h>
 
+extern int wpas_wps_registrar_button_pushed();
+
 /*
  * @brief  struct wps_credential - WPS Credential
  */

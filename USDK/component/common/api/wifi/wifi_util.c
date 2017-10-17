@@ -900,7 +900,7 @@ int wext_send_eapol(const char *ifname, char *buf, __u16 buf_len, __u16 flags) {
 	return iw_ioctl(ifname, SIOCSIWEAPOLSEND, &iwr);
 }
 
-#if CONFIG_ENABLE_P2P
+//#if CONFIG_ENABLE_P2P
 int wext_send_mgnt(const char *ifname, char *buf, __u16 buf_len, __u16 flags) {
 	struct iwreq iwr;
 	memset(&iwr, 0, sizeof(iwr));
@@ -909,7 +909,7 @@ int wext_send_mgnt(const char *ifname, char *buf, __u16 buf_len, __u16 flags) {
 	iwr.u.data.flags = flags;
 	return iw_ioctl(ifname, SIOCSIWMGNTSEND, &iwr);
 }
-#endif
+//#endif
 
 int wext_set_gen_ie(const char *ifname, char *buf, __u16 buf_len, __u16 flags) {
 	struct iwreq iwr;

@@ -8,6 +8,7 @@
 #include "osdep_service.h"
 #include "freertos/wrapper.h"
 #include "rtl_bios_data.h"
+#include "rtw_cmd.h"
 
 #define _atr_aligned2_ __attribute__((aligned(2)))
 #define _atr_aligned4_ __attribute__((aligned(4)))
@@ -739,6 +740,23 @@ struct evt_priv {
 	uint32_t evt_done_cnt;
 };
 
+struct dvobj_priv {
+	void *if1;
+	void *if2;
+	void *padapters[2];
+	uint8_t iface_nums;
+	uint8_t RtOutPipe[3];
+	uint8_t Queue2Pipe[8];
+	uint8_t irq_alloc;
+	uint8_t irq_enabled;
+	_lock irq_th_lock;
+};
+
+struct fifo_more_data {
+	uint32_t more_data;
+	uint32_t len;
+};
+
 struct _io_ops {
 	int (*init_io_priv)(struct dvobj_priv *);
 	int (*write8_endian)(struct dvobj_priv *, uint32_t, uint32_t, uint32_t);
@@ -1227,18 +1245,6 @@ typedef struct net_device *_nic_hdl;
  };
  */
 
-struct dvobj_priv {
-	void *if1;
-	void *if2;
-	void *padapters[2];
-	uint8_t iface_nums;
-	uint8_t RtOutPipe[3];
-	uint8_t Queue2Pipe[8];
-	uint8_t irq_alloc;
-	uint8_t irq_enabled;
-	_lock irq_th_lock;
-};
-
 struct phy_info {
 	uint8_t RxPWDBAll;
 	uint8_t SignalQuality;
@@ -1483,11 +1489,6 @@ struct sta_info {
  uint8_t type;
  };
  */
-
-struct fifo_more_data {
-	uint32_t more_data;
-	uint32_t len;
-};
 
 struct hw_xmit {
 	_queue *sta_queue;
@@ -1877,7 +1878,6 @@ enum _PS_BBRegBackup_ // : sint32_t
  };
  typedef struct _power_mgn_ Power_Mgn;
 
- /*
  // hal_gpio.h
  enum $E1AD70AB12E7AA6E98B8D89D9B965EB5 //: sint32_t
  {

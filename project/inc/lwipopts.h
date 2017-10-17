@@ -152,7 +152,7 @@ a lot of data that needs to be copied, this should be set high. */
 /*  TCP_SND_QUEUELEN: TCP sender buffer space (pbufs). This must be at least
   as much as (2 * TCP_SND_BUF/TCP_MSS) for things to work. */
 
-#define TCP_SND_QUEUELEN        (4* TCP_SND_BUF/TCP_MSS)
+#define TCP_SND_QUEUELEN        (4*TCP_SND_BUF/TCP_MSS)
 
 /* TCP receive window. */
 #define TCP_WND                 (4*TCP_MSS) // (2*TCP_MSS)

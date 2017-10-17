@@ -20,6 +20,7 @@
 #ifndef __RTW_CMD_H_
 #define __RTW_CMD_H_
 
+#include "drv_types.h"
 #include <rtw_rf.h>
 #include <rtw_led.h>
 

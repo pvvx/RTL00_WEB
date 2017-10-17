@@ -550,7 +550,7 @@ int wifi_connect(
 				result = RTW_TIMEOUT;
 				goto error;
 			} else {
-				if(wifi_is_connected_to_ap( ) != RTW_SUCCESS) {
+				if(rltk_wlan_is_connected_to_ap( ) != RTW_SUCCESS) {
 					result = RTW_ERROR;
 					goto error;
 				}
@@ -570,7 +570,7 @@ int wifi_connect(
 			if (join_result->network_info.password_len) {
 				rtw_free(join_result->network_info.password);
 			}
-			if (wifi_is_connected_to_ap() != RTW_SUCCESS) {
+			if (rltk_wlan_is_connected_to_ap() != RTW_SUCCESS) {
 				result = RTW_ERROR;
 				goto error;
 			}
@@ -889,6 +889,7 @@ int wifi_off(void) {
 
 #if defined(CONFIG_ENABLE_WPS_AP) && CONFIG_ENABLE_WPS_AP
 	// @todo
+	extern void wpas_wps_deinit();
 	wpas_wps_deinit();
 #endif
 	rltk_wlan_deinit();
