@@ -91,7 +91,7 @@ mp: OTA_IMAGE = $(BIN_DIR)/ota_mp.bin
 
 TST_IMAGE = $(BIN_DIR)/ram_2.bin
 
-.PHONY: genbin1 genbin23 flashburn reset test readfullflash flashwebfs flash_OTA runram runsdram
+.PHONY: genbin1 genbin23 flashburn reset test readfullflash flashboot flashwebfs flash_OTA runram runsdram
 .NOTPARALLEL: all mp genbin1 genbin23 flashburn reset test readfullflash _endgenbin flashwebfs flash_OTA
 
 all: $(ELFFILE) $(OTA_IMAGE) $(FLASH_IMAGE) _endgenbin
@@ -136,6 +136,17 @@ flashburn:
 	@cmd /K start $(JLINK_PATH)$(JLINK_GDBSRV) -device Cortex-M3 -if SWD -ir -endian little -speed 1000 
 	@$(GDB) -x $(FLASHER_PATH)gdb_wrflash.jlink
 	#@taskkill /F /IM $(JLINK_GDBSRV)
+
+flashboot:
+	@echo define call1>$(FLASHER_PATH)file_info.jlink
+	@echo set '$$'ImageSize = $(shell printf '0x%X\n' $$(stat --printf="%s" $(BIN_DIR)/ram_1.p.bin))>>$(FLASHER_PATH)file_info.jlink
+	@echo set '$$'ImageAddr = 0x000000>>$(FLASHER_PATH)file_info.jlink
+	@echo end>>$(FLASHER_PATH)file_info.jlink
+	@echo define call2>>$(FLASHER_PATH)file_info.jlink
+	@echo FlasherWrite $(BIN_DIR)/ram_1.p.bin '$$'ImageAddr '$$'ImageSize>>$(FLASHER_PATH)file_info.jlink
+	@echo end>>$(FLASHER_PATH)file_info.jlink
+	@cmd /K start $(JLINK_PATH)$(JLINK_GDBSRV) -device Cortex-M3 -if SWD -ir -endian little -speed 1000 
+	@$(GDB) -x $(FLASHER_PATH)gdb_wrfile.jlink
 
 flashwebfs:
 	@echo define call1>$(FLASHER_PATH)file_info.jlink

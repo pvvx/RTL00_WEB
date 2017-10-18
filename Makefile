@@ -20,7 +20,10 @@ clean:
 clean_all:
 	@$(MAKE) -f $(SDK_PATH)sdkbuild.mk clean_all
 	
-.PHONY: flashburn runram reset test readfullflash flashwebfs
+.PHONY: flashburn runram reset test readfullflash flashwebfs flashboot
+flashboot:
+	@$(MAKE) -f $(SDK_PATH)flasher.mk flashboot
+
 flashburn: 
 	#JLinkGDB-WrFlash.bat
 	@$(MAKE) -f $(SDK_PATH)flasher.mk flashburn
