@@ -55,6 +55,7 @@ endif
 PATHLIBS = sdk/component/soc/realtek/8195a/misc/bsp/lib/common/gcc
 
 ifdef USE_SDRAM
+CFLAGS += -DUSE_SDRAM=1
 LDFILE ?= rlx8195A-symbol-v04-img3.ld
 else
 LDFILE ?= rlx8195A-symbol-v04-img2.ld

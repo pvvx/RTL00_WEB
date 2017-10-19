@@ -121,6 +121,35 @@ SECTIONS
 		KEEP(*(.image2.validate.rodata*))
 		KEEP(*(.custom.validate.rodata*))
 	} > BD_RAM
+
+	.sdr_text :
+	{
+		__sdram_data_start__ = .;
+	INCLUDE "sdram_obj.txt"
+		*(.sdram.text*) 
+	} > SDRAM_RAM
+
+	.sdr_rodata :
+	{
+		*(.sdram.rodata*) 
+	} > SDRAM_RAM
+
+	.sdr_data : 
+	{
+		*(.sdram.data*) 
+		__sdram_data_end__ = .;
+	} > SDRAM_RAM
+
+	.sdr_bss :
+	{
+		__sdram_bss_start__ = .;
+		*(.uvc.ram.bss)
+		*(.sdram.bss*)
+	INCLUDE "sdram_bss.txt"
+		__sdram_bss_end__ = .;
+		. = ALIGN(8);
+		__sdram_heap_start__ = .;
+	} > SDRAM_RAM
 	
 	.ram_image2.text :
 	{
@@ -151,7 +180,7 @@ SECTIONS
 		*(.fwu.text*)
 		*(.otg.rom.text*)
 		*(.text*)
-		*(.sdram.text*)
+/*		*(.sdram.text*) */
 		*(.p2p.text*)
 		*(.wps.text*)
 		*(.websocket.text*)
@@ -161,7 +190,7 @@ SECTIONS
 	{
 	*(.rodata*)
 		*(.fwu.rodata*)
-		*(.sdram.rodata*)
+/*		*(.sdram.rodata*) */
 		*(.p2p.rodata*)
 		*(.wps.rodata*)
 		*(.websocket.rodata*)
@@ -191,7 +220,7 @@ SECTIONS
 		*(.p2p.data*)
 		*(.wps.data*)
 		*(.websocket.data*)
-		*(.sdram.data*)
+/*		*(.sdram.data*) */
 		__data_end__ = .;
 		__ram_image2_text_end__ = .;
 	} > BD_RAM
@@ -208,7 +237,7 @@ SECTIONS
 		*(.bfsram.data*)
 		*(COMMON)
 		*(.bss*)
-		*(.sdram.bss*)
+/*		*(.sdram.bss*) */
 		*(.p2p.bss*)
 		*(.wps.bss*)
 		*(.websocket.bss*)
@@ -226,27 +255,6 @@ SECTIONS
 	} > BD_RAM
 	__ram_heap2_end__ = 0x10070000;
 	
-	.sdr_text :
-	{
-		__sdram_data_start__ = .;
-	} > SDRAM_RAM
-
-	.sdr_rodata :
-	{
-	} > SDRAM_RAM
-
-	.sdr_data : 
-	{
-		__sdram_data_end__ = .;
-	} > SDRAM_RAM
-
-	.sdr_bss :
-	{
-		__sdram_bss_start__ = .;
-		__sdram_bss_end__ = .;
-		. = ALIGN(8);
-		__sdram_heap_start__ = .;
-	} > SDRAM_RAM
 	__sdram_heap_end__ = 0x30200000;
 
 	.boot.head :

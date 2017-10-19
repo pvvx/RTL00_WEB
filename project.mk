@@ -1,6 +1,7 @@
 #=============================================
 # SDK CONFIG
 #=============================================
+#USE_SDRAM = 1
 WEB_INA219_DRV = 1
 #WEB_MLX90614_DRV = 1
 #WEB_ADC_DRV = 1
@@ -43,9 +44,9 @@ CFLAGS += -DLOGUART_STACK_SIZE=1024
 ADD_SRC_C += project/src/user/main.c
 ADD_SRC_C += project/src/user/user_start.c
 # components
-ADD_SRC_C += project/src/console/atcmd_user.c
-ADD_SRC_C += project/src/console/wifi_console.c
-ADD_SRC_C += project/src/console/wlan_tst.c
+DRAM_C += project/src/console/atcmd_user.c
+DRAM_C += project/src/console/wifi_console.c
+#DRAM_C += project/src/console/wlan_tst.c
 #ADD_SRC_C += project/src/console/pwm_tst.c
 
 ifdef USE_SDCARD
@@ -76,8 +77,7 @@ ADD_SRC_C += project/src/adc_ws/adc_ws.c
 CFLAGS += -DWEB_ADC_DRV=1
 endif
 
-
-#Web-������
+#Web
 INCLUDES += project/inc/web
 ADD_SRC_C += project/src/tcpsrv/tcp_srv_conn.c
 ADD_SRC_C += project/src/webfs/webfs.c
@@ -88,5 +88,3 @@ ADD_SRC_C += project/src/web/websock.c
 ADD_SRC_C += project/src/web/web_int_callbacks.c
 ADD_SRC_C += project/src/web/web_int_vars.c
 ADD_SRC_C += project/src/web/web_auth.c
-
-

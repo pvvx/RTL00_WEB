@@ -1,5 +1,5 @@
 /* 
- *  StartUp USDK v0.2 (18/10/2017)
+ *  StartUp USDK v0.2 (19/10/2017)
  *  Created on: 02/03/2017
  *      Author: pvvx
  */
@@ -50,7 +50,7 @@ extern const unsigned char cus_sig[32]; // images name
 
 IMAGE2_START_RAM_FUN_SECTION RAM_START_FUNCTION gImage2EntryFun0 =
 	{ InfraStart + 1 };
-
+#ifdef CONFIG_SDR_EN
 #ifdef FIX_SDR_CALIBRATION // for speed :)
 #include "rtl8195a/rtl8195a_sdr.h"
 LOCAL void sdr_init(void) {
@@ -106,6 +106,7 @@ LOCAL void sdr_init(void) {
 	DBG_8195A(" ok\n");
 }
 #endif // FIX_SDR_CALIBRATION
+#endif // CONFIG_SDR_EN
 /*
 //----- HalNMIHandler_Patch
 void HalNMIHandler_Patch(void) {

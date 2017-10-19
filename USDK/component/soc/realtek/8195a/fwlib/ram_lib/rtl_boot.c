@@ -1,5 +1,5 @@
 /* 
- *  BootLoader Ver 0.3 (18/10/2017)
+ *  BootLoader Ver 0.3 (19/10/2017)
  *  Created on: 12/02/2017
  *      Author: pvvx
  */
@@ -38,11 +38,11 @@
 typedef struct _seg_header {
 	uint32 size;
 	uint32 ldaddr;
+	uint32 sign[2];
 } IMGSEGHEAD, *PIMGSEGHEAD;
 
 typedef struct _img2_header {
 	IMGSEGHEAD seg;
-	uint32 sign[2];
 	void (*startfunc)(void);
 	uint8 rtkwin[7];
 	uint8 ver[13];
@@ -530,10 +530,10 @@ LOCAL uint32 BOOT_RAM_TEXT_SECTION get_seg_id(uint32 addr, int32 size) {
 LOCAL uint32 BOOT_RAM_TEXT_SECTION load_img2_head(uint32 faddr, PIMG2HEAD hdr) {
 	flashcpy(faddr, hdr, sizeof(IMG2HEAD));
 	uint32 ret = get_seg_id(hdr->seg.ldaddr, hdr->seg.size);
-	if (hdr->sign[1] == IMG_SIGN2_RUN) {
-		if (hdr->sign[0] == IMG_SIGN1_RUN) {
+	if (hdr->seg.sign[1] == IMG_SIGN2_RUN) {
+		if (hdr->seg.sign[0] == IMG_SIGN1_RUN) {
 			ret |= 1 << 9;	// есть сигнатура RUN
-		} else if (hdr->sign[0] == IMG_SIGN1_SWP) {
+		} else if (hdr->seg.sign[0] == IMG_SIGN1_SWP) {
 			ret |= 1 << 8;  // есть сигнатура SWP
 		};
 	}
