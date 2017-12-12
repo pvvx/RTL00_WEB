@@ -48,6 +48,8 @@ DRAM_C += project/src/console/atcmd_user.c
 DRAM_C += project/src/console/wifi_console.c
 #DRAM_C += project/src/console/wlan_tst.c
 #ADD_SRC_C += project/src/console/pwm_tst.c
+ADD_SRC_C += project/src/WS2812/ws2812_tst.c 
+ADD_SRC_C += project/src/WS2812/WS2812.c 
 
 ifdef USE_SDCARD
 ADD_SRC_C += project/src/console/sd_fat.c
@@ -81,10 +83,16 @@ endif
 INCLUDES += project/inc/web
 ADD_SRC_C += project/src/tcpsrv/tcp_srv_conn.c
 ADD_SRC_C += project/src/webfs/webfs.c
+
+ifdef COMPILE_SCI
 ADD_SRC_C += project/src/web/web_srv.c
 ADD_SRC_C += project/src/web/web_utils.c
 ADD_SRC_C += project/src/web/web_websocket.c
 ADD_SRC_C += project/src/web/websock.c
+ADD_SRC_C += project/src/web/web_auth.c
 ADD_SRC_C += project/src/web/web_int_callbacks.c
 ADD_SRC_C += project/src/web/web_int_vars.c
-ADD_SRC_C += project/src/web/web_auth.c
+else
+ADD_SRC_C += project/src/web/_sci_web.c
+ADD_SRC_C += project/src/web/_sci_web_user.c
+endif

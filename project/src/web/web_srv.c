@@ -6,6 +6,7 @@
  * ver1.1 02/04/2015  SDK 1.0.0
  * ver2.0 14/14/2017  RTL871x
 *******************************************************************************/
+#ifndef COMPILE_SCI  // Use Single Compilation Unit "web"
 #include "user_config.h"
 #ifdef USE_WEB
 #include "autoconf.h"
@@ -36,16 +37,22 @@
 #include "overlay.h"
 #endif
 
+//#define mMIN(a, b)  ((a<b)?a:b)
+//#define mMAX(a, b)  ((a>b)?a:b)
+extern int rom_atoi(const char *);
+#undef atoi
+#define atoi(s) rom_atoi(s)
+
+#endif // USE_WEB
+#endif // COMPILE_SCI
+
+#ifdef USE_WEB
+
 #define USE_WEB_NAGLE // https://en.wikipedia.org/wiki/Nagle%27s_algorithm
 #define MIN_REQ_LEN  7  // Minimum length for a valid HTTP/0.9 request: "GET /\r\n" -> 7 bytes
 #define CRLF "\r\n"
 
 #define max_len_buf_write_flash 2048 // размер буфера при записи flash. Увеличение/уменньшение размера (до сектора 4096) ускорения не дает (1..2%)
-
-//#define mMIN(a, b)  ((a<b)?a:b)
-//#define mMAX(a, b)  ((a>b)?a:b)
-#undef atoi
-#define atoi(s) rom_atoi(s)
 
 LOCAL void web_print_headers(HTTP_CONN *CurHTTP, TCP_SERV_CONN *ts_conn) ICACHE_FLASH_ATTR ;
 

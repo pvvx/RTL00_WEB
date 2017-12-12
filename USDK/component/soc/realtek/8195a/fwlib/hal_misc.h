@@ -29,6 +29,7 @@ enum _HAL_RESET_REASON{
 typedef u32 HAL_RESET_REASON;
 
 #ifdef CONFIG_TIMER_MODULE
+/*	Min Step 31 us ! */
 extern _LONG_CALL_ unsigned int HalDelayUs(unsigned int us);
 #endif
 

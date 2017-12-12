@@ -30,6 +30,7 @@ extern int inic_stop(void);
 
 #if CONFIG_DEBUG_LOG > 0
 #undef printf
+extern int rtl_printf(const char *fmt, ...);
 #define printf(...) rtl_printf(__VA_ARGS__)
 #else
 #undef printf
@@ -832,13 +833,13 @@ int wifi_on(rtw_mode_t mode) {
 	wifi_set_mib();
 	printf("Initializing WIFI ...\n");
 	for (idx = 0; idx < devnum; idx++) {
-		ret = rltk_wlan_init(idx, mode);
+		ret = rltk_wlan_init(idx, mode); // 56
 		if (ret < 0)
 			return ret;
 	}
-	for (idx = 0; idx < devnum; idx++)
+	for (idx = 0; idx < devnum; idx++) {
 		rltk_wlan_start(idx);
-
+	}
 	while (1) {
 		if (rltk_wlan_running(devnum - 1)) {
 			printf("WIFI initialized\n");

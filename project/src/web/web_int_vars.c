@@ -2,7 +2,7 @@
  * FileName: webserver.c
  * Description: The web server mode configuration.
 *******************************************************************************/
-
+#ifndef COMPILE_SCI  // Use Single Compilation Unit "web"
 #include "user_config.h"
 #ifdef USE_WEB
 #include "autoconf.h"
@@ -23,6 +23,7 @@
 #include "rtl8195a/rtl_libc.h"
 #include "user/sys_cfg.h"
 #include "wifi_api.h"
+#include "sleep_ex_api.h"
 #include "sys_api.h"
 #include "esp_comp.h"
 
@@ -66,6 +67,11 @@ extern void web_hexdump(TCP_SERV_CONN *ts_conn);
 extern int rom_atoi(const char *);
 #undef atoi
 #define atoi rom_atoi
+
+#endif	// USE_WEB
+#endif	// COMPILE_SCI
+
+#ifdef USE_WEB
 
 typedef uint32 (* call_func)(uint32 a, uint32 b, uint32 c);
 extern QueueHandle_t xQueueWebSrv;

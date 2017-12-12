@@ -26,7 +26,7 @@ var gu = new Dygraph(
 		series : {
 			'U': { axis: 'y2' }
 		}
-		, axes: { y2: {valueRange: [3000, 3500] }}
+//		, axes: { y2: {valueRange: [3000, 3500] }}
 //		, axes: { y2: {valueRange: [3000, 3500] },	y: {valueRange: [0, 2] }}
 	});
 
@@ -35,6 +35,7 @@ var rdnextflg = false;
 var cur_idx = 0;
 var sig = 10;
 var ttout = 100;
+var wstt;
 function wsping() { ws.send('ina219'); wstt = setTimeout(wsping, ttout);};
 ws = new WebSocket('ws://rtl871x0/web.cgi');
 ws.binaryType = 'arraybuffer';

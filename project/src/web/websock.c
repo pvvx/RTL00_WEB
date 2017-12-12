@@ -4,6 +4,7 @@
  * Author: PV`
  * (c) PV` 2016
 *******************************************************************************/
+#ifndef COMPILE_SCI  // Use Single Compilation Unit "web"
 #include "user_config.h"
 #ifdef WEBSOCKET_ENA
 #include "autoconf.h"
@@ -20,6 +21,10 @@
 #include "rtl8195a/rtl_libc.h"
 #include "esp_comp.h"
 #include "hal_crypto.h"
+#endif // WEBSOCKET_ENA
+#endif // COMPILE_SCI
+
+#ifdef WEBSOCKET_ENA
 
 // HTTP/1.1 101 Web Socket Protocol Handshake\r\n
 const uint8 WebSocketHTTPOkKey[] ICACHE_RODATA_ATTR = "HTTP/1.1 101 Switching Protocols\r\nAccess-Control-Allow-Origin: *\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: %s\r\n\r\n";

@@ -712,7 +712,8 @@ VOID HalSsiSetSclkRtl8195a(VOID *Adapter, u32 ClkRate)
             }
             ClockDivider &= 0xFFFE;     // bit 0 always is 0
         }
-        DBG_SSI_INFO("spi_frequency: Set SCLK Freq=%d\r\n", (ssi_clk/ClockDivider));
+//        DBG_SSI_INFO("spi_frequency: Set SCLK Freq=%d\r\n", (ssi_clk/ClockDivider));
+        DiagPrintf("spi_frequency: Set SCLK Freq=%d\r\n", (ssi_clk/ClockDivider));
         pHalSsiAdapter->ClockDivider = ClockDivider;
         
         SsiEn = HAL_SSI_READ32(spi_idx, REG_DW_SSI_SSIENR); // Backup SSI_EN register

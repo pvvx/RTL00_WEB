@@ -4,7 +4,9 @@
  *  Created on: 23/04/2017.
  *      Author: pvvx
  */
+#ifndef COMPILE_SCI  // Use Single Compilation Unit "web"
 #include "autoconf.h"
+#ifdef USE_WEB
 #include "FreeRTOS.h"
 #include "diag.h"
 #include "web_utils.h"
@@ -12,8 +14,10 @@
 #include "web_srv.h"
 #include "rtl8195a/rtl_libc.h"
 #include "esp_comp.h"
+#endif	// USE_WEB
+#endif	// COMPILE_SCI
 
-
+#ifdef USE_WEB
 /* ----------------------------------------------------------------------------------
  * pbuf[77] = Username and password are combined into a string "username:password"
  * Return: Authorization Level
@@ -46,3 +50,4 @@ uint8 UserAuthorization(uint8 *pbuf, size_t declen)
 		}
 		return 0;
 }
+#endif // USE_WEB

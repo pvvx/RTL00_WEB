@@ -8,6 +8,7 @@
 #include <osdep_service.h>
 #include <wlan/wlan_test_inc.h>
 #include <dhcp/dhcps.h>
+#include <wifi_constants.h>
 #include <wifi/wifi_conf.h>
 #include <wifi/wifi_util.h>
 #include <platform/platform_stdlib.h>
@@ -382,7 +383,7 @@ static void cmd_wifi_connect(int argc, char **argv)
 	char 				*ssid;
 	rtw_security_t	security_type;
 	char 				*password;
-	int 				ssid_len;
+//	int 				ssid_len;
 	int 				password_len;
 	int 				key_id;
 	void				*semaphore;
@@ -411,21 +412,21 @@ static void cmd_wifi_connect(int argc, char **argv)
 	if(argc == 2){
 		security_type = RTW_SECURITY_OPEN;
 		password = NULL;
-		ssid_len = strlen((const char *)argv[1]);
+//		ssid_len = strlen((const char *)argv[1]);
 		password_len = 0;
 		key_id = 0;
 		semaphore = NULL;
 	}else if(argc ==3){
 		security_type = RTW_SECURITY_WPA2_AES_PSK;
 		password = argv[2];
-		ssid_len = strlen((const char *)argv[1]);
+//		ssid_len = strlen((const char *)argv[1]);
 		password_len = strlen((const char *)argv[2]);
 		key_id = 0;
 		semaphore = NULL;
 	}else{
 		security_type = RTW_SECURITY_WEP_PSK;
 		password = argv[2];
-		ssid_len = strlen((const char *)argv[1]);
+//		ssid_len = strlen((const char *)argv[1]);
 		password_len = strlen((const char *)argv[2]);
 		key_id = atoi(argv[3]);
 		if(( password_len != 5) && (password_len != 13)) {

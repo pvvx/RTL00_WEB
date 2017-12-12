@@ -4,6 +4,7 @@
  *  Created on: 25 дек. 2014 г.
  *      Author: PV`
  */
+#ifndef COMPILE_SCI  // Use Single Compilation Unit "web"
 #include "user_config.h"
 #include "autoconf.h"
 #include "FreeRTOS.h"
@@ -18,7 +19,10 @@
 #include "web_utils.h"
 #include "esp_comp.h"
 
-#define mMIN(a, b)  ((a<b)?a:b)
+//#define mMIN(a, b)  ((a<b)?a:b)
+//#define mMAX(a, b)  ((a>b)?a:b)
+
+#endif // COMPILE_SCI
 
 /******************************************************************************
 * xstrcpy() из сегментов flash и IRAM с возвратом размера строки:

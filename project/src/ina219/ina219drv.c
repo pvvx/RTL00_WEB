@@ -26,6 +26,11 @@
 
 #include "hal_com_reg.h"
 
+#undef mMIN
+#define mMIN(a, b)  ((a < b)? a : b)
+#undef mMAX
+#define mMAX(a, b)  ((a > b)? a : b)
+
 //#define ReadTSF_Lo32() (*((volatile unsigned int *)(WIFI_REG_BASE + REG_TSFTR)))
 //#define ReadTSF_Hi32() (*((volatile unsigned int *)(WIFI_REG_BASE + REG_TSFTR1)))
 
@@ -44,7 +49,7 @@ INA219DRV ina219drv = {
 		.i2c.status = DRV_I2C_OFF,
 		.i2c.idx = 1,				// I2C1
 		.i2c.io_sel = S0,			// PC_4, PC_5
-		.i2c.mode = DRV_I2C_FS_MODE // DRV_I2C_HS_MODE
+		.i2c.mode = DRV_I2C_FS_MODE // DRV_I2C_FS_MODE
 };
 /*
 void  ina219_write(unsigned char reg, unsigned short data)
@@ -185,9 +190,6 @@ size_t ina219_getdata(void *pd, uint16 cnt)
 	taskENABLE_INTERRUPTS();
 	return cnt * sizeof(INA219DATA) + 4;
 }
-
-//#define mMIN(a, b)  ((a<b)?a:b)
-#define mMAX(a, b)  ((a>b)?a:b)
 
 #include "web_srv.h"
 #include "websock.h"

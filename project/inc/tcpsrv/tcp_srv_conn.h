@@ -12,11 +12,6 @@
 
 #include "lwip/err.h"
 
-#undef mMIN
-#define mMIN(a, b)  ((a < b)? a : b)
-#define mMAX(a, b)  ((a>b)?a:b)
-
-
 enum srvconn_state {
     SRVCONN_NONE =0,
     SRVCONN_CLOSEWAIT,  // ожидает закрытия
@@ -35,9 +30,11 @@ enum srvconn_state {
 #define  MAX_TIME_WAIT_PCB 10
 #endif
 
+#define _mMIN(a, b)  ((a < b)? a : b)
+
 // кол-во одновременно открытых соединений по умолчанию
 #ifndef TCP_SRV_MAX_CONNECTIONS
- #define TCP_SRV_MAX_CONNECTIONS  mMIN(MEMP_NUM_TCP_PCB, 10)
+ #define TCP_SRV_MAX_CONNECTIONS  _mMIN(MEMP_NUM_TCP_PCB, 10)
 #endif
 
 // порт сервера по умолчанию

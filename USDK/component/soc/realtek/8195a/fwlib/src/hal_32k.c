@@ -67,7 +67,7 @@ En32KCalibration(
             DiagPrintf("Check lock: %d\n", Ttemp);
             DiagPrintf("0x278: %x\n", Rtemp);
 #endif
-            if (Ttemp > 100000) { /*Delay 100ms*/            
+            if (Ttemp > 100000/63) { /*Delay 100ms*/
                 DiagPrintf("32K Calibration Fail!\n", Ttemp);
                 break;
             }

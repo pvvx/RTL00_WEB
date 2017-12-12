@@ -203,12 +203,12 @@ extern HAL_GPIO_ADAPTER gBoot_Gpio_Adapter;
 	HalReInitPlatformTimer(); // HalInitPlatformTimerV02(); HalTimerOpInit_Patch((VOID*) (&HalTimerOp));
 	SystemCoreClockUpdate();
 	En32KCalibration();
-
 	//---- Spic
 //	_memset(SpicInitParaAllClk, 0, sizeof(SpicInitParaAllClk));
 	*(uint32 *)(&SpicInitParaAllClk[0][0].BaudRate) = 0x01310202; // patch
 	*(uint32 *)(&SpicInitParaAllClk[1][0].BaudRate) = 0x11311301; // patch
 //	*(uint32 *)(&SpicInitParaAllClk[2][0].BaudRate) = 0x21311301; // patch
+#ifdef CONFIG_SDR_EN
 	SPI_FLASH_PIN_FCTRL(ON);
 /*
 //	uint8 SpicBaudRate = CPU_CLK_TYPE_NO - 1 - ((HAL_SYS_CTRL_READ32(REG_SYS_CLK_CTRL1) >> 4) & 7);
@@ -224,7 +224,6 @@ extern HAL_GPIO_ADAPTER gBoot_Gpio_Adapter;
 	};
 */
 //	SpicFlashInitRtl8195A(SpicDualBitMode); //	SpicReadIDRtl8195A(); SpicDualBitMode
-#ifdef CONFIG_SDR_EN
 	//---- SDRAM
 	uint8 ChipId = HalGetChipId();
 	if (ChipId >= CHIP_ID_8195AM) {
@@ -253,9 +252,9 @@ extern HAL_GPIO_ADAPTER gBoot_Gpio_Adapter;
 	HAL_PERI_ON_WRITE32(REG_SOC_FUNC_EN, HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) | BIT(21)); // Flag SDRAM Init or None
 #else
 	HAL_PERI_ON_WRITE32(REG_SOC_FUNC_EN, HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) & (~BIT(21))); // Flag SDRAM Not Init
-#endif // CONFIG_SDR_EN
 	//----- Close Flash
 	SPI_FLASH_PIN_FCTRL(OFF);
+#endif // CONFIG_SDR_EN
 
 	InitSoCPM();
 	VectorTableInitForOSRtl8195A(&vPortSVCHandler, &xPortPendSVHandler,

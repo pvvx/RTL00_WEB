@@ -1,40 +1,55 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="dygraph.css">
+    <link rel="stylesheet" href="ina2.css">
     <title>Get data INA219</title>
-    <script type="text/javascript" src="dygraph.min.js"></script>
-
+    <script type="text/javascript" src="dygraph.js"></script>
   </head>
   <body>
-    <h3 style="width:800px; text-align: center;">U & I (INA219)</h3>
-    <div id="div_v" style="width:800px; height:400px;"></div>
-    <script type="text/javascript">
-var datau = [];
-//var datai = [];
-var gu = new Dygraph(
-	document.getElementById("div_v"), 
-    datau,
-	{
-		showRangeSelector: true,
-		labels: ['X', 'U', 'I'],
-//		drawPoints: true,
-//		rollPeriod: 2,
-//		errorBars: true,
-//		showRoller: true,
-		ylabel: 'U(mV)',
-			y2label: 'I(mA)',
-		series : {
-			'I': { axis: 'y2' }
-		}
-//		, axes: { y: {valueRange: [3000, 3500] },	y2: {valueRange: [0, 30] }}
-	});
+    <div style="width:1000px; height:500px;">
+    <div id="div_v"	style="width:100%; height:400px;"></div>
+	<p style="text-align: center;">	
+		<input type="button" id="butOnOff" value="Stop">
+		<input type="radio" name='rm1'  id="FixEnd"/>
+		<label for="FixEnd">Fixed</label>
+		<input type="radio" checked name='rm1' id="FixNone"/> 
+		<label for="FixNone">Float</label><br>
+		Window: <span id='wdsize'>?</span> sec<br>
+		Sample Rate: <span id='smprate'>?</span> smps
+	</p>
+	<div id='labdiv' style="text-align: center;"></div>
+	</div>
 
+<script type="text/javascript">
+var $ = function(id) {
+	return document.getElementById(id);
+}
+var stg = 0;
+var smprate = 1819;
+var smps = smprate;
+var samples = 10*smprate;
+var rend = 1;
 var oldblkid = 0;
 var rdnextflg = false;
 var cur_idx = 0;
-var sig = 10;
-function wsping() {ws.send('ina219'); wstt = setTimeout(wsping, 50);};
+var sttim = 0;
+$("butOnOff").onclick =  function() {
+	if(rend) { 
+		rend = 0;
+		$("butOnOff").value = "Run";
+	} else {
+		rend = 1;
+		$("butOnOff").value = "Stop";
+	}
+}
+var datau = [];
+var gu;
+//window.onresize= function(){//	alert('Размеры div #Test изменены.');}	
+function wsping() {
+	clearTimeout(wstt);
+	ws.send('ina219'); 
+	wstt = setTimeout(wsping, 500);
+}
 ws = new WebSocket('ws://rtl871x0/web.cgi');
 ws.binaryType = 'arraybuffer';
 ws.onopen = function(){ ws.send('user=rtl871x:supervisor'); ws.send('sys_debug=0'); wstt = setTimeout(wsping, 50);};
@@ -45,21 +60,79 @@ ws.onmessage = function (event) {
 		if(wordarray.length > 2) {
 			var blksz = wordarray[0]; 
 			if(wordarray.length == blksz*2 + 2) {
-				var blkid = wordarray[1] & 0xFFFF;
-				if(rdnextflg) {
-					cur_idx += (blkid - oldblkid) & 0xFFFF;
-				} else rdnextflg = true;
-				oldblkid = blkid + blksz;
-				for (var i=2; i<wordarray.length; i+=2) {
- 					if(cur_idx > 10000 ) datau.shift();
-					datau.push([cur_idx*0.001, wordarray[i]*0.5, wordarray[i+1]*0.1]);
-					cur_idx++;
-				}
-	 	 	    gu.updateOptions({'file':datau});
-			}
-			wstt = setTimeout(wsping, 50);
-		}
-	}
+				if(!sttim) {
+					sttim = new Date().getTime();
+					setInterval(function(){wsSmpRate()}, 500);
+				} else {
+					var blkid = wordarray[1] & 0xFFFF;
+					if(rdnextflg) {
+						cur_idx += (blkid - oldblkid) & 0xFFFF;
+					} else rdnextflg = true;
+					oldblkid = blkid + blksz;
+					for (var i=2; i<wordarray.length; i+=2) {
+						if(rend) {
+ 							if(cur_idx >= samples ) datau.shift();
+ 							if(wordarray[i] & 2) datau.push([cur_idx/smprate, wordarray[i]*0.0005, wordarray[i+1]*0.1]);
+ 							else datau.push([cur_idx/smprate]);
+						}					
+						cur_idx++;
+					}
+					if(!stg) {
+						gu = new Dygraph(
+						$("div_v"), 
+					    datau,
+						{
+							title: 'U & I (INA219)',
+//							rightGap: 250,
+							showRangeSelector: true,
+//							drawPoints: true,
+//							rollPeriod: 10,
+//							errorBars: true,
+//							fillGraph: true,
+							showRoller: true,
+//							maxNumberWidth: 10,
+//							digitsAfterDecimal: 3,
+							xlabel: 'T(sec)',
+							ylabel: 'U(V)',
+							y2label: 'I(mA)',
+							colors: ['rgb(51,204,204)','rgb(255,100,100)'],
+//							highlightSeriesOpts: { strokeWidth: 2 },
+							series : { 'I': { axis: 'y2' } },
+							axes: { 
+								x: {valueFormatter: function(x){return this.getLabels()[0] + ': '+ x.toPrecision(3);}},
+								y: {valueRange: [0,]}, 
+								y2: {valueRange: [0,]}},
+							labels: ['T', 'U', 'I'],
+							labelsDiv: $('labdiv'),
+							legend: 'always',  // "follow"
+//							legendFormatter: legendFormatter
+						});
+						setInterval(function(){renderChart()}, 50);
+						stg = 1;
+					}
+			}	}
+			wstt = setTimeout(wsping, 40);
+}	}	}
+function wsSmpRate() {
+	smps = cur_idx * 1000/ (new Date().getTime() - sttim);
+	$('smprate').innerHTML = smps.toFixed(1);
+}
+var renderChart = function() {
+//    $('div_v').style.height = (window.innerHeight-180) + 'px';
+	var dl;
+	if (gu.dateWindow_) { 
+		dl = gu.dateWindow_[1] - gu.dateWindow_[0];
+	    if ($("FixEnd").checked) {
+			var ls = datau.length - 1;
+			gu.dateWindow_[1] = datau[ls][0];
+			gu.dateWindow_[0] = datau[ls][0] - dl;
+    	} else if (gu.dateWindow_[0] < datau[0][0]) { 
+			gu.dateWindow_[0] = datau[0][0];
+			gu.dateWindow_[1] = datau[0][0] + dl;
+	   	}
+	} else dl = datau.length/smprate;
+	$("wdsize").innerHTML = dl.toFixed(3);
+	if(rend) gu.updateOptions({'file': datau});
 }
 </script>
   </body>

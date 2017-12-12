@@ -3,6 +3,7 @@
  * Description: The web server inernal callbacks.
 *******************************************************************************/
 
+#ifndef COMPILE_SCI  // Use Single Compilation Unit "web"
 #include "user_config.h"
 #ifdef USE_WEB
 #include "autoconf.h"
@@ -53,15 +54,21 @@
 #undef atoi
 #define atoi rom_atoi
 
-//#define mMIN(a, b)  ((a<b)?a:b)
+#undef mMIN
+#define mMIN(a, b)  ((a < b)? a : b)
+//#undef mMAX
+//#define mMAX(a, b)  ((a > b)? a : b)
+
 #define ifcmp(a)  if(rom_xstrcmp(cstr, a))
+extern struct netif xnetif[NET_IF_NUM]; /* network interface structure */
+
+#endif	// USE_WEB
+#endif	// COMPILE_SCI
+
+#ifdef USE_WEB
 
 #define OpenFlash() { device_mutex_lock(RT_DEV_LOCK_FLASH); flash_turnon(); }
 #define CloseFlash() { SpicDisableRtl8195A(); device_mutex_unlock(RT_DEV_LOCK_FLASH); }
-
-
-extern struct netif xnetif[NET_IF_NUM]; /* network interface structure */
-
 
 #if WEB_DEBUG_FUNCTIONS
 //#define TEST_SEND_WAVE

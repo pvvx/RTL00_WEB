@@ -28,7 +28,6 @@ void us_ticker_init(void)
 {
     
     if (us_ticker_inited) return;
-    us_ticker_inited = 1;
 
     // Initial a G-Timer
     Timer6Adapter.IrqDis = 1;    // Disable Irq
@@ -44,6 +43,7 @@ void us_ticker_init(void)
     HalTimerOp.HalTimerInit((VOID*) &Timer6Adapter);
 
     DBG_TIMER_INFO("%s: Timer_Id=%d\n", __FUNCTION__, APP_TIM_ID);
+    us_ticker_inited = 1;
 }
 
 #if (!TICK_READ_FROM_CPU) || !defined(PLATFORM_FREERTOS)
@@ -56,9 +56,9 @@ uint32_t us_ticker_read()
     uint64_t us_tick;
 
     //1 Our G-timer  resolution is ~31 us (1/32K), and is a countdown timer
-//    if (!us_ticker_inited) {
-//        us_ticker_init();
-//    }
+    if (!us_ticker_inited) {
+        us_ticker_init();
+    }
     tick_cnt = HalTimerOp.HalTimerReadCount(SYS_TIM_ID);
     tick_cnt = 0xffffffff - tick_cnt;   // it's a down counter
     ticks_125ms = tick_cnt/(GTIMER_CLK_HZ/8);

@@ -4,6 +4,7 @@
  * Author: pvvx
  * 2016
 *******************************************************************************/
+#ifndef COMPILE_SCI  // Use Single Compilation Unit "web"
 #include "user_config.h"
 #ifdef WEBSOCKET_ENA
 #include "autoconf.h"
@@ -21,14 +22,20 @@
 #include "rtl8195a/rtl_libc.h"
 #include "esp_comp.h"
 
+
+//#define mMIN(a, b)  ((a<b)?a:b)
+
+#endif	// WEBSOCKET_ENA
+#endif	// COMPILE_SCI
+
+#ifdef WEBSOCKET_ENA
+
 #if 0
 #undef DEBUGSOO
 #define DEBUGSOO 4
 #endif
 
 #define copy_s4d1 rtl_memcpy
-
-//#define mMIN(a, b)  ((a<b)?a:b)
 
 #define MAX_RX_BUF_SIZE 8192
 

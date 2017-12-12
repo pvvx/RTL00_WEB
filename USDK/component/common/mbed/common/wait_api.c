@@ -96,12 +96,14 @@ void wait_ms(int ms) { // До 1073741 секунд? 298 часов
 void wait_us(int us) { // До 2.147483648 секунды!
 	uint32_t start;
 #ifdef WAIT_US_USE_CYCCNT
-	if(us < 1) return;
-	if (us < 327) { // G-timer  resolution is ~31 us (1/32K), use DWT->CYCCNT...
+	if((uint32_t)us < 1) return;
+	if ((uint32_t)us < 327) { // G-timer  resolution is ~31 us (1/32K), use DWT->CYCCNT...
         if(!(DWT->CTRL & DWT_CTRL_CYCCNTENA_Msk)) { // уже включен?
+//        	taskENTER_CRITICAL();
 			CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; // открыть доступ
             DWT->CYCCNT = 0; // обнулить и запустить
             DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk; // запустить счет
+//    		taskEXIT_CRITICAL();
         }
         start = DWT->CYCCNT + us * (PLATFORM_CLOCK / 1000000ul);
         while ((int32_t)(start - DWT->CYCCNT) > 0);
