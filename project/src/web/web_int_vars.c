@@ -263,7 +263,19 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
           else ifcmp("ip") 		wifi_ap_dhcp.ip = ipaddr_addr(pvar);
           else ifcmp("gw") 		wifi_ap_dhcp.gw = ipaddr_addr(pvar);
           else ifcmp("msk") 	wifi_ap_dhcp.mask = ipaddr_addr(pvar);
-//        else ifcmp("mac") 	strtomac(pvar, wifi_ap_cfg.macaddr);
+          else ifcmp("mac") 	{
+        	  if(wifi_mode & RTW_MODE_AP) {
+            	  uint8 new_mac[6];
+            	  if (strtomac(pvar, new_mac)) {
+                	  uint16 xs = 0;
+                	  for(int i = 0; i < 6; i++) xs += new_mac[i];
+                	  if (xs != 0 && xs != 0xff*6 && memcmp(xnetif[WLAN_AP_NETIF_NUM].hwaddr, new_mac, 6)) {
+                   		  if(wifi_mode == RTW_MODE_STA_AP) new_mac[5]--; // если AP+ST, то последняя цифра mac - 1
+                   		  wifi_set_mac_address(new_mac);
+                	  }
+            	  }
+        	  }
+          }
 //    	  else ifcmp("sip") 	wifi_ap_dhcp.start_ip = ipaddr_addr(pvar);
 //    	  else ifcmp("eip") 	wifi_ap_dhcp.end_ip = ipaddr_addr(pvar);
 #if DEBUGSOO > 2
@@ -321,7 +333,19 @@ void ICACHE_FLASH_ATTR web_int_vars(TCP_SERV_CONN *ts_conn, uint8 *pcmd, uint8 *
     	  else ifcmp("ip") 		wifi_st_dhcp.ip = ipaddr_addr(pvar);
           else ifcmp("gw") 		wifi_st_dhcp.gw = ipaddr_addr(pvar);
           else ifcmp("msk") 	wifi_st_dhcp.mask = ipaddr_addr(pvar);
-//          else ifcmp("mac") 	strtomac(pvar, wifi_st_cfg.mac);
+          else ifcmp("mac") {
+        	  if(wifi_mode & RTW_MODE_STA) {
+            	  uint8 new_mac[6];
+            	  if (strtomac(pvar, new_mac)) {
+                	  uint16 xs = 0;
+                	  for(int i = 0; i < 6; i++) xs += new_mac[i];
+                	  if (xs != 0 && xs != 0xff*6 && memcmp(xnetif[WLAN_ST_NETIF_NUM].hwaddr, new_mac, 6)) {
+//                   		  if(wifi_mode == RTW_MODE_STA_AP) new_mac[5]--; // если AP+ST, то последняя цифра mac - 1
+                   		  wifi_set_mac_address(new_mac);
+                	  }
+            	  }
+        	  }
+          }
 //          else ifcmp("sbss") 	wifi_st_cfg.bssidx = val;
 #if DEBUGSOO > 5
           else os_printf(" - none!\n");

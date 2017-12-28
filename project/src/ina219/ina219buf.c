@@ -129,6 +129,8 @@ void ina219_init(void)
 // (!) Установки драйвера I2C заданы в структуре ina219drv
 //	    rtl_printf("INA219 control reg = 0x%04x\n", p->config);
 //		_i2c_setup(&p->i2c, INA219_I2C_PIN_SDA , INA219_I2C_PIN_SCL, DRV_I2C_FS_MODE); // == DRV_I2C_OK?
+//		HAL_GPIO_PullCtrl((u32)PC_4, (u32)PullUp);
+//		HAL_GPIO_PullCtrl((u32)PC_5, (u32)PullUp);
 		_i2c_init(&p->i2c);
 //		_i2c_set_speed(&p->i2c, INA219_I2C_BUS_CLK);
 		rtl_printf("I2C%d mode = %d, drvStatus = %d\n", p->i2c.idx, p->i2c.mode, p->i2c.status);

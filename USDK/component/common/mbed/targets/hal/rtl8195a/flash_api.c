@@ -587,6 +587,26 @@ unsigned int flash_get_size(flash_t *obj) {
 	return flashchip_size;
 }
 
+unsigned int flash_read_id(flash_t *obj)
+{
+	flash_turnon();
+	/* Disable SPI_FLASH User Mode */
+	HAL_SPI_WRITE32(REG_SPIC_SSIENR, 0);
+
+	/* Set Ctrlr1; 1 byte data frames */
+	HAL_SPI_WRITE32(REG_SPIC_CTRLR1, BIT_NDF(3));
+
+	/* Send flash RX command and read the data */
+	SpicRxCmdRefinedRtl8195A(FLASH_CMD_RDID, obj->SpicInitPara);
+	unsigned int ret = HAL_SPI_READ32(REG_SPIC_DR0);
+
+	/* Disable SPI_FLASH User Mode */
+	HAL_SPI_WRITE32(REG_SPIC_SSIENR, 0);
+
+	SpicDisableRtl8195A();
+	return ret;
+}
+
 /*
  * Read Flash OTP data
  */
@@ -619,17 +639,25 @@ int flash_otp_read(flash_t *obj, uint32_t address, uint32_t Length,
 				flashobj.SpicInitPara.Mode.BitMode);
 		SpicTxCmdWithDataRtl8195A(FLASH_CMD_WRDI, 0, 0, flashobj.SpicInitPara); // exit secured OTP
 		break;
+//	case FLASH_OTHERS: // ?
 	case FLASH_MICRON: // (4Bh) READ OTP ARRAY
 #if	CONFIG_DEBUG_LOG > 4
 		DBG_SPIF_INFO("MICRON: @TODO !\n");
-#endif
 		// FLASH_CMD_ROTPA
-		ret = 0;
-		break;
+#endif
 	default:
-		DBG_8195A("Flash type?");
+		DBG_8195A("Flash type %d [%06x]?\n", flashobj.SpicInitPara.flashtype, flash_read_id(&flashobj));
+	    /* Read Flash status reg */
+/*
+		SpicRxCmdRefinedRtl8195A(0x05, flashobj.SpicInitPara);
+	    u16 st = HAL_SPI_READ32(REG_SPIC_DR0);
+	    SpicRxCmdRefinedRtl8195A(0x35, flashobj.SpicInitPara);
+	    st = (st & 0xFF) | (HAL_SPI_READ32(REG_SPIC_DR0) << 8);
+		DBG_8195A("Flash status: 0x%04x\n", st);
+*/
 		ret = 0;
 	}
 	SpicDisableRtl8195A();
 	return ret;
 }
+

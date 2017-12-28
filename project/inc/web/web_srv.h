@@ -185,6 +185,7 @@ typedef struct s_http_response
 //#define tcp_urlstrcpy(str, len) web_conn->msgbuflen += urlencode(&web_conn->msgbuf[web_conn->msgbuflen], str, web_conn->msgbufsize - web_conn->msgbuflen - 1, len)
 #define tcp_puts(...) web_conn->msgbuflen += rtl_sprintf((char *)&web_conn->msgbuf[web_conn->msgbuflen], __VA_ARGS__)
 #define tcp_puts_fd(...) web_conn->msgbuflen += rtl_sprintf((char *)&web_conn->msgbuf[web_conn->msgbuflen], __VA_ARGS__)
+#define tcp_put_mac(m) web_conn->msgbuflen += mactostr((char *)&web_conn->msgbuf[web_conn->msgbuflen], (unsigned char *)m, true)
 /*
 #define tcp_puts_fd(fmt, ...) do { \
 		static const char flash_str[] ICACHE_RODATA_ATTR = fmt;	\

@@ -74,7 +74,6 @@ void user_init_thrd(void) {
 	if(!syscfg.cfg.b.debug_print_enable) print_off = 1;
 
 	/* Initilaize the console stack */
-
 	console_init();
 
 	/* Web Disk Init */

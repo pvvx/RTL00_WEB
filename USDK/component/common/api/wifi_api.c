@@ -43,7 +43,7 @@
 #include "main.h"
 #include "wifi_user_set.h"
 
-#if 0
+#if 1
 #undef debug_printf
 #define debug_printf(fmt, ...) rtl_printf(fmt, ##__VA_ARGS__)
 #undef info_printf
@@ -558,7 +558,7 @@ LOCAL int _wifi_on(rtw_mode_t mode) {
 	wext_set_adaptivity(wifi_cfg.adaptivity & 3);
 
 	debug_printf("Wlan0 init...\n");
-
+//	rltk_wlan_deinit_fastly();
 	ret = rltk_wlan_init(WLAN0_IDX, mode); // rtw_mode_t
 
 	debug_printf("netif_set_up 0...\n");

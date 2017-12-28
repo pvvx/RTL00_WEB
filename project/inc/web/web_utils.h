@@ -31,7 +31,7 @@ uint8 * cmpcpystr(uint8 *pbuf, uint8 *pstr, uint8 a, uint8 b, uint16 len);
 uint8 * web_strnstr(const uint8* buffer, const uint8* token, int n);
 bool base64decode(const uint8 *in, int len, uint8_t *out, int *outlen);
 size_t base64encode(char* target, size_t target_len, const char* source, size_t source_len);
-void strtomac(uint8 *s, uint8 *macaddr);
+int strtomac(uint8 *s, uint8 *macaddr);
 //uint32 strtoip(uint8 *s); // ipaddr_addr();
 int urldecode(uint8 *d, uint8 *s, uint16 lend, uint16 lens);
 //int urlencode(uint8 *d, uint8 *s, uint16 lend, uint16 lens);

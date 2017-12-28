@@ -287,9 +287,9 @@ int reset_uart_atcmd_setting(){
 	return 0;
 }
 
+#ifdef UART_AT_RX_WAKE
 #if defined(configUSE_WAKELOCK_PMU) && (configUSE_WAKELOCK_PMU == 1)
 #include "gpio_irq_api.h"
-#define UART_AT_RX_WAKE 	UART_RX
 void gpio_uart_at_rx_irq_callback (uint32_t id, gpio_irq_event event)
 {
 	/*  WAKELOCK_LOGUART is also handled in log service.
@@ -301,16 +301,12 @@ void gpio_uart_at_rx_irq_callback (uint32_t id, gpio_irq_event event)
 void uart_at_rx_wakeup()
 {
 	gpio_irq_t gpio_rx_wake;
-#ifdef RTL8711AM
-#if  (UART_AT_RX_WAKE!=PA_0)||(UART_AT_RX_WAKE!=PE_3)
-#error "Set pin rx_wakeup!"
-#endif
-#endif
 	gpio_irq_init(&gpio_rx_wake, UART_AT_RX_WAKE, gpio_uart_at_rx_irq_callback, 0);
 	gpio_irq_set(&gpio_rx_wake, IRQ_FALL, 1);   // Falling Edge Trigger
 	gpio_irq_enable(&gpio_rx_wake);
 }
 #endif
+#endif // UART_AT_RX_WAKE
 
 void uart_atcmd_reinit(UART_LOG_CONF* uartconf){
 	serial_baud(&at_cmd_sobj,uartconf->BaudRate);
@@ -318,14 +314,15 @@ void uart_atcmd_reinit(UART_LOG_CONF* uartconf){
 
 	// set flow control, only support RTS and CTS concurrent mode
 	// rxflow and tx flow is fixed by hardware
-#define rxflow	UART_RTS
-#define txflow	UART_CTS
+//	unsigned rxflow	= UART_RTS;
+	unsigned txflow	= UART_CTS;
+
 	if(uartconf->FlowControl){
 		pin_mode(txflow, PullDown); //init CTS in low
-		serial_set_flow_control(&at_cmd_sobj, FlowControlRTSCTS, rxflow, txflow);
+		serial_set_flow_control(&at_cmd_sobj, FlowControlRTSCTS);//, rxflow, txflow);
 	}
 	else
-		serial_set_flow_control(&at_cmd_sobj, FlowControlNone, rxflow, txflow);
+		serial_set_flow_control(&at_cmd_sobj, FlowControlNone);//, rxflow, txflow);
 }
 
 void uart_at_send_string(char *str)
@@ -535,21 +532,25 @@ void uart_atcmd_main(void)
 {
 	UART_LOG_CONF uartconf;
 
+	unsigned rx	= UART_RX;
+	unsigned tx	= UART_TX;
+	unsigned rxflow	= UART_RTS;
+	unsigned txflow	= UART_CTS;
+
 	read_uart_atcmd_setting_from_system_data(&uartconf);
-	serial_init(&at_cmd_sobj, UART_TX, UART_RX);
+    serial_init(&at_cmd_sobj, tx, rx);
+    printf("tx: %02x, rx: %02x\n", tx, rx);
 	serial_baud(&at_cmd_sobj,uartconf.BaudRate);
 	serial_format(&at_cmd_sobj, uartconf.DataBits, (SerialParity)uartconf.Parity, uartconf.StopBits);
 	serial_rx_fifo_level(&at_cmd_sobj, FifoLvHalf);
 	// set flow control, only support RTS and CTS concurrent mode
 	// rxflow and tx flow is fixed by hardware
-	#define rxflow	UART_RTS
-	#define txflow	UART_CTS
 	if(uartconf.FlowControl){
 		pin_mode(txflow, PullDown); //init CTS in low
-		serial_set_flow_control(&at_cmd_sobj, FlowControlRTSCTS, rxflow, txflow);
+		serial_set_flow_control(&at_cmd_sobj, FlowControlRTSCTS);//, rxflow, txflow);
 	}
 	else
-		serial_set_flow_control(&at_cmd_sobj, FlowControlNone, rxflow, txflow);
+		serial_set_flow_control(&at_cmd_sobj, FlowControlNone);//, rxflow, txflow);
 
 	/*uart_at_lock_init();*/
 
@@ -564,9 +565,11 @@ void uart_atcmd_main(void)
 	serial_irq_handler(&at_cmd_sobj, uart_irq, (uint32_t)&at_cmd_sobj);
 	serial_irq_set(&at_cmd_sobj, RxIrq, 1);
 
+#ifdef UART_AT_RX_WAKE
 #if defined(configUSE_WAKELOCK_PMU) && (configUSE_WAKELOCK_PMU == 1)
 	uart_at_rx_wakeup();
 #endif
+#endif // UART_AT_RX_WAKE
 }
 
 static void uart_atcmd_thread(void *param)

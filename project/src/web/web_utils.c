@@ -375,18 +375,27 @@ uint32 ICACHE_FLASH_ATTR str_array_b(uint8 *s, uint8 *buf, uint32 max_buf)
 /******************************************************************************
  * FunctionName : strtmac
 *******************************************************************************/
-void ICACHE_FLASH_ATTR strtomac(uint8 *s, uint8 *macaddr)
+int ICACHE_FLASH_ATTR strtomac(uint8 *s, uint8 *macaddr)
 {
-	uint8 pbuf[4];
-	s = cmpcpystr(pbuf, s, 0, ':', 3);
-	*macaddr++ = hextoul(pbuf);
-	int i = 4;
-	while(i--) {
-		s = cmpcpystr(pbuf, s, ':', ':', 3);
-		*macaddr++ = hextoul(pbuf);
+	uint8 * ptrm = macaddr;
+	int slen = strlen(s);
+	uint8 * ptr = s;
+	if(slen == (6*2 + 5) || slen == (6*2)) {
+		uint8 pbuf[4];
+		pbuf[2] = 0;
+		slen = 6;
+		while(slen--) {
+			pbuf[0] = ptr[0];
+			pbuf[1] = ptr[1];
+			*ptrm++ = (uint8)hextoul(pbuf);
+			if(ptr[2] != ':') ptr +=2;
+			else ptr +=3;
+		}
+		return 1;
+	} else {
+		rtl_memset(macaddr, 0xff, 6);
+		return 0;
 	}
-	s = cmpcpystr(pbuf, s, ':', ' ', 3);
-	*macaddr++ = hextoul(pbuf);
 }
 /******************************************************************************
  * FunctionName : urldecode

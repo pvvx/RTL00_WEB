@@ -182,6 +182,13 @@ else
 ifeq ($(FLASHER_TYPE),cmsis-dap)
 FLASHER:=cmsis-dap
 
+flashboot:
+	@$(OPENOCD) -f interface/$(FLASHER).cfg -c 'transport select swd' -c 'adapter_khz 1000' \
+	-f $(FLASHER_PATH)rtl8710.ocd -c 'init' -c 'reset halt' -c 'adapter_khz $(FLASHER_SPEED)' \
+	-c 'rtl8710_flash_auto_erase 1' -c 'rtl8710_flash_auto_verify 1' \
+	-c 'rtl8710_flash_write $(RAM1P_IMAGE) 0' \
+	-c 'rtl8710_reboot' -c 'reset run' -c shutdown
+
 flashburn:
 	@$(OPENOCD) -f interface/$(FLASHER).cfg -c 'transport select swd' -c 'adapter_khz 1000' \
 	-f $(FLASHER_PATH)rtl8710.ocd -c 'init' -c 'reset halt' -c 'adapter_khz $(FLASHER_SPEED)' \
@@ -195,6 +202,13 @@ flashimage2p:
 	-f $(FLASHER_PATH)rtl8710.ocd -c 'init' -c 'reset halt' -c 'adapter_khz $(FLASHER_SPEED)' \
 	-c 'rtl8710_flash_auto_erase 1' -c 'rtl8710_flash_auto_verify 1' \
 	-c 'rtl8710_flash_write $(RAM2P_IMAGE) 0xb000' \
+	-c 'rtl8710_reboot' -c 'reset run' -c shutdown
+
+flash_OTA:
+	@$(OPENOCD) -f interface/$(FLASHER).cfg -c 'transport select swd' -c 'adapter_khz 1000' \
+	-f $(FLASHER_PATH)rtl8710.ocd -c 'init' -c 'reset halt' -c 'adapter_khz $(FLASHER_SPEED)' \
+	-c 'rtl8710_flash_auto_erase 1' -c 'rtl8710_flash_auto_verify 1' \
+	-c 'rtl8710_flash_write $(RAM2P_IMAGE) 0x80000' \
 	-c 'rtl8710_reboot' -c 'reset run' -c shutdown
 	
 flashwebfs:
@@ -222,6 +236,14 @@ runram:
 	-c 'load_image $(RAM1R_IMAGE) 0x10000bc8 bin' \
 	-c 'load_image $(RAM2_IMAGE) 0x10006000 bin' \
 	-c 'mww 0x40000210 0x20111157' -c 'rtl8710_reboot' -c shutdown
+
+runsdram:
+	@$(OPENOCD) -f interface/$(FLASHER).cfg -c 'transport select swd' -c 'adapter_khz 1000' \
+	-f $(FLASHER_PATH)rtl8710.ocd -c 'init' -c 'reset halt' -c 'adapter_khz $(FLASHER_SPEED)' \
+	-c 'load_image $(RAM1R_IMAGE) 0x10000bc8 bin' \
+	-c 'load_image $(RAM2_IMAGE) 0x10006000 bin' \
+	-c 'boot_load_srdam $(RAM3_IMAGE) 0x30000000' \
+	-c shutdown
 
 endif
 endif

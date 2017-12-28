@@ -284,10 +284,10 @@ int uartadapter_uart_open(ua_socket_t *ua_socket, ua_uart_set_str *puartpara)
 	#define txflow	UA_UART_CTS_PIN
 	if(puartpara->FlowControl){
 		pin_mode(txflow, PullDown); // init CTS in low
-		serial_set_flow_control(&ua_socket->uart.uart_sobj, FlowControlRTSCTS, rxflow, txflow);
+		serial_set_flow_control(&ua_socket->uart.uart_sobj, FlowControlRTSCTS);//, rxflow, txflow);
 	}
 	else
-		serial_set_flow_control(&ua_socket->uart.uart_sobj, FlowControlNone, rxflow, txflow);
+		serial_set_flow_control(&ua_socket->uart.uart_sobj, FlowControlNone);//, rxflow, txflow);
 	//---------------------------- add Flow
 
 	/*uart irq handle*/

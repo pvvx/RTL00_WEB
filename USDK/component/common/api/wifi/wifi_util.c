@@ -237,7 +237,7 @@ int wext_set_mac_address(const char *ifname, char * mac)
 {
 	char buf[13+17+1];
 	memset(buf, 0, sizeof(buf));
-	snprintf(buf, 13+17, "write_mac %s", mac);
+	snprintf(buf, 13+17, "write_mac %02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 	return wext_private_command(ifname, buf, 0);
 }
 

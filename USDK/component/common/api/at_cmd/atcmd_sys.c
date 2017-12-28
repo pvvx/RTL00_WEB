@@ -1269,20 +1269,21 @@ void fATFO(void *arg) {
 					rdsize = size;
 				else
 					rdsize = 8 * symbs_line;
-				flash_otp_read(&flashobj, addr, rdsize, flash_data);
-				uint8_t *ptr = flash_data;
-				while (ptr < flash_data + rdsize) {
-					if (symbs_line > size)
-						symbs_line = size;
-					printf("%08X ", addr);
-					print_hex_dump(ptr, symbs_line, ' ');
-					printf("\r\n");
-					addr += symbs_line;
-					ptr += symbs_line;
-					size -= symbs_line;
-					if (size == 0)
-						break;
-				}
+				if (flash_otp_read(&flashobj, addr, rdsize, flash_data)) {
+					uint8_t *ptr = flash_data;
+					while (ptr < flash_data + rdsize) {
+						if (symbs_line > size)
+							symbs_line = size;
+						printf("%08X ", addr);
+						print_hex_dump(ptr, symbs_line, ' ');
+						printf("\r\n");
+						addr += symbs_line;
+						ptr += symbs_line;
+						size -= symbs_line;
+						if (size == 0)
+							break;
+					}
+				} else break;
 			}
 			free(flash_data);
 		}

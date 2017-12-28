@@ -533,14 +533,14 @@ extern int adc_ws(TCP_SERV_CONN *ts_conn, char cmd);
               else ifcmp("auth") 	tcp_put((wifi_ap_cfg.security) ? '1' : '0');
               else ifcmp("hssid") 	tcp_put((wifi_ap_cfg.ssid_hidden & 1) + '0');
               else ifcmp("bint") 	tcp_puts("%u", wifi_ap_cfg.beacon_interval);
-              else ifcmp("mac") 	tcp_puts(MACSTR, MAC2STR(xnetif[WLAN_AP_NETIF_NUM].hwaddr));
+              else ifcmp("mac") 	tcp_put_mac(xnetif[WLAN_AP_NETIF_NUM].hwaddr); //s(MACSTR, MAC2STR(xnetif[WLAN_AP_NETIF_NUM].hwaddr));
               else ifcmp("hostname") tcp_strcpy(lwip_host_name[1]);
               else ifcmp("dhcp")	tcp_puts("%u", wifi_ap_dhcp.mode);
               else ifcmp("ip") 		tcp_puts(IPSTR, IP2STR(&wifi_ap_dhcp.ip));
               else ifcmp("gw") 		tcp_puts(IPSTR, IP2STR(&wifi_ap_dhcp.gw));
               else ifcmp("msk") 	tcp_puts(IPSTR, IP2STR(&wifi_ap_dhcp.mask));
               else ifcmp("cip") 	tcp_puts(IPSTR, IP2STR(&xnetif[WLAN_ST_NETIF_NUM].ip_addr.addr));
-    //        else ifcmp("mac") 	strtomac(pvar, wifi_ap_cfg.macaddr);
+              else ifcmp("mac")		tcp_put_mac(xnetif[WLAN_AP_NETIF_NUM].hwaddr);
     //    	  else ifcmp("sip") 	tcp_puts(IPSTR, IP2STR(&wifi_ap_dhcp.start_ip));
     //    	  else ifcmp("eip") 	tcp_puts(IPSTR, IP2STR(&wifi_ap_dhcp.end_ip));
     #if DEBUGSOO > 2
@@ -565,8 +565,8 @@ extern int adc_ws(TCP_SERV_CONN *ts_conn, char cmd);
             	  wifi_st_cfg.password[IW_PASSPHRASE_MAX_SIZE] = '\0';
             	  tcp_strcpy(wifi_st_cfg.password);
               }
-              else ifcmp("mac") 	tcp_puts(MACSTR, MAC2STR(xnetif[WLAN_ST_NETIF_NUM].hwaddr));
-              else ifcmp("bssid") 	tcp_puts(MACSTR, MAC2STR(wifi_st_cfg.bssid));
+              else ifcmp("mac") 	tcp_put_mac(xnetif[WLAN_ST_NETIF_NUM].hwaddr); // (MACSTR, MAC2STR(xnetif[WLAN_ST_NETIF_NUM].hwaddr));
+              else ifcmp("bssid") 	tcp_put_mac(wifi_st_cfg.bssid); // (MACSTR, MAC2STR(wifi_st_cfg.bssid));
               else ifcmp("sbss") 	tcp_puts("%u", wifi_st_cfg.flg);
               else ifcmp("sleep") 	tcp_puts("%d", wifi_st_cfg.sleep);
               else ifcmp("dtim") 	tcp_puts("%u", wifi_st_cfg.dtim);

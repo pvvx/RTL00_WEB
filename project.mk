@@ -48,8 +48,8 @@ DRAM_C += project/src/console/atcmd_user.c
 DRAM_C += project/src/console/wifi_console.c
 #DRAM_C += project/src/console/wlan_tst.c
 #ADD_SRC_C += project/src/console/pwm_tst.c
-ADD_SRC_C += project/src/WS2812/ws2812_tst.c 
-ADD_SRC_C += project/src/WS2812/WS2812.c 
+#ADD_SRC_C += project/src/WS2812/ws2812_tst.c 
+#ADD_SRC_C += project/src/WS2812/WS2812.c 
 
 ifdef USE_SDCARD
 ADD_SRC_C += project/src/console/sd_fat.c
