@@ -42,6 +42,7 @@
 #define SYS_DEFAULT_THREAD_STACK_DEPTH	configMINIMAL_STACK_SIZE
 
 typedef xSemaphoreHandle sys_sem_t;
+typedef xSemaphoreHandle sys_mutex_t;
 typedef xQueueHandle sys_mbox_t;
 typedef xTaskHandle sys_thread_t;
 

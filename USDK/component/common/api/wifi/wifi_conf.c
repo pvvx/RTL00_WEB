@@ -904,16 +904,17 @@ int wifi_off(void) {
 
 	uint32 timeout = xTaskGetTickCount();
 
+	if ((rltk_wlan_running(WLAN0_IDX) == 0)
+			&& (rltk_wlan_running(WLAN1_IDX) == 0)) {
+		info_printf("WIFI is not running\n");
+		wifi_mode = RTW_MODE_NONE;
+		return 0;
+	}
 #if CONFIG_LWIP_LAYER
 	dhcps_deinit();
 	LwIP_DHCP(0, DHCP_STOP);
 	LwIP_DHCP(1, DHCP_STOP);
 #endif
-	if ((rltk_wlan_running(WLAN0_IDX) == 0)
-			&& (rltk_wlan_running(WLAN1_IDX) == 0)) {
-		info_printf("WIFI is not running\n");
-		return 0;
-	}
 	info_printf("Deinitializing WIFI ...\n");
 
 #if defined(CONFIG_ENABLE_WPS_AP) && CONFIG_ENABLE_WPS_AP

@@ -811,7 +811,7 @@ etharp_arp_input(struct netif *netif, struct eth_addr *ethaddr, struct pbuf *p)
       LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_arp_input: we are unconfigured, ARP request ignored.\n"));
     /* request was not directed to us */
     } else {
- #ifdef CONFIG_DONT_CARE_TP
+#ifdef CONFIG_DONT_CARE_TP
     if(netif->flags & NETIF_FLAG_IPSWITCH)
       netif->linkoutput(netif, p);
     else
@@ -842,6 +842,72 @@ etharp_arp_input(struct netif *netif, struct eth_addr *ethaddr, struct pbuf *p)
   }
   /* free ARP packet */
   pbuf_free(p);
+}
+
+static void (*rarp_retrieve_cb)(u8_t *, u8_t *) = NULL;
+
+void rarp_retrieve_hook_callback(void (*callback)(u8_t *, u8_t *)) {
+	rarp_retrieve_cb = callback;	
+}
+
+static void
+etharp_rarp_input(struct netif *netif, struct eth_addr *ethaddr, struct pbuf *p)
+{
+	struct etharp_hdr *hdr;
+	struct eth_hdr *ethhdr;
+#if LWIP_AUTOIP
+  	const u8_t * ethdst_hwaddr;
+#endif /* LWIP_AUTOIP */
+
+  	LWIP_ERROR("netif != NULL", (netif != NULL), return;);
+
+  	/* drop short ARP packets: we have to check for p->len instead of p->tot_len here
+     	since a struct etharp_hdr is pointed to p->payload, so it musn't be chained! */
+  	if (p->len < SIZEOF_ETHARP_PACKET) {
+    	ETHARP_STATS_INC(etharp.lenerr);
+    	ETHARP_STATS_INC(etharp.drop);
+    	pbuf_free(p);
+    	return;
+  	}
+
+  	ethhdr = (struct eth_hdr *)p->payload;
+  	hdr = (struct etharp_hdr *)((u8_t*)ethhdr + SIZEOF_ETH_HDR);
+
+  	/* RFC 826 "Packet Reception": */
+  	if ((hdr->hwtype != PP_HTONS(HWTYPE_ETHERNET)) ||
+      	(hdr->hwlen != ETHARP_HWADDR_LEN) ||
+      	(hdr->protolen != sizeof(ip_addr_t)) ||
+      	(hdr->proto != PP_HTONS(ETHTYPE_IP)))  {
+      
+		LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE | LWIP_DBG_LEVEL_WARNING,
+		("etharp_arp_input: packet dropped, wrong hw type, hwlen, proto, protolen or ethernet type (%"U16_F"/%"U16_F"/%"U16_F"/%"U16_F")\n",
+		hdr->hwtype, hdr->hwlen, hdr->proto, hdr->protolen));
+    	ETHARP_STATS_INC(etharp.proterr);
+    	ETHARP_STATS_INC(etharp.drop);
+    	pbuf_free(p);
+    	return;
+  	}
+  	ETHARP_STATS_INC(etharp.recv);
+
+  	switch (hdr->opcode) {
+  		/* RARP request? */
+  		case PP_HTONS(RARP_REQUEST):
+			LWIP_DEBUGF (ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_rarp_input: incoming RARP request\n"));
+    		break;
+	
+  		case PP_HTONS(RARP_REPLY):
+			if(rarp_retrieve_cb != NULL)
+				rarp_retrieve_cb((u8_t *)&hdr->dipaddr, (u8_t *)&hdr->dhwaddr.addr);
+			break;
+			
+  		default:
+			LWIP_DEBUGF(ETHARP_DEBUG | LWIP_DBG_TRACE, ("etharp_rarp_input: RARP unknown opcode type %"S16_F"\n", htons(hdr->opcode)));
+			ETHARP_STATS_INC(etharp.err);
+			break;
+
+  	}
+  	/* free ARP packet */
+  	pbuf_free(p);
 }
 
 /** Just a small helper function that sends a pbuf to an ethernet address
@@ -1243,7 +1309,10 @@ etharp_raw(struct netif *netif, const struct eth_addr *ethsrc_addr,
   hdr->hwlen = ETHARP_HWADDR_LEN;
   hdr->protolen = sizeof(ip_addr_t);
 
-  ethhdr->type = PP_HTONS(ETHTYPE_ARP);
+	if((opcode == RARP_REQUEST) | (opcode == RARP_REPLY))
+		ethhdr->type = PP_HTONS(ETHTYPE_RARP);
+	else
+		ethhdr->type = PP_HTONS(ETHTYPE_ARP);
   /* send ARP query */
   result = netif->linkoutput(netif, p);
   ETHARP_STATS_INC(etharp.xmit);
@@ -1379,6 +1448,14 @@ ethernet_input(struct pbuf *p, struct netif *netif)
       }
       /* pass p to ARP module */
       etharp_arp_input(netif, (struct eth_addr*)(netif->hwaddr), p);
+      break;
+      
+    case PP_HTONS(ETHTYPE_RARP):
+      if (!(netif->flags & NETIF_FLAG_ETHARP)) {
+        goto free_and_return;
+      }
+      /* pass p to RARP module */
+      etharp_rarp_input(netif, (struct eth_addr*)(netif->hwaddr), p);
       break;
 #endif /* LWIP_ARP */
 #if PPPOE_SUPPORT

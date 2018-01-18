@@ -11,6 +11,7 @@
 #include "freertos_pmu.h"
 #include "task.h"
 #include "diag.h"
+#include "hal_crypto.h"
 #include "netbios/netbios.h"
 #include "sntp/sntp.h"
 #include "user/sys_cfg.h"
@@ -59,12 +60,11 @@ void sys_write_cfg(void)
 }
 
 extern void console_init(void);
+extern void HalReInitPlatformTimer(void);
 
 void user_init_thrd(void) {
 
-
 	/* Read system config*/
-
 	if(syscfg.cfg.b.pin_clear_cfg_enable
 		&& 0) {  // user_test_clear_pin()
 		wifi_cfg.load_flg = 0;
@@ -81,6 +81,14 @@ void user_init_thrd(void) {
 
 	/* Load cfg, init WiFi + LwIP init, WiFi start if wifi_cfg.mode !=  RTW_MODE_NONE */
 	wifi_init();
+
+#if (defined(CONFIG_CRYPTO_STARTUP) && (CONFIG_CRYPTO_STARTUP))
+	 if(rtl_cryptoEngine_init() != 0 ) {
+		 error_printf("Crypto engine init failed!\n");
+	 }
+#else
+//	 rtl_cryptoEngine_deinit();
+#endif
 
 #if defined(USE_NETBIOS)
 	if(syscfg.cfg.b.netbios_ena) netbios_init();

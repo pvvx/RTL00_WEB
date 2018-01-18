@@ -1011,6 +1011,8 @@ tcp_slowtmr_start:
     if ((u32_t)(tcp_ticks - pcb->tmr) > 2 * TCP_MSL / TCP_SLOW_INTERVAL) {
       ++pcb_remove;
     }
+    
+
 
     /* If the PCB should be removed, do it. */
     if (pcb_remove) {

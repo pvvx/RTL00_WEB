@@ -74,7 +74,7 @@ int main(void)
 	WDGStart();
 #endif
 
-#if (defined(CONFIG_CRYPTO_STARTUP) && (CONFIG_CRYPTO_STARTUP))
+#if 0 // (defined(CONFIG_CRYPTO_STARTUP) && (CONFIG_CRYPTO_STARTUP))
 	 if(rtl_cryptoEngine_init() != 0 ) {
 		 DBG_8195A("Crypto engine init failed!\n");
 	 }

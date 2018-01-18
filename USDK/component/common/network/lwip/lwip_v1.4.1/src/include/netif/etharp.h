@@ -140,6 +140,12 @@ PACK_STRUCT_END
 #define ETHTYPE_PPPOEDISC 0x8863U  /* PPP Over Ethernet Discovery Stage */
 #define ETHTYPE_PPPOE     0x8864U  /* PPP Over Ethernet Session Stage */
 
+#define ETHTYPE_RARP      0x8035U
+#define RARP_REQUEST      3
+#define RARP_REPLY        4
+void rarp_retrieve_hook_callback(void (*callback)(u8_t *, u8_t *));
+
+
 /** MEMCPY-like macro to copy to/from struct eth_addr's that are local variables
  * or known to be 32-bit aligned within the protocol header. */
 #ifndef ETHADDR32_COPY

@@ -377,6 +377,7 @@ LOCAL void fATSP(int argc, char *argv[])
 	};
 	printf("WakeLock Status %d\n", pmu_get_wakelock_status());
 }
+
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 MON_RAM_TAB_SECTION COMMAND_TABLE console_commands_at[] = {

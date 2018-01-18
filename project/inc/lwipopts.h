@@ -27,6 +27,27 @@
 #include <platform/platform_stdlib.h>
 #include "platform_opts.h"
 
+////////////////////////////
+
+#ifdef CONFIG_SDR_EN
+#define WIFI_LOGO_CERTIFICATION_CONFIG 1  // for ping 10k test buffer setting
+#else
+#define WIFI_LOGO_CERTIFICATION_CONFIG 0
+#endif
+/*LWIP_UART_ADAPTER==1: Enable LWIP_UART_ADAPTER when CONFIG_GAGENT is enabled,
+   because some GAGENT functions denpond on the following macro definitions.*/
+#define LWIP_UART_ADAPTER               0
+
+
+/**
+ * IP_FORWARD==1: Enables the ability to forward IP packets across network
+ * interfaces. If you are going to run lwIP on a device with only one network
+ * interface, define this to 0.
+ */
+#define IP_FORWARD                      1
+#define IP_NAPT 						1
+
+////////////////////////////
 /**
  * LWIP_RANDOMIZE_INITIAL_LOCAL_PORTS==1: randomize the local port for the first
  * local TCP/UDP pcb (default==0). This can prevent creating predictable port
@@ -34,20 +55,43 @@
  */
 #define LWIP_RANDOMIZE_INITIAL_LOCAL_PORTS 1
 
-#define WIFI_LOGO_CERTIFICATION_CONFIG 1    //for ping 10k test buffer setting
 /**
  * MEM_LIBC_MALLOC==1: Use malloc/free/realloc provided by your C-library
  * instead of the lwip internal allocator. Can save code size if you
  * already use it.
  */
 #define MEM_LIBC_MALLOC			1
+
 /**
 * MEMP_MEM_MALLOC==1: Use mem_malloc/mem_free instead of the lwip pool allocator.
 * Especially useful with MEM_LIBC_MALLOC but handle with care regarding execution
 * speed and usage from interrupts!
 */
 #define MEMP_MEM_MALLOC         1
-    
+
+/**
+ * LWIP_NETIF_HOSTNAME==1: use DHCP_OPTION_HOSTNAME with netif's hostname
+ * field.
+ */
+#define LWIP_NETIF_HOSTNAME		1
+#define LWIP_NETIF_HOSTNAME_SIZE 16
+/**
+ *  netif0: DEF_HOSTNAME "0", netif1: DEF_HOSTNAME "1", ..
+ */
+#define DEF_HOSTNAME "rtl871x"
+
+/**
+ * LWIP_AUTOIP==1: Enable AUTOIP module.
+ */
+#define LWIP_AUTOIP                   0 // Realtek modified (0->1)
+
+/** LWIP_TIMEVAL_PRIVATE: if you want to use the struct timeval provided
+ * by your system, set this to 0 and include <sys/time.h> in cc.h */
+#if defined(_SYS__TIMEVAL_H_)
+#define LWIP_TIMEVAL_PRIVATE 0
+#endif
+
+////////////////
 /**
  * SYS_LIGHTWEIGHT_PROT==1: if you want inter-task protection for certain
  * critical regions during buffer allocation, deallocation and memory
@@ -65,21 +109,14 @@
 #define ARP_QUEUEING            0
 
 /**
- * LWIP_NETIF_HOSTNAME==1: use DHCP_OPTION_HOSTNAME with netif's hostname
- * field.
- */
-#define LWIP_NETIF_HOSTNAME		1
-#define LWIP_NETIF_HOSTNAME_SIZE 16
-/**
- *  netif0: DEF_HOSTNAME "0", netif1: DEF_HOSTNAME "1", ..
- */
-#define DEF_HOSTNAME "rtl871x"
-
-/**
  * NO_SYS==1: Provides VERY minimal functionality. Otherwise,
  * use lwIP facilities.
  */
 #define NO_SYS                  0
+
+#ifndef CONFIG_DYNAMIC_TICKLESS
+#define CONFIG_DYNAMIC_TICKLESS 0
+#endif
 
 /* ---------- Memory options ---------- */
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
@@ -90,9 +127,9 @@
 /* MEM_SIZE: the size of the heap memory. If the application will send
 a lot of data that needs to be copied, this should be set high. */
 #if WIFI_LOGO_CERTIFICATION_CONFIG
-    #define MEM_SIZE                (10*1024) //for ping 10k test
+    #define MEM_SIZE                (16*1024) //for ping 10k test
 #else
-    #define MEM_SIZE                (5*1024)
+    #define MEM_SIZE                (6*1024)
 #endif
 
 /* MEMP_NUM_PBUF: the number of memp struct pbufs. If the application
@@ -119,7 +156,7 @@ a lot of data that needs to be copied, this should be set high. */
 /* ---------- Pbuf options ---------- */
 /* PBUF_POOL_SIZE: the number of buffers in the pbuf pool. */
 #if WIFI_LOGO_CERTIFICATION_CONFIG
-    #define PBUF_POOL_SIZE          30 //for ping 10k test
+    #define PBUF_POOL_SIZE          30 // for ping 10k test
 #else
     #define PBUF_POOL_SIZE          20
 #endif
@@ -155,58 +192,58 @@ a lot of data that needs to be copied, this should be set high. */
 #define TCP_SND_QUEUELEN        (4*TCP_SND_BUF/TCP_MSS)
 
 /* TCP receive window. */
-#define TCP_WND                 (4*TCP_MSS) // (2*TCP_MSS)
-
+#if WIFI_LOGO_CERTIFICATION_CONFIG
+#define TCP_WND                 (4*TCP_MSS)
+#else
+#define TCP_WND                 (2*TCP_MSS)
+#endif
 
 /* ---------- ICMP options ---------- */
-#define LWIP_ICMP		1
+#define LWIP_ICMP                       1
 
 /* ---------- ARP options ----------- */
-#define LWIP_ARP		1
-/**
- * LWIP_AUTOIP==1: Enable AUTOIP module.
- */
-#define LWIP_AUTOIP                   0 //Realtek modified (0->1)
+#define LWIP_ARP                        1
 
 /* ---------- DHCP options ---------- */
 /* Define LWIP_DHCP to 1 if you want DHCP configuration of
    interfaces. DHCP is not implemented in lwIP 0.5.1, however, so
    turning this on does currently not work. */
-#define LWIP_DHCP		1
+#define LWIP_DHCP               1
 
 /* ---------- UDP options ---------- */
-#define LWIP_UDP		1
-#define UDP_TTL			255
+#define LWIP_UDP                1
+#define UDP_TTL                 255
 /* ---------- DNS options ---------- */
-#define LWIP_DNS		1
+#define LWIP_DNS                        1
 
 /* ---------- UPNP options --------- */
 #define LWIP_UPNP		0
 
 /* Support Multicast */
-#define LWIP_IGMP		1
-
-extern __attribute__ ((long_call)) unsigned int Rand(void);
-#define LWIP_RAND()		Rand()
+#define LWIP_IGMP                   1
+extern _LONG_CALL_ u32 Rand(void);
+#define LWIP_RAND()                 Rand() // srand(sys_now())
 
 /* Support TCP Keepalive */
 #define LWIP_TCP_KEEPALIVE				1
 
-/*LWIP_UART_ADAPTER==1: Enable LWIP_UART_ADAPTER when CONFIG_GAGENT is enabled, 
-   because some GAGENT functions denpond on the following macro definitions.*/
-#if CONFIG_EXAMPLE_UART_ADAPTER
-#define LWIP_UART_ADAPTER				1
-#else
-#define LWIP_UART_ADAPTER				0
-#endif
 
-#if LWIP_UART_ADAPTER
+#if LWIP_UART_ADAPTER || CONFIG_ETHERNET || CONFIG_EXAMPLE_UART_ATCMD || CONFIG_EXAMPLE_SPI_ATCMD
+
+/**
+ * LWIP_SO_SNDTIMEO==1: Enable send timeout for sockets/netconns and
+ * SO_SNDTIMEO processing.
+ */
 #undef  LWIP_SO_SNDTIMEO        
 #define LWIP_SO_SNDTIMEO                1
 
 #undef  SO_REUSE        
 #define SO_REUSE                        1
 
+/**
+* MEMP_NUM_NETCONN: the number of struct netconns.
+* (only needed if you use the sequential API, like api_lib.c)
+*/
 #undef MEMP_NUM_NETCONN                	
 #define MEMP_NUM_NETCONN                10
 
@@ -218,15 +255,7 @@ extern __attribute__ ((long_call)) unsigned int Rand(void);
 #define TCP_KEEPCNT_DEFAULT				10U
 #endif
 
-#if CONFIG_EXAMPLE_UART_ATCMD
-#undef  LWIP_SO_SNDTIMEO        
-#define LWIP_SO_SNDTIMEO                1
-
-#undef  SO_REUSE        
-#define SO_REUSE                        1
-
-#undef MEMP_NUM_NETCONN                	
-#define MEMP_NUM_NETCONN                10
+#if CONFIG_EXAMPLE_UART_ATCMD || CONFIG_EXAMPLE_SPI_ATCMD 
 
 #undef MEMP_NUM_TCP_PCB
 #define MEMP_NUM_TCP_PCB				(MEMP_NUM_NETCONN)
@@ -234,19 +263,22 @@ extern __attribute__ ((long_call)) unsigned int Rand(void);
 #undef MEMP_NUM_UDP_PCB
 #define MEMP_NUM_UDP_PCB				(MEMP_NUM_NETCONN)
 
-#undef TCP_WND                
-#define TCP_WND                         (4*TCP_MSS)
-
-#define TCP_KEEPIDLE_DEFAULT			10000UL
-#define TCP_KEEPINTVL_DEFAULT			1000UL
-#define TCP_KEEPCNT_DEFAULT				10U
-
 #define ERRNO   1
+
 #endif
 
-/* ---------- Statistics options ---------- */
-#define LWIP_STATS			0
-#define LWIP_PROVIDE_ERRNO	1
+/*
+   --------------------------------------
+   --------- Statistics options ---------
+   --------------------------------------
+ */
+
+/*
+ * LWIP_STATS==1: Enable statistics collection in lwip_stats.
+ */
+#define LWIP_STATS 0
+
+#define LWIP_PROVIDE_ERRNO 1
 
 
 /*
@@ -254,15 +286,6 @@ extern __attribute__ ((long_call)) unsigned int Rand(void);
    ---------- Checksum options ----------
    --------------------------------------
 */
-
-/* 
-The STM32F2x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums by hardware:
- - To use this feature let the following define uncommented.
- - To disable it and process by CPU comment the  the checksum.
-*/
-//Do checksum by lwip - WLAN nic does not support Checksum offload
-//#define CHECKSUM_BY_HARDWARE 
-
 
 #ifdef CHECKSUM_BY_HARDWARE
   /* CHECKSUM_GEN_IP==0: Generate checksums by hardware for outgoing IP packets.*/
@@ -311,7 +334,7 @@ The STM32F2x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
 /**
  * LWIP_SOCKET==1: Enable Socket API (require to use sockets.c)
  */
-#define LWIP_SOCKET                     1
+#define LWIP_SOCKET                     1	
 
 /*
    -----------------------------------
@@ -320,6 +343,7 @@ The STM32F2x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
 */
 
 #define LWIP_DEBUG                      0
+
 
 /*
    ---------------------------------
@@ -376,11 +400,10 @@ The STM32F2x7 allows computing and verifying the IP, UDP, TCP and ICMP checksums
  */
 #define TCPIP_THREAD_PRIO               (configMAX_PRIORITIES - 2)
 
-/** LWIP_TIMEVAL_PRIVATE: if you want to use the struct timeval provided
- * by your system, set this to 0 and include <sys/time.h> in cc.h */
-#if defined(_SYS__TIMEVAL_H_)
-#define LWIP_TIMEVAL_PRIVATE 0
-#endif
+/* Added by Realtek */
+#ifndef DNS_IGNORE_REPLY_ERR
+#define DNS_IGNORE_REPLY_ERR   1
+#endif /* DNS_IGNORE_REPLY_ERR */
 
 #endif /* __LWIPOPTS_H__ */
 

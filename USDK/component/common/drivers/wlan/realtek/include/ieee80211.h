@@ -242,7 +242,7 @@ typedef struct ieee_param {
 			u16 capability;
 			int flags;
 			u8 tx_supp_rates[16];		
-			struct rtw_ieee80211_ht_cap ht_cap;
+			struct rtw_ieee80211_ht_cap	ht_cap;
 		} add_sta;
 		struct {
 			u8	reserved[2];//for set max_num_sta

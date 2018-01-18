@@ -43,7 +43,7 @@
 #include "main.h"
 #include "wifi_user_set.h"
 
-#if 1
+#if 0
 #undef debug_printf
 #define debug_printf(fmt, ...) rtl_printf(fmt, ##__VA_ARGS__)
 #undef info_printf
@@ -701,6 +701,9 @@ int wifi_run(rtw_mode_t mode) {
 		switch(mode) {
 			 case RTW_MODE_STA_AP:
 				 ret = wifi_run_ap() | wifi_run_st();
+#if IP_NAPT
+				 xnetif[WLAN_AP_NETIF_NUM].napt = 1;
+#endif
 //				 _wext_enable_powersave(0, 0, 0);
 		 		 break;
 			 case RTW_MODE_STA:

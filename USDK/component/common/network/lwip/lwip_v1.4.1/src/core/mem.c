@@ -274,6 +274,7 @@ void
 mem_init(void)
 {
   struct mem *mem;
+
   LWIP_ASSERT("Sanity check alignment",
     (SIZEOF_STRUCT_MEM & (MEM_ALIGNMENT-1)) == 0);
 

@@ -114,10 +114,10 @@ static void low_level_init(struct netif *netif)
 	netif->hwaddr_len = ETHARP_HWADDR_LEN;
 
 	/* set netif maximum transfer unit */
-	netif->mtu = 1500;
+	netif->mtu = netifMTU;
 
 	/* Accept broadcast address and ARP traffic */
-	netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;	     
+	netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
 
 	/* Wlan interface is initialized later */
 }

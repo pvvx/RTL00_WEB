@@ -1,7 +1,7 @@
 #=============================================
 # SDK CONFIG
 #=============================================
-#USE_SDRAM = 1
+USE_SDRAM = 1
 WEB_INA219_DRV = 1
 #WEB_MLX90614_DRV = 1
 #WEB_ADC_DRV = 1
@@ -29,6 +29,7 @@ endif
 RTOSDIR=freertos_v9.0.0
 LWIPDIR=lwip_v1.4.1
 
+
 ifdef USE_UVC
 USE_SDRAM = 1
 USE_GCC_LIB = 1
@@ -46,6 +47,7 @@ ADD_SRC_C += project/src/user/user_start.c
 # components
 DRAM_C += project/src/console/atcmd_user.c
 DRAM_C += project/src/console/wifi_console.c
+#ADD_SRC_C += project/src/console/acl_tst.c
 #DRAM_C += project/src/console/wlan_tst.c
 #ADD_SRC_C += project/src/console/pwm_tst.c
 #ADD_SRC_C += project/src/WS2812/ws2812_tst.c 

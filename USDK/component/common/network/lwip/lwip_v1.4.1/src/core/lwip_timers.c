@@ -62,7 +62,7 @@
 
 /** The one and only timeout list */
 static struct sys_timeo *next_timeout;
-#if NO_SYS
+#if NO_SYS || CONFIG_DYNAMIC_TICKLESS
 static u32_t timeouts_last_time;
 #endif /* NO_SYS */
 
@@ -242,7 +242,7 @@ void sys_timeouts_init(void)
   sys_timeout(DNS_TMR_INTERVAL, dns_timer, NULL);
 #endif /* LWIP_DNS */
 
-#if NO_SYS
+#if NO_SYS || CONFIG_DYNAMIC_TICKLESS
   /* Initialise timestamp for sys_check_timeouts */
   timeouts_last_time = sys_now();
 #endif
@@ -436,7 +436,54 @@ sys_timeouts_mbox_fetch(sys_mbox_t *mbox, void **msg)
     } else {
       time_needed = SYS_ARCH_TIMEOUT;
     }
+	
+#if CONFIG_DYNAMIC_TICKLESS
+    if (time_needed == SYS_ARCH_TIMEOUT) {
+      /* If time == SYS_ARCH_TIMEOUT, a timeout occured before a message
+         could be fetched. We should now call the timeout handler and
+         deallocate the memory allocated for the timeout. */
+	  u8_t had_one;
+	  u32_t now;
+	  u32_t diff;
+	  
+	now = sys_now();
+    /* this cares for wraparounds */
+    diff = now - timeouts_last_time;
+    do
+    {
+      had_one = 0;
+      tmptimeout = next_timeout;
+      if (tmptimeout && (tmptimeout->time <= diff)) {
+        /* timeout has expired */
+        had_one = 1;
+        timeouts_last_time = now;
+        diff -= tmptimeout->time;
+        next_timeout = tmptimeout->next;
+        handler = tmptimeout->h;
+        arg = tmptimeout->arg;
+#if LWIP_DEBUG_TIMERNAMES
+        if (handler != NULL) {
+          LWIP_DEBUGF(TIMERS_DEBUG, ("sct calling h=%s arg=%p\n",
+            tmptimeout->handler_name, arg));
+        }
+#endif /* LWIP_DEBUG_TIMERNAMES */
+        memp_free(MEMP_SYS_TIMEOUT, tmptimeout);
+        if (handler != NULL) {
+        	LOCK_TCPIP_CORE();
+        	handler(arg);
+       	UNLOCK_TCPIP_CORE();
+        }
+      }
+    /* repeat until all expired timers have been called */
+    }while(had_one);
+	
+      LWIP_TCPIP_THREAD_ALIVE();
 
+      /* We try again to fetch a message from the mbox. */
+      goto again;
+    }
+
+#else
     if (time_needed == SYS_ARCH_TIMEOUT) {
       /* If time == SYS_ARCH_TIMEOUT, a timeout occured before a message
          could be fetched. We should now call the timeout handler and
@@ -463,7 +510,9 @@ sys_timeouts_mbox_fetch(sys_mbox_t *mbox, void **msg)
 
       /* We try again to fetch a message from the mbox. */
       goto again;
-    } else {
+    }
+#endif
+ else {
       /* If time != SYS_ARCH_TIMEOUT, a message was received before the timeout
          occured. The time variable is set to the number of
          milliseconds we waited for the message. */

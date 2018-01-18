@@ -68,6 +68,7 @@ struct dhcp
   ip_addr_t offered_si_addr;
   char boot_file_name[DHCP_FILE_LEN];
 #endif /* LWIP_DHCP_BOOTPFILE */
+  u32_t seconds_elapsed;
 };
 
 /* MUST be compiled with "pack structs" or equivalent! */
@@ -138,7 +139,7 @@ void dhcp_coarse_tmr(void);
 void dhcp_fine_tmr(void);
 
 err_t dhcp_release_unicast(struct netif *netif);
-
+ 
 /** DHCP message item offsets and length */
 #define DHCP_OP_OFS       0
 #define DHCP_HTYPE_OFS    1

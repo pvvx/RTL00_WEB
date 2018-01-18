@@ -509,6 +509,14 @@
 #endif
 
 /**
+ * IP_NAPT==1: Enables the ability to do Network Address Port Translation (NAPT) 
+ * on forwarded packets. This only makes sense with IP_FORWARD==1.
+ */
+#ifndef IP_NAPT
+#define IP_NAPT                         0
+#endif
+
+/**
  * IP_OPTIONS_ALLOWED: Defines the behavior for IP options.
  *      IP_OPTIONS_ALLOWED==0: All packets with IP options are dropped.
  *      IP_OPTIONS_ALLOWED==1: IP options are allowed (but not parsed).
@@ -1297,7 +1305,7 @@
  * PPP_THREAD_NAME: The name assigned to the pppInputThread.
  */
 #ifndef PPP_THREAD_NAME
-#define PPP_THREAD_NAME                "pppInputThread"
+#define PPP_THREAD_NAME                "pppIThrd"
 #endif
 
 /**
@@ -2130,5 +2138,6 @@
 #ifndef DNS_DEBUG
 #define DNS_DEBUG                       LWIP_DBG_OFF
 #endif
+
 
 #endif /* __LWIP_OPT_H__ */

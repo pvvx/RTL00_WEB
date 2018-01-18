@@ -85,6 +85,7 @@ typedef int sys_prot_t;
 #define PACK_STRUCT_STRUCT __attribute__ ((__packed__))
 #define PACK_STRUCT_END
 #define PACK_STRUCT_FIELD(x) x
+#define PACK_STRUCT_USE_INCLUDES
 
 #elif defined (__TASKING__)
 

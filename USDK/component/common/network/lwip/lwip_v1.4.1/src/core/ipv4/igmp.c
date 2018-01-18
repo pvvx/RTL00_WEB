@@ -271,8 +271,22 @@ igmp_report_groups(struct netif *netif)
   LWIP_DEBUGF(IGMP_DEBUG, ("igmp_report_groups: sending IGMP reports on if %p\n", netif));
 
   while (group != NULL) {
-    if (group->netif == netif) {
+    if ((group->netif == netif) && (!ip_addr_cmp(&group->group_address, &allsystems))) {
       igmp_delaying_member(group, IGMP_JOIN_DELAYING_MEMBER_TMR);
+    }
+    group = group->next;
+  }
+}
+
+/* Realtek added to only send igmp leave, but not remove group */
+void
+igmp_report_groups_leave(struct netif *netif)
+{
+  struct igmp_group *group = igmp_group_list;
+
+  while (group != NULL) {
+    if ((group->netif == netif) && (!ip_addr_cmp(&group->group_address, &allsystems)) && (group->last_reporter_flag)) {
+      igmp_send(group, IGMP_LEAVE_GROUP);
     }
     group = group->next;
   }

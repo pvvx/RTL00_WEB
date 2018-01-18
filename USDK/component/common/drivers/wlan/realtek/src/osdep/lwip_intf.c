@@ -153,8 +153,18 @@ void rltk_wlan_recv(int idx, struct eth_drv_sg *sg_list, int sg_len)
 #endif
 }
 
+/* uses in void __fastcall rltk_netif_rx(sk_buff *skb) */
+
 int netif_is_valid_IP(int idx, unsigned char *ip_dest)
 {
+#if	IP_FORWARD // add pvvx
+    return 1;
+#elif  defined(CONFIG_DONT_CARE_TP)
+	if(pnetif->flags & NETIF_FLAG_IPSWITCH)
+        return 1;
+	else
+		return 0;
+#else
 #if CONFIG_LWIP_LAYER == 1
 #if DEVICE_EMAC
 	struct netif *pnetif = xnetif[idx];
@@ -187,13 +197,9 @@ int netif_is_valid_IP(int idx, unsigned char *ip_dest)
 		return 1;
 
 	DBG_TRACE("invalid IP: %d.%d.%d.%d ",ip_dest[0],ip_dest[1],ip_dest[2],ip_dest[3]);
-#endif	
-#ifdef CONFIG_DONT_CARE_TP
-	if(pnetif->flags & NETIF_FLAG_IPSWITCH)
-        return 1;
-	else
-#endif
     return 0;
+#endif	// CONFIG_LWIP_LAYER
+#endif // IP_FORWARD / CONFIG_DONT_CARE_TP
 }
 
 int netif_get_idx(struct netif *pnetif)

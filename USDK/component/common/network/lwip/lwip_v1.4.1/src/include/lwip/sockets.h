@@ -363,7 +363,6 @@ int lwip_last_err_socket(int s); // errno
 #define select(a,b,c,d,e)     lwip_select(a,b,c,d,e)
 #define ioctlsocket(a,b,c)    lwip_ioctl(a,b,c)
 
-
 #if LWIP_POSIX_SOCKETS_IO_NAMES
 #define read(a,b,c)           lwip_read(a,b,c)
 #define write(a,b,c)          lwip_write(a,b,c)

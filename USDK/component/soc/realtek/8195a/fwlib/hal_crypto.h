@@ -53,7 +53,10 @@ typedef enum _SHA2_TYPE_ {
 extern int rtl_cryptoEngine_init(void);
 extern void rtl_cryptoEngine_info(void);
 
+extern _LONG_CALL_ int __rtl_cryptoEngine_exit_v1_00(void);
+extern int init_status;
 
+#define rtl_cryptoEngine_deinit __rtl_cryptoEngine_exit_v1_00
 
 //
 // Authentication 

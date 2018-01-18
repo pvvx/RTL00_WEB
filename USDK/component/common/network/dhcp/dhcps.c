@@ -143,7 +143,11 @@ static void add_offer_options(uint8_t *option_start_address)
         The option specifies a list of DNS servers available to the client. */
 	temp_option_addr = fill_one_option_content(temp_option_addr,
 			DHCP_OPTION_CODE_DNS_SERVER, DHCP_OPTION_LENGTH_FOUR,
+#if IP_NAPT
+					(void *)&dhcps_local_gateway);	
+#else
 					(void *)&dhcps_local_address);	
+#endif					
 	/* add DHCP options 51.
 	This option is used to request a lease time for the IP address. */
 	temp_option_addr = fill_one_option_content(temp_option_addr,

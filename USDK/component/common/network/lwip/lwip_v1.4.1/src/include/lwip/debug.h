@@ -75,8 +75,7 @@
   LWIP_PLATFORM_ASSERT(message); handler;}} while(0)
 #endif /* LWIP_ERROR */
 
-#if LWIP_DEBUG
-//#ifdef LWIP_DEBUG
+#if LWIP_DEBUG //#ifdef LWIP_DEBUG
 /** print debug message only if debug message type is enabled...
  *  AND is of correct type AND is at least LWIP_DBG_LEVEL
  */

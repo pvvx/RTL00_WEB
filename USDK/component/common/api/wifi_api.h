@@ -10,6 +10,7 @@
 #include "wifi_constants.h"
 #include "queue.h"
 
+/* Get one byte from the 4-byte address */
 #ifndef ip4_addr1
 #define ip4_addr1(ipaddr) (((uint8_t*)(ipaddr))[0])
 #define ip4_addr2(ipaddr) (((uint8_t*)(ipaddr))[1])
