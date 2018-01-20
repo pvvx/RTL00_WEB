@@ -40,7 +40,7 @@ HalPinCtrlRtl8195A(
     IN BOOL   Operation
     );
 
-extern _LONG_CALL_ VOID 
+extern _LONG_CALL_ int
 HalSerialPutcRtl8195a(
     IN  u8 c
     );

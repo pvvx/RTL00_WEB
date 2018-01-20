@@ -86,7 +86,7 @@ HalLogUartInit(
     );
 
 
-extern _LONG_CALL_ROM_ VOID 
+extern _LONG_CALL_ROM_ int
 HalSerialPutcRtl8195a(
     IN  u8 c
     );

@@ -10,7 +10,7 @@ import os
 import struct
 import sys
 
-__version__ = "17.01.18"
+__version__ = "20.01.18"
 
 PYTHON2 = sys.version_info[0] < 3  # True if on pre-Python 3
 
@@ -255,7 +255,7 @@ class xFirmwareImage(object):
 						print('Error: Segment %s is big!' % self.name)
 					f.write(self.data)
 					while i < gap:
-						f.write('\0')
+						f.write('\xff')
 						i += 1
 				else:
 					f.write(self.data)
@@ -310,8 +310,7 @@ def elf2image(args):
 		try:
 			with open(fn, "wb") as f:
 				for s in image:
-					if s.hm & HM_IS_SRAM:
-						s.save_sram(f, fn)
+					s.save_sram(f, fn)
 				f.close()
 				
 		except:

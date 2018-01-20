@@ -185,7 +185,12 @@ extern HAL_GPIO_ADAPTER gBoot_Gpio_Adapter;
 	_pHAL_Gpio_Adapter = &gBoot_Gpio_Adapter;
 	VectorTableInitRtl8195A(STACK_TOP);	// 0x1FFFFFFC
 	loguart_wait_tx_fifo_empty(); //	иначе глючит LogUART, если переключение CLK приходится на вывод символов !
-#if 1 // if set CLK CPU
+	uint8 ChipId = HalGetChipId();
+#ifdef ARDUINO
+	// 0 - 166666666 Hz, 1 - 83333333 Hz
+	*((int *) (SYSTEM_CTRL_BASE + REG_SYS_SYSPLL_CTRL1)) &= ~(1 << 17); // REG_SYS_SYSPLL_CTRL1 &= ~BIT_SYS_SYSPLL_DIV5_3
+	HalCpuClkConfig(ChipId < CHIP_ID_8195AM);
+#else  // if set CLK CPU
 	if(HalGetCpuClk() != PLATFORM_CLOCK) {
 		//----- CLK CPU
 #if	CPU_CLOCK_SEL_DIV5_3
@@ -198,7 +203,7 @@ extern HAL_GPIO_ADAPTER gBoot_Gpio_Adapter;
 		HalCpuClkConfig(CPU_CLOCK_SEL_VALUE);
 #endif // CPU_CLOCK_SEL_DIV5_3
 	};
-#endif
+#endif // ARDUINO
 	PSHalInitPlatformLogUart(); // HalInitPlatformLogUartV02(); // Show "<RTL8195A>"... :(
 	HalReInitPlatformTimer(); // HalInitPlatformTimerV02(); HalTimerOpInit_Patch((VOID*) (&HalTimerOp));
 	SystemCoreClockUpdate();
@@ -225,7 +230,7 @@ extern HAL_GPIO_ADAPTER gBoot_Gpio_Adapter;
 */
 //	SpicFlashInitRtl8195A(SpicDualBitMode); //	SpicReadIDRtl8195A(); SpicDualBitMode
 	//---- SDRAM
-	uint8 ChipId = HalGetChipId();
+//	uint8 ChipId = HalGetChipId();
 	if (ChipId >= CHIP_ID_8195AM) {
 		if((HAL_PERI_ON_READ32(REG_SOC_FUNC_EN) & BIT(21)) == 0) { // SDR not init?
  #ifdef FIX_SDR_CALIBRATION // for speed :)
