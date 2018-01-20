@@ -549,8 +549,7 @@ LOCAL uint32 BOOT_RAM_TEXT_SECTION load_img2_head(uint32 faddr, PIMG2HEAD hdr) {
 	return ret;
 }
 
-LOCAL uint32 BOOT_RAM_TEXT_SECTION load_segs(uint32 faddr, PIMG2HEAD hdr,
-		uint8 flgload) {
+LOCAL uint32 BOOT_RAM_TEXT_SECTION load_segs(uint32 faddr, PIMG2HEAD hdr, uint8 flgload) {
 	uint32 fnextaddr = faddr;
 	uint8 segnum = 0;
 	while (1) {
@@ -571,9 +570,11 @@ LOCAL uint32 BOOT_RAM_TEXT_SECTION load_segs(uint32 faddr, PIMG2HEAD hdr,
 #endif
 			fnextaddr += hdr->seg.size;
 		} else {
+			// seg_id == UNK
+			fnextaddr -= 8;
 			break;
 		}
-		fnextaddr += flashcpy(fnextaddr, &hdr->seg, sizeof(IMGSEGHEAD));
+		fnextaddr += flashcpy(fnextaddr, hdr, sizeof(IMGSEGHEAD)) + 8;
 		segnum++;
 	}
 	return fnextaddr;
@@ -605,6 +606,7 @@ LOCAL int BOOT_RAM_TEXT_SECTION loadUserImges(int imgnum) {
 			if (faddr < 0x8000000)
 				faddr += SPI_FLASH_BASE;
 			if (get_seg_id(faddr, 0x100) == SEG_ID_FLASH) {
+				// если указывает в область flash
 				imagenum = 0;
 				imgnum = 0;
 			} else {
