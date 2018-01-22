@@ -559,14 +559,14 @@ LOCAL uint32 BOOT_RAM_TEXT_SECTION load_segs(uint32 faddr, PIMG2HEAD hdr, uint8 
 						|| seg_id == SEG_ID_SDRAM)) {
 #if CONFIG_DEBUG_LOG > 1
 			DBG_8195A("Load Flash seg%d: 0x%08x -> %s: 0x%08x, size: %d\n",
-					segnum, faddr, txt_tab_seg[seg_id], hdr->seg.ldaddr,
+					segnum, fnextaddr, txt_tab_seg[seg_id], hdr->seg.ldaddr,
 					hdr->seg.size);
 #endif
 			fnextaddr += flashcpy(fnextaddr, (void *)hdr->seg.ldaddr, hdr->seg.size);
 		} else if (seg_id) {
 #if CONFIG_DEBUG_LOG > 2
 			DBG_8195A("Skip Flash seg%d: 0x%08x -> %s: 0x%08x, size: %d\n", segnum,
-					faddr, txt_tab_seg[seg_id], hdr->seg.ldaddr, hdr->seg.size);
+					fnextaddr, txt_tab_seg[seg_id], hdr->seg.ldaddr, hdr->seg.size);
 #endif
 			fnextaddr += hdr->seg.size;
 		} else {
@@ -574,7 +574,7 @@ LOCAL uint32 BOOT_RAM_TEXT_SECTION load_segs(uint32 faddr, PIMG2HEAD hdr, uint8 
 			fnextaddr -= 8;
 			break;
 		}
-		fnextaddr += flashcpy(fnextaddr, hdr, sizeof(IMGSEGHEAD)) + 8;
+		fnextaddr += flashcpy(fnextaddr, hdr, sizeof(IMGSEGHEAD));
 		segnum++;
 	}
 	return fnextaddr;
@@ -590,6 +590,7 @@ LOCAL int BOOT_RAM_TEXT_SECTION loadUserImges(int imgnum) {
 	DBG_8195A("Selected Image %d.\n", imgnum);
 
 	while (1) {
+		// новая image только с нового сектора flash
 		faddr = (faddr + FLASH_SECTOR_SIZE - 1) & (~(FLASH_SECTOR_SIZE - 1));
 		uint32 img_id = load_img2_head(faddr, &hdr);
 		if ((img_id >> 8) > 4 && (uint8) img_id != 0) { // есть подпись  "RTKW" + RUN или SWP, сегмент != unknown
@@ -603,7 +604,7 @@ LOCAL int BOOT_RAM_TEXT_SECTION loadUserImges(int imgnum) {
 			DBG_8195A("No Image%d! Trying Image0...\n", imgnum);
 			// пробуем загрузить image по умолчанию, по записи в секторе установок
 			flashcpy(FLASH_SYSTEM_DATA_ADDR, &faddr, sizeof(faddr));
-			if (faddr < 0x8000000)
+			if (faddr < 0x08000000)
 				faddr += SPI_FLASH_BASE;
 			if (get_seg_id(faddr, 0x100) == SEG_ID_FLASH) {
 				// если указывает в область flash

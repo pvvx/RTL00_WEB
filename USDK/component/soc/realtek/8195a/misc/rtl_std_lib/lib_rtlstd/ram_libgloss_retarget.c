@@ -97,9 +97,9 @@ int ram_libgloss_write(int file, const char *ptr, int len) {
 //----- ram_libgloss_open()
 int ram_libgloss_open(char *file, int flags, int mode) {
 // file->_p
-	int result = rtl_strcmp(file, "/stdin");
+	int result;
 
-	if (result) {
+	if (rtl_strcmp(file, "/stdin")) {
 		if (rtl_strcmp(file, "/stdout")) {
 			if (rtl_strcmp(file, "/stderr"))
 				result = -1;

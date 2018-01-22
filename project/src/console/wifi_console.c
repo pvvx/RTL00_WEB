@@ -350,4 +350,3 @@ MON_RAM_TAB_SECTION COMMAND_TABLE console_cmd_wifi_api[] = {
 		{"ATSN", 0, fATSN, ": Scan networks"}
 };
 
-
