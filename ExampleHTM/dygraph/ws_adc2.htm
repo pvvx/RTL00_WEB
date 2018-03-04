@@ -85,8 +85,9 @@ ws.onmessage = function (event) {
 					oldblkid = blkid + blksz;
 					for (var i=2; i<wordarray.length; i+=2) {
 						if(rend) {
-// 							datau.push([cur_idx/smprate,wordarray[i],wordarray[i+1]]);
- 							datau.push([cur_idx/smprate, (wordarray[i]-11460)*0.00007757, (wordarray[i+1]-11460)*0.00007757]);
+ 							if(cur_idx >= samples) datau.shift();
+ 							datau.push([cur_idx/smprate, (wordarray[i]-11460)*0.00007757]);
+// 							datau.push([cur_idx/smprate, wordarray[i]]);
 						}
 						cur_idx++;
 					}
@@ -95,17 +96,15 @@ ws.onmessage = function (event) {
 						$("div_v"), 
 					    datau,
 						{
-							title: 'RTL8195AM ADCs',
+							title: 'RTL8711Ax ADCs',
 							showRangeSelector: true,
 							showRoller: true,
 							xlabel: 'T(sec)',
-							ylabel: 'U2(V)',
-							y2label: 'U1(V)',
-							colors: ['green','red'],
-							series : { 'U1': { axis: 'y2' } },
+							ylabel: 'U(V)',
+							colors: ['green'],
 							axes: { 
 								x: {valueFormatter: function(x){return this.getLabels()[0] + ': '+ x.toPrecision(5);}}}, 
-							labels: ['T', 'U2', 'U1'],
+							labels: ['T', 'U'],
 							labelsDiv: $('labdiv'),
 							legend: 'always',  // "follow"
 							digitsAfterDecimal: 3,

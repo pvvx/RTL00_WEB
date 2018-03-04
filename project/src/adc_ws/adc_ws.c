@@ -98,7 +98,7 @@ void adc_int_handler(void *par) {
 	if(p->pbuf) {
 		PADC_DATA pd = p->pbuf + p->buf_tx;
 		pd->us0 = buf.w[3];
-		pd->us1 = buf.w[0];
+		pd->us1 = buf.w[2];
 		if(p->buf_tx >= p->buf_idx) p->buf_tx = 0;
 		else p->buf_tx++;
 		if(p->buf_rx == p->buf_tx) {
