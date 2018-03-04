@@ -25,7 +25,7 @@ var $ = function(id) {
 	return document.getElementById(id);
 }
 var stg = 0;
-var smprate = 1819;
+var smprate = 963.4; // 1819;
 var smps = smprate;
 var samples = 10*smprate;
 var rend = 1;
@@ -74,7 +74,7 @@ ws.onmessage = function (event) {
  							if(cur_idx >= samples ) datau.shift();
  							if(wordarray[i] & 2) datau.push([cur_idx/smprate, wordarray[i]*0.0005, wordarray[i+1]*0.1]);
  							else datau.push([cur_idx/smprate]);
-						}					
+						}
 						cur_idx++;
 					}
 					if(!stg) {
@@ -91,7 +91,6 @@ ws.onmessage = function (event) {
 //							fillGraph: true,
 							showRoller: true,
 //							maxNumberWidth: 10,
-//							digitsAfterDecimal: 3,
 							xlabel: 'T(sec)',
 							ylabel: 'U(V)',
 							y2label: 'I(mA)',
@@ -99,12 +98,13 @@ ws.onmessage = function (event) {
 //							highlightSeriesOpts: { strokeWidth: 2 },
 							series : { 'I': { axis: 'y2' } },
 							axes: { 
-								x: {valueFormatter: function(x){return this.getLabels()[0] + ': '+ x.toPrecision(3);}},
+								x: {valueFormatter: function(x){return this.getLabels()[0] + ': '+ x.toPrecision(5);}},
 								y: {valueRange: [0,]}, 
 								y2: {valueRange: [0,]}},
 							labels: ['T', 'U', 'I'],
 							labelsDiv: $('labdiv'),
 							legend: 'always',  // "follow"
+							digitsAfterDecimal: 3,
 //							legendFormatter: legendFormatter
 						});
 						setInterval(function(){renderChart()}, 50);

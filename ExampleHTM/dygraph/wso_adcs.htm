@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="ina2.css">
+    <title>Get ADC data</title>
+  </head>
+  <body>
+    <div style="height: auto; width: auto; text-align: center;">
+    <div id='div_v'	style="height:512px;">
+	    <canvas id='scope' width=975 height=512></canvas>
+    </div>
+		Window: <span id='wdsize'>?</span> sec, Sample Rate: <span id='smprate'>?</span> smps
+	<div>
+		<span id='labdiv'>?</span>
+		<input type="button" id="butOnOff" value="Stop">
+		<input type="button" id="butSave" value="Save data.csv"><br>
+	</div>
+	</div>
+  </body>
+<script type="text/javascript">
+var $ = function(id) {return document.getElementById(id);}
+var smprate = 3900; // adc1: 3900 sps, adc2: 1950 sps, adc4: 975 sps, adc8: 487.5 sps
+var sttim = 0;
+var cur_idx = 0;
+var old_idx = 0;
+var frend = 0;
+function wsSmpRate() {
+	var idx = cur_idx, tt = new Date().getTime();
+	var sps = (idx - old_idx) * 1000/ (tt - sttim);
+	sttim = tt;	old_idx = idx;
+	if(smprate)	smprate = smprate * 0.9 + sps * 0.1;
+	else smprate = sps;
+	$('smprate').innerHTML = smprate.toFixed(1);
+	$('wdsize').innerHTML = ($('scope').width/smprate).toFixed(2);
+  	$('labdiv').innerHTML = 'Render ' + frend + ' Hz';
+  	frend = 0;
+}
+var samples = smprate*3;
+var rend = 1;
+var oldblkid = 0;
+var rdnextflg = false;
+$("butOnOff").onclick =  function() {
+	if(rend) {rend = 0; $("butOnOff").value = "Run";} 
+	else {rend = 1; $("butOnOff").value = "Stop";}
+}
+var data_ch1 = [];
+var data_ch2 = [];
+var gu;
+function wsping() {
+	clearTimeout(wstt);
+	ws.send('adc*'); 
+	wstt = setTimeout(wsping, 400);
+}
+var ctx = document.getElementById('scope').getContext('2d');
+function draw() {
+	var width = ctx.canvas.width;
+	var height = ctx.canvas.height;
+	var timeData1 = data_ch1;
+	var timeData2 = data_ch2;
+	var scaling = height / 65536 / 2;
+	var risingEdge = 0;
+	var len = timeData1.length;
+	ctx.fillStyle = 'rgba(0, 20, 0, 0.1)';
+	ctx.fillRect(0, 0, width, height);
+	ctx.lineWidth = 1;
+	ctx.strokeStyle = 'rgb(0, 255, 0)';
+	ctx.beginPath();
+	while (timeData1[486 + risingEdge++] > 32768 && risingEdge <= width);
+	if (risingEdge >= width) risingEdge = 0;
+	while (timeData1[486 + risingEdge++] < 32768 && risingEdge <= width);
+	if (risingEdge >= width) risingEdge = 0;
+	for (var x = risingEdge; x < timeData1.length && x - risingEdge < width; x++)
+		ctx.lineTo(x - risingEdge, height - timeData1[x] * scaling);
+	ctx.moveTo(0,0);
+	for (var x = risingEdge; x < timeData2.length && x - risingEdge < width; x++)
+		ctx.lineTo(x - risingEdge, height - 256 - timeData2[x] * scaling);
+	ctx.stroke();
+	frend++;
+	requestAnimationFrame(draw);
+}
+var wsUri = 'ws://rtl871x1/web.cgi'
+//var wsUri = "ws://"+window.location.host.toString()+"/web.cgi";
+ws = new WebSocket(wsUri);
+ws.binaryType = 'arraybuffer';
+ws.onopen = function(){ 
+	ws.send('user=rtl871x:supervisor'); 
+	ws.send('sys_debug=0'); 
+	ws.send('adcz'); // drv deinit
+	ws.send('adcy'); // mode 2 chls
+	ws.send('adc1'); // decimation
+	ws.send('adcd'); // xclk 
+	wstt = setTimeout(wsping,100);};
+ws.onmessage = function (event) {
+	if(event.data instanceof ArrayBuffer) {
+		clearTimeout(wstt);
+		var wordarray = new Uint16Array(event.data);
+		if(wordarray.length > 2) {
+			var blksz = wordarray[0]; 
+			if(wordarray.length == blksz*2 + 2) {
+				var blkid = wordarray[1] & 0xFFFF;
+				if(rdnextflg) cur_idx += (blkid - oldblkid) & 0xFFFF;
+				else {
+					rdnextflg = true;
+					sttim = new Date().getTime();
+					setInterval(function(){wsSmpRate()}, 1000);
+					$('wdsize').innerHTML = 975/smprate;
+					draw();
+				}						
+				oldblkid = blkid + blksz;
+				for (var i=2; i<wordarray.length; i+=2) {
+					if(rend) {
+						if(data_ch1.length >= samples) {
+							data_ch1.shift();
+							data_ch2.shift();
+						}
+						data_ch1.push([wordarray[i]]);
+						data_ch2.push([wordarray[i+1]]);
+					}
+					cur_idx++;
+			}	}
+			wstt = setTimeout(wsping, 40);
+}	}	}
+function convertArrayOfObjectsToCSV(value){
+	var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+	data = value.data || null;
+	if (data == null || !data.length) {return null;}
+	columnDelimiter = value.columnDelimiter || ';';
+	lineDelimiter = value.lineDelimiter || '\n';
+	keys = Object.keys(data[1]);
+	result = '';
+	result += keys.join(columnDelimiter);
+	result += lineDelimiter;
+	data.forEach(function(item){
+		ctr = 0;
+		keys.forEach(function(key){
+			if (ctr > 0) 
+				result += columnDelimiter;
+			result += item[key];
+			ctr++;
+		});
+		result += lineDelimiter;
+	});
+    return result;
+} 
+$("butSave").onclick =  function() { 	
+	var csv = convertArrayOfObjectsToCSV({data: datau});
+	if (!csv.match(/^data:text\/csv/i)) {csv = 'data:text/csv;charset=utf-8,' + csv;}
+	var encodedUri = encodeURI(csv);
+	var link = document.createElement('a');
+	link.setAttribute('href', encodedUri);
+	link.setAttribute('download',"data.csv");
+	link.click(); 
+}
+</script>
+</html>

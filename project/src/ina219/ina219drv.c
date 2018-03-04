@@ -47,8 +47,8 @@ INA219DRV ina219drv = {
 								// Если шаг заполнения 1 ms -> буфер на 0.71 сек
 								// Оптимизация под TCP: (TCP_MSS*2 - 80)/4 = (1460*2 - 80)/4 = 710
 		.i2c.status = DRV_I2C_OFF,
-		.i2c.idx = 1,				// =1: I2C1
-		.i2c.io_sel = S0,			// =S0: PC_4, PC_5
+		.i2c.idx = 3, //1,				// =1: I2C1, =2: I2C2, =3: I2C3
+		.i2c.io_sel = S0,			// =S0: PC_4, PC_5; PB_6, PB_7; PB_2, PB_3
 		.i2c.mode = DRV_I2C_FS_MODE // DRV_I2C_FS_MODE
 };
 /*

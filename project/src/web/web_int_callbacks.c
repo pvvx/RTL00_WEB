@@ -466,7 +466,7 @@ extern int ina219_ws(TCP_SERV_CONN *ts_conn, char cmd);
         else ifcmp("mlx90614") {
         	  if(CheckSCB(SCB_WEBSOC)) {
 extern int mlx90614_ws(TCP_SERV_CONN *ts_conn, char cmd);
-				  int x = mlx90614_ws(ts_conn, cstr[6]);
+				  int x = mlx90614_ws(ts_conn, cstr[8]);
         		  if(x < 0) SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
         		  else tcp_puts("%d", x);
         	  }
@@ -476,7 +476,7 @@ extern int mlx90614_ws(TCP_SERV_CONN *ts_conn, char cmd);
         else ifcmp("adc") {
         	  if(CheckSCB(SCB_WEBSOC)) {
 extern int adc_ws(TCP_SERV_CONN *ts_conn, char cmd);
-				  int x = adc_ws(ts_conn, cstr[6]);
+				  int x = adc_ws(ts_conn, cstr[3]);
         		  if(x < 0) SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
         		  else tcp_puts("%d", x);
         	  }

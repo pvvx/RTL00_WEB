@@ -447,7 +447,12 @@ int wifi_get_lps_dtim(unsigned char *dtim);
  * @return    RTW_SUCCESS : if successfully creates an AP
  *            RTW_ERROR   : if an error occurred
  */
-int wifi_start_ap(char *ssid, rtw_security_t security_type, char *password, int channel, char ssid_hidden);
+int wifi_start_ap(
+	char *ssid, 
+	rtw_security_t security_type, 
+	char *password, 
+	int channel, 
+	char ssid_hidden);
 /*
 int wifi_start_ap(
 	char 				*ssid,

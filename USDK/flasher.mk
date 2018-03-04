@@ -90,7 +90,7 @@ mp: OTA_IMAGE = $(BIN_DIR)/ota_mp.bin
 
 
 .PHONY: genbin flashburn reset test readfullflash flashboot flashwebfs flash_OTA runram runsdram
-.NOTPARALLEL: all mp genbin1 genbin23 flashburn reset test readfullflash _endgenbin flashwebfs flash_OTA
+.NOTPARALLEL: all mp genbin flashburn reset test readfullflash _endgenbin flashwebfs flash_OTA
 
 all: $(ELFFILE) $(FLASH_IMAGE) _endgenbin
 mp: $(ELFFILE) $(FLASH_IMAGE) _endgenbin
@@ -110,6 +110,9 @@ $(NMAPFILE): $(ELFFILE)
 $(FLASH_IMAGE):$(ELFFILE)
 	@echo "==========================================================="
 	$(IMAGETOOL) -a -r -o $(BIN_DIR)/ $(ELFFILE) 
+ifdef USE_SDRAM
+	@cat $(RAM3P_IMAGE) >> $(RAM2P_IMAGE)
+endif
  
 _endgenbin:
 	@echo "-----------------------------------------------------------"
@@ -240,7 +243,7 @@ reset:
 	-c 'mww 0x40000210 0x111157' -c 'rtl8710_reboot' -c shutdown
 	
 runram:
-	@$(OPENOCD) -f interface/$(FLASHER).cfg -c 'transport select swd' -c 'adapter_khz 1000' \
+	$(OPENOCD) -f interface/$(FLASHER).cfg -c 'transport select swd' -c 'adapter_khz 1000' \
 	-f $(FLASHER_PATH)rtl8710.ocd -c 'init' -c 'reset halt' -c 'adapter_khz $(FLASHER_SPEED)' \
 	-c 'load_image $(RAM1_IMAGE) 0x10000bc8 bin' \
 	-c 'load_image $(RAM2_IMAGE) 0x10006000 bin' \

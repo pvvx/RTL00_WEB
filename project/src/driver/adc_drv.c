@@ -82,7 +82,7 @@ static void ADCEnablePS(void)
 }
 #endif
 
-void ADCInit(ADC_MODULE_SEL adc_idx) {
+void ADCInit(unsigned char mode, unsigned char xclk, unsigned char dcmf) {
     /* ADC Function and Clock Enable */
     /* To release DAC delta sigma clock gating */
     HAL_WRITE32(SYSTEM_CTRL_BASE, REG_SYS_SYSPLL_CTRL2,
@@ -97,10 +97,10 @@ void ADCInit(ADC_MODULE_SEL adc_idx) {
     HAL_ADC_WRITE32(REG_ADC_CONTROL,
     	BIT_CTRL_ADC_COMP_ONLY(ADC_FEATURE_DISABLED) 	// compare mode only enable (without FIFO enable)
 		| BIT_CTRL_ADC_ONESHOT(ADC_FEATURE_DISABLED)	// one-shot mode enable
-		| BIT_CTRL_ADC_OVERWRITE(ADC_FEATURE_DISABLED)	// overwrite mode enable
+		| BIT_CTRL_ADC_OVERWRITE(ADC_FEATURE_ENABLED)	// overwrite mode enable
 		| BIT_CTRL_ADC_ENDIAN(ADC_DATA_ENDIAN_LITTLE)		// endian selection
 		| BIT_CTRL_ADC_BURST_SIZE(8)	// DMA operation threshold
-		| BIT_CTRL_ADC_THRESHOLD(8)	// one shot mode threshold
+		| BIT_CTRL_ADC_THRESHOLD(8)		// one shot mode threshold
 		| BIT_CTRL_ADC_DBG_SEL(ADC_DBG_SEL_DISABLE));
 #if 0
     /* ADC compare value and compare method setting*/
@@ -141,23 +141,25 @@ void ADCInit(ADC_MODULE_SEL adc_idx) {
 			& (~(1 << adc_idx))); // compare mode control : less than the compare threshold
 #endif
     /* ADC audio mode set-up */
+#if 0
     /* ADC enable manually setting */
     HAL_ADC_WRITE32(REG_ADC_ANAPAR_AD0,
     		HAL_ADC_READ32(REG_ADC_ANAPAR_AD0)
 //			& (~(BIT_ADC_AUDIO_EN)))
 //			& (~(BIT_ADC_EN_MANUAL))
-			| BIT_ADC_AUDIO_EN 	// ADC audio mode enable
+//			| BIT_ADC_AUDIO_EN 	// ADC audio mode enable
 			| BIT_ADC_EN_MANUAL // ADC enable manually
 			);
+#endif
     /* ADC analog parameter 0 */
-    HAL_ADC_WRITE32(REG_ADC_ANAPAR_AD0,
-    		(HAL_ADC_READ32(REG_ADC_ANAPAR_AD0)
-//			& (~BIT14) //ADC Input is internal?
-			| (BIT14))
-			& (~(BIT3|BIT2)));
+    HAL_ADC_WRITE32(REG_ADC_ANAPAR_AD0, 0x00953b10
+    		| BIT_CTRL_ADC_AUDIO_EN(mode)
+			| BIT_CTRL_ADC_SAMPLE_CLKL(xclk));
     /* ADC analog parameter 1 */
-    HAL_ADC_WRITE32(REG_ADC_ANAPAR_AD1,
-    		(HAL_ADC_READ32(REG_ADC_ANAPAR_AD1) & (~BIT1)) | (BIT2|BIT0));
+    HAL_ADC_WRITE32(REG_ADC_ANAPAR_AD1, BIT_ADC_DIGITAL_RST_BAR
+			| BIT_ADC_EXT_VREF_EN
+			| BIT_ADC_DECIMATION_FILTER_ORDER
+			| BIT_CTRL_DOWN_SAMPLE_RATE(dcmf));
     /* ADC analog parameter 2 */
     HAL_ADC_WRITE32(REG_ADC_ANAPAR_AD2, 0x67884400);
     /* ADC analog parameter 3 */

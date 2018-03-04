@@ -26,6 +26,10 @@
 
 #include "hal_com_reg.h"
 
+#ifndef mMIN
+#define mMIN(a, b)  ((a<b)?a:b)
+#endif
+
 #define MLX90614_I2CADDR 0x5A
 // RAM
 #define MLX90614_RAWIR1 0x04

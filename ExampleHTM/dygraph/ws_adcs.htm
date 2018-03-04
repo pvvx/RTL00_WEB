@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="ina2.css">
+    <title>Get ADC data</title>
+    <script type="text/javascript" src="dygraph.min.js"></script>
+  </head>
+  <body>
+    <div style="height: auto; width: auto; text-align: center;">
+    <div id="div_v"	style="height:400px;"></div>
+		<input type="button" id="butOnOff" value="Stop">
+		<input type="radio" checked name='rm1'  id="FixEnd"/>
+		<label for="FixEnd">Fixed</label>
+		<input type="radio" name='rm1' id="FixNone"/> 
+		<label for="FixNone">Float</label>
+		<input type="button" id="butSave" value="Save data.csv"><br>
+		Window: <span id='wdsize'>?</span> sec, Sample Rate: <span id='smprate'>?</span> smps
+	<div id='labdiv' style=></div>
+	</div>
+  </body>
+<script type="text/javascript">
+var $ = function(id) {
+	return document.getElementById(id);
+}
+var stg = 0;
+var smprate = 975; // adc1: 3900 sps, adc2: 1950 sps, adc4: 975 sps, adc8: 487.5 sps
+var smps = smprate;
+var sttim = 0;
+var cur_idx = 0;
+var old_idx = 0;
+var smpsa = [];
+function wsSmpRate() {
+	var idx = cur_idx, tt = new Date().getTime();
+	var sps = (idx - old_idx) * 1000/ (tt - sttim);
+	sttim = tt;	old_idx = idx;
+	smpsa.push(sps);
+	var len = smpsa.length;	
+	if(len > 100) { smpsa.shift(); len-- };
+	var csps = 0;
+	for (var i = 0; i < len; i++) csps += smpsa[i];
+	csps = csps/len;
+	$('smprate').innerHTML = csps.toFixed(1);
+}
+var samples = 10*smprate;
+var rend = 1;
+var oldblkid = 0;
+var rdnextflg = false;
+$("butOnOff").onclick =  function() {
+	if(rend) {rend = 0; $("butOnOff").value = "Run";} 
+	else {rend = 1; $("butOnOff").value = "Stop";}
+}
+var datau = [];
+var gu;
+function wsping() {
+	clearTimeout(wstt);
+	ws.send('adc*'); 
+	wstt = setTimeout(wsping, 400);
+}
+var wsUri = 'ws://rtl871x1/web.cgi'
+//var wsUri = "ws://"+window.location.host.toString()+"/web.cgi";
+ws = new WebSocket(wsUri);
+ws.binaryType = 'arraybuffer';
+ws.onopen = function(){ 
+	ws.send('user=rtl871x:supervisor'); 
+	ws.send('adcz'); // drv deinit
+	ws.send('adcy'); // mode 2 chnl
+	ws.send('adc4'); // decimation
+	ws.send('adcd'); // xclk 
+	ws.send('sys_debug=0'); // print off
+	wstt = setTimeout(wsping,50);};
+ws.onmessage = function (event) {
+	if(event.data instanceof ArrayBuffer) {
+		clearTimeout(wstt);
+		var wordarray = new Uint16Array(event.data);
+		if(wordarray.length > 2) {
+			var blksz = wordarray[0]; 
+			if(wordarray.length == blksz*2 + 2) {
+				if(!sttim) {
+					sttim = new Date().getTime();
+					setInterval(function(){wsSmpRate()}, 500);
+				} else {
+					var blkid = wordarray[1] & 0xFFFF;
+					if(rdnextflg) cur_idx += (blkid - oldblkid) & 0xFFFF;
+					else rdnextflg = true;
+					oldblkid = blkid + blksz;
+					for (var i=2; i<wordarray.length; i+=2) {
+						if(rend) {
+ 							if(cur_idx >= samples) datau.shift();
+ 							datau.push([cur_idx/smprate, (wordarray[i]-10500)*0.000078, (wordarray[i+1]-10500)*0.000078]);
+						}
+						cur_idx++;
+					}
+					if(!stg) {
+						gu = new Dygraph(
+						$("div_v"), 
+					    datau,
+						{
+							title: 'RTL871xAx ADCs',
+							showRangeSelector: true,
+							showRoller: true,
+							xlabel: 'T(sec)',
+							ylabel: 'U19(V)',
+							y2label: 'Uvbat(V)',
+							colors: ['red','green'],
+							series : { 'Uvbat': { axis: 'y2' } },
+							axes: { 
+								x: {valueFormatter: function(x){return this.getLabels()[0] + ': '+ x.toPrecision(5);}}}, 
+							labels: ['T', 'U19', 'Uvbat'],
+							labelsDiv: $('labdiv'),
+							legend: 'always',  // "follow"
+							digitsAfterDecimal: 3,
+						});
+						setInterval(function(){renderChart()}, 50);
+						stg = 1;
+					}
+			}	}
+			wstt = setTimeout(wsping, 40);
+}	}	}
+function avg(arr) {
+	var arrLen = arr.length, result = 0;
+	for (var i = 0; i < arrLen; i++) result += arr[i];
+	return result / arrLen;
+}
+var renderChart = function() {
+	var dl;
+	if (gu.dateWindow_) { 
+		dl = gu.dateWindow_[1] - gu.dateWindow_[0];
+	    if ($("FixEnd").checked) {
+			var ls = datau.length - 1;
+			gu.dateWindow_[1] = datau[ls][0];
+			gu.dateWindow_[0] = datau[ls][0] - dl;
+    	} else if (gu.dateWindow_[0] < datau[0][0]) { 
+			gu.dateWindow_[0] = datau[0][0];
+			gu.dateWindow_[1] = datau[0][0] + dl;
+	   	}
+	} else dl = datau.length/smprate;
+	$("wdsize").innerHTML = dl.toFixed(3);
+	if(rend) gu.updateOptions({'file': datau});
+}
+function convertArrayOfObjectsToCSV(value){
+	var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+
+	data = value.data || null;
+	if (data == null || !data.length) {return null;}
+	columnDelimiter = value.columnDelimiter || ';';
+	lineDelimiter = value.lineDelimiter || '\n';
+	keys = Object.keys(data[1]);
+	result = '';
+	result += keys.join(columnDelimiter);
+	result += lineDelimiter;
+	data.forEach(function(item){
+		ctr = 0;
+		keys.forEach(function(key){
+			if (ctr > 0) 
+				result += columnDelimiter;
+			result += item[key];
+			ctr++;
+		});
+		result += lineDelimiter;
+	});
+    return result;
+} 
+$("butSave").onclick =  function() { 	
+	var csv = convertArrayOfObjectsToCSV({data: datau});
+	if (!csv.match(/^data:text\/csv/i)) {csv = 'data:text/csv;charset=utf-8,' + csv;}
+	var encodedUri = encodeURI(csv);
+	var link = document.createElement('a');
+	link.setAttribute('href', encodedUri);
+	link.setAttribute('download',"data.csv");
+	link.click(); 
+}
+if(window.innerHeight > 320) $('div_v').style.height = (window.innerHeight-80) + 'px';
+window.onresize = function(){    
+	if(window.innerHeight > 320) $('div_v').style.height = (window.innerHeight-80) + 'px';
+//	$('div_v').style.width = (window.innerWidth-50) + 'px';
+}	
+</script>
+</html>

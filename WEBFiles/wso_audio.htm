@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="ina2.css">
+    <title>Get ADC data</title>
+  </head>
+  <body>
+    <div style="height: auto; width: auto; text-align: center;">
+    <div id='div_v'	style="height:512px;">
+	    <canvas id='scope' width=976 height=512></canvas>
+    </div>
+		Window: <span id='wdsize'>?</span> sec, Sample Rate: <span id='smprate'>?</span> sps
+	<div>
+		<span id='labdiv'>?</span>
+		<input type="button" id="butOnOff" value="Stop">
+		<input type="button" id="butSave" value="Save data.csv"><br>
+	</div>
+	</div>
+  </body>
+<script type="text/javascript">
+var $ = function(id) {
+	return document.getElementById(id);
+}
+var ctx = $('scope').getContext('2d');
+//===================================
+//	  |	adc1	adc2	adc4	adc8 
+//----+------------------------------
+//adca|	12200	6100	3050	1525
+//adcb|	24400	12200	6100	3050
+//adcc|	48800	24400	12200	6100
+//adcd|	97600	48800	24400	12200
+//===================================
+var data_ch1 = [];
+var smprate = 0;
+var smpbuffer = ctx.canvas.width*10;
+zero_level = 10500;
+trigger = 32768-zero_level/2;
+var sttim = 0;
+var cur_idx = 0;
+var old_idx = 0;
+var frend = 0;
+function wsSmpRate() {
+	var idx = cur_idx, tt = new Date().getTime();
+	var sps = (idx - old_idx) * 2000/ (tt - sttim);
+	sttim = tt;	old_idx = idx;
+	if(smprate)	smprate = smprate * 0.9 + sps * 0.1;
+	else smprate = sps;
+	$('smprate').innerHTML = smprate.toFixed(1);
+	$('wdsize').innerHTML = ($('scope').width/smprate).toFixed(3);
+  	$('labdiv').innerHTML = 'Render ' + frend + ' Hz';
+  	frend = 0;
+}
+var rend = 1;
+var oldblkid = 0;
+var rdnextflg = false;
+$("butOnOff").onclick =  function() {
+	if(rend) {rend = 0; $("butOnOff").value = "Run";} 
+	else {rend = 1; $("butOnOff").value = "Stop";}
+}
+var gu;
+function wsping() {
+	clearTimeout(wstt);
+	ws.send('adc*'); 
+	wstt = setTimeout(wsping, 100);
+}
+var scope_height = ctx.canvas.height;
+var scaling = scope_height / (65536 - zero_level);
+function draw() {
+	var scope_width = ctx.canvas.width;
+	ctx.fillStyle = 'rgba(0, 20, 0, 0.1)';
+	ctx.fillRect(0, 0, scope_width, scope_height);
+	ctx.lineWidth = 1;
+	ctx.beginPath();
+	var data_start = scope_width/2;
+	var timeData1 = data_ch1.slice();
+	var data_max = timeData1.length - scope_width;
+	if(scope_width > data_max) scope_width = data_max;
+	var risingEdge = data_start;
+	while(risingEdge < data_max && timeData1[risingEdge++] < trigger);
+	while(risingEdge < data_max && timeData1[risingEdge++] > trigger);
+	if(risingEdge >= data_max) { 
+		risingEdge = data_start;
+		ctx.strokeStyle = 'rgb(0, 0, 255)';
+	} else ctx.strokeStyle = 'rgb(0, 255, 0)';
+	risingEdge -= data_start;
+	for(var x = 0; x < scope_width; x++)
+		ctx.lineTo(x, scope_height - timeData1[x + risingEdge] * scaling);
+	ctx.stroke();
+	frend++;
+	requestAnimationFrame(draw);
+}
+//var wsUri = 'ws://rtl871x1/web.cgi'
+var wsUri = "ws://"+window.location.host.toString()+"/web.cgi";
+ws = new WebSocket(wsUri);
+ws.binaryType = 'arraybuffer';
+ws.onopen = function(){
+	ws.send('user=rtl871x:supervisor');
+	ws.send('sys_debug=0');
+	ws.send('adcz'); // drv deinit
+	ws.send('adcx'); // mode Audio
+	ws.send('adc1'); // decimation
+	ws.send('adcd'); // xclk 
+	wstt = setTimeout(wsping,50);
+};
+ws.onmessage = function (event) {
+	if(event.data instanceof ArrayBuffer) {
+		clearTimeout(wstt);
+		var wordarray = new Uint16Array(event.data);
+		if(wordarray.length > 2) {
+			var blksz = wordarray[0]; 
+			if(wordarray.length == blksz*2 + 2) {
+				var blkid = wordarray[1] & 0xFFFF;
+				if(rdnextflg) cur_idx += (blkid - oldblkid) & 0xFFFF;
+				else { 
+					rdnextflg = true;
+					sttim = new Date().getTime();
+					setInterval(function(){wsSmpRate()}, 1000);
+					draw();
+				}
+				oldblkid = blkid + blksz;
+				for (var i=2; i<wordarray.length; i+=2) {
+					if(rend) {
+						if(data_ch1.length > smpbuffer) {
+							data_ch1.shift();
+							data_ch1.shift();
+						}
+						data_ch1.push([wordarray[i]-zero_level]);
+						data_ch1.push([wordarray[i+1]-zero_level]);
+					}
+					cur_idx++;
+			}	}
+			wstt = setTimeout(wsping, 5);
+}	}	}
+function convertArrayOfObjectsToCSV(value){
+	var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+	data = value.data || null;
+	if (data == null || !data.length) return null;
+	columnDelimiter = value.columnDelimiter || ';';
+	lineDelimiter = value.lineDelimiter || '\n';
+	keys = Object.keys(data[1]);
+	result = '';
+	result += keys.join(columnDelimiter);
+	result += lineDelimiter;
+	data.forEach(function(item){
+		ctr = 0;
+		keys.forEach(function(key){
+			if (ctr > 0) 
+				result += columnDelimiter;
+			result += item[key];
+			ctr++;
+		});
+		result += lineDelimiter;
+	});
+    return result;
+} 
+$("butSave").onclick =  function() { 	
+	var csv = convertArrayOfObjectsToCSV({data: datau});
+	if (!csv.match(/^data:text\/csv/i)) {csv = 'data:text/csv;charset=utf-8,' + csv;}
+	var encodedUri = encodeURI(csv);
+	var link = document.createElement('a');
+	link.setAttribute('href', encodedUri);
+	link.setAttribute('download',"data.csv");
+	link.click(); 
+}
+</script>
+</html>

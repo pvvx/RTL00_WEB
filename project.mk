@@ -2,9 +2,9 @@
 # SDK CONFIG
 #=============================================
 USE_SDRAM = 1
-WEB_INA219_DRV = 1
+#WEB_INA219_DRV = 1
 #WEB_MLX90614_DRV = 1
-#WEB_ADC_DRV = 1
+WEB_ADC_DRV = 1
 #USE_SDCARD = 1
 #USE_UVC = 1
 #USE_AT = 1
