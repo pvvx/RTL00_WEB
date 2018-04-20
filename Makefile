@@ -20,13 +20,12 @@ clean:
 clean_all:
 	@$(MAKE) -f $(SDK_PATH)sdkbuild.mk clean_all
 	
-.PHONY: flashburn runram reset test readfullflash flashwebfs flashboot
-flashboot:
-	@$(MAKE) -f $(SDK_PATH)flasher.mk flashboot
-
-flashburn: 
-	#JLinkGDB-WrFlash.bat
-	@$(MAKE) -f $(SDK_PATH)flasher.mk flashburn
+.PHONY: flash_images runram reset test readfullflash flash_webfs flash_boot
+flash_boot:
+	@$(MAKE) -f $(SDK_PATH)flasher.mk flash_boot
+	
+flash_images:	
+	@$(MAKE) -f $(SDK_PATH)flasher.mk flash_images
 
 flash_OTA:
 	@$(MAKE) -f $(SDK_PATH)flasher.mk flash_OTA
@@ -34,11 +33,10 @@ flash_OTA:
 webfs:
 	@$(MAKE) -f webfs.mk
 
-flashwebfs:
-	@$(MAKE) -f webfs.mk
-	@$(MAKE) -f $(SDK_PATH)flasher.mk flashwebfs
+flash_webfs: webfs
+	@$(MAKE) -f $(SDK_PATH)flasher.mk flash_webfs
 	#JLinkGDB-WrWebFs.bat
-
+	
 runram: 
 	#JLink-RunRAM.bat
 	@$(MAKE) --f $(SDK_PATH)flasher.mk runram

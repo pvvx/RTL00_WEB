@@ -31,35 +31,19 @@ LOCAL void fATPN(int argc, char *argv[]){
 			show_wifi_st_cfg();
 		}
 		else {
-			strncpy(wifi_st_cfg.ssid, argv[1], NDIS_802_11_LENGTH_SSID);
-			int pswlen;
+			strncpy(wifi_st_cfg.ssid, argv[1], sizeof(wifi_st_cfg.ssid));
+			wifi_st_cfg.security = IDX_SECURITY_OPEN;
+			int	pswlen = strlen(strncpy(wifi_st_cfg.password, argv[2], sizeof(wifi_st_cfg.password)));
 			if(argc > 2) {
-				pswlen = strlen(wifi_st_cfg.password);
-				strncpy(wifi_st_cfg.password, argv[2], NDIS_802_11_LENGTH_SSID);
 				if(pswlen > 7) {
 					wifi_st_cfg.security = IDX_SECURITY_WPA2_AES_PSK;
-				}
-				else if(!pswlen) {
-					wifi_st_cfg.security = IDX_SECURITY_OPEN;
-				}
-				else {
+				} 
+				else if(pswlen != 0) {
 					printf("password len < 8!\n");
-					wifi_st_cfg.security = IDX_SECURITY_OPEN;
 				}
-			}
-			else {
-				// default
-				wifi_st_cfg.password[0] = 0;
-				wifi_st_cfg.security = IDX_SECURITY_OPEN;
 			}
 			if(argc > 3) {
-				if(pswlen > 7) {
-					wifi_st_cfg.security = atoi(argv[3]);
-				}
-				else {
-					printf("password len < 8!\n");
-					wifi_st_cfg.security = IDX_SECURITY_OPEN;
-				}
+				wifi_st_cfg.security = atoi(argv[3]);
 			}
 			if(argc > 4) {
 				wifi_st_cfg.autoreconnect = atoi(argv[4]);
@@ -85,24 +69,16 @@ LOCAL void fATPA(int argc, char *argv[]){
 			show_wifi_ap_cfg();
 		}
 		else {
-			strncpy(wifi_ap_cfg.ssid, argv[1], NDIS_802_11_LENGTH_SSID);
+			strncpy(wifi_ap_cfg.ssid, argv[1], sizeof(wifi_ap_cfg.ssid));
+			wifi_ap_cfg.security = 0; // IDX_SECURITY_OPEN;
+			int pswlen = strlen(strncpy(wifi_ap_cfg.password, argv[2], sizeof(wifi_ap_cfg.password)));
 			if(argc > 2) {
-				strncpy(wifi_ap_cfg.password, argv[2], NDIS_802_11_LENGTH_SSID);
-				int i = strlen(wifi_ap_cfg.password);
-				if(i > 7) {
+				if(pswlen > 7) {
 					wifi_ap_cfg.security = 1; // IDX_SECURITY_WPA2_AES_PSK;
 				}
-				else if(i == 0) {
-					wifi_ap_cfg.security = 0; // IDX_SECURITY_OPEN;
-				}
-				else {
+				else if(pswlen != 0) {
 					printf("password len < 8!\n");
-					wifi_ap_cfg.security = 0; // IDX_SECURITY_OPEN;
 				}
-			}
-			else {
-				wifi_ap_cfg.password[0] = 0;
-				wifi_ap_cfg.security = 0; // IDX_SECURITY_OPEN;
 			}
 			if(argc > 3) {
 				wifi_ap_cfg.security = (argv[3][0] == '0')? 0 : 1; //RTW_SECURITY_OPEN : RTW_SECURITY_WPA2_AES_PSK;

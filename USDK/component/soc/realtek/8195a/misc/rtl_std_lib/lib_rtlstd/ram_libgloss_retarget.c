@@ -2,9 +2,10 @@
  * ram_libgloss_retarget.o
  * pvvx 2016
  */
-
+#ifdef SWO_DEBUG_OUT_ENA
+#include "device.h"
+#endif
 #include "rtl_bios_data.h"
-
 //-------------------------------------------------------------------------
 // Function declarations
 
@@ -86,6 +87,15 @@ char *ram_libgloss_sbrk(int incr) {
 	return prev_heap_end;
 }
 
+#ifdef SWO_DEBUG_OUT_ENA
+//----- ram_libgloss_write()
+int ram_libgloss_write(int file, const char *ptr, int len) {
+	int i;
+	for (i = 0; i < len; ++i)
+		ITM_SendChar(ptr[i]);
+	return len;
+}
+#else	
 //----- ram_libgloss_write()
 int ram_libgloss_write(int file, const char *ptr, int len) {
 	int i;
@@ -93,6 +103,7 @@ int ram_libgloss_write(int file, const char *ptr, int len) {
 		HalSerialPutcRtl8195a(ptr[i]);
 	return len;
 }
+#endif
 
 //----- ram_libgloss_open()
 int ram_libgloss_open(char *file, int flags, int mode) {
@@ -115,6 +126,9 @@ int ram_libgloss_open(char *file, int flags, int mode) {
 
 //----- init_rom_libgloss_ram_map()
 void init_rom_libgloss_ram_map(void) {
+#ifdef SWO_DEBUG_OUT_ENA
+//#error @TODO: Not init SWO!
+#endif
 	rom_libgloss_ram_map.libgloss_close = ram_libgloss_close;
 	rom_libgloss_ram_map.libgloss_fstat = ram_libgloss_fstat;
 	rom_libgloss_ram_map.libgloss_isatty = ram_libgloss_isatty;

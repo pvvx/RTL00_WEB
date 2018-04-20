@@ -554,12 +554,21 @@ int32_t spi_master_write_stream(spi_t *obj, char *tx_buffer, uint32_t length)
     pHalSsiOp = &obj->spi_op;
 
     obj->state |= SPI_STATE_TX_BUSY;
+
     /* as Master mode, sending data will receive data at sametime, so we need to
        drop those received dummy data */
     if ((ret=pHalSsiOp->HalSsiWriteInterrupt(pHalSsiAdaptor, (u8 *) tx_buffer, length)) != HAL_OK) {
         obj->state &= ~SPI_STATE_TX_BUSY;
     }
     return ret;
+}
+
+VOID HalSsiTModRtl8195a(VOID *Adaptor, SSI_CTRLR0_TMOD tmod);
+// SSI_CTRLR0_TMOD tmod
+void spi_set_tmod(spi_t *obj, SSI_CTRLR0_TMOD tmod)
+{
+	PHAL_SSI_ADAPTOR pHalSsiAdaptor = &obj->spi_adp;
+	HalSsiTModRtl8195a(pHalSsiAdaptor, tmod);
 }
 
 // Master mode write a sequence of data by interrupt mode

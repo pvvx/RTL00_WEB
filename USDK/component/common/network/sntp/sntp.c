@@ -165,9 +165,9 @@ time_t sntp_gen_system_time(int timezone)
 
 	sntp_get_lasttime(&update_sec, &update_usec, &update_tick);
 
-	unsigned int current_tick = xTaskGetTickCount();
 
 	if(update_tick) {
+		unsigned int current_tick = xTaskGetTickCount();
 		long tick_diff_sec, tick_diff_ms;
 
 		tick_diff_sec = (current_tick - update_tick) / configTICK_RATE_HZ;
@@ -176,10 +176,9 @@ time_t sntp_gen_system_time(int timezone)
 		update_usec += (tick_diff_ms * 1000);
 		current_sec = update_sec + update_usec / 1000000 + timezone * 3600;
 	}
-	else {
+//	else {
 //		current_sec = current_tick / configTICK_RATE_HZ;
-		current_sec = update_usec;
-	}
+//	}
 	return current_sec;
 /*
 	current_tm = *(localtime(&current_sec));

@@ -28,7 +28,7 @@ s8 spdio_tx_done_cb(void *padapter, u8 *data, u16 offset, u16 pktsize, u8 type){
 
 
 s8 spdio_tx(struct spdio_t *obj, struct spdio_buf_t *pbuf){
-extern s8 HalSdioRxCallback(PHAL_SDIO_ADAPTER pSDIODev, VOID *pData, u16 Offset, u16 PktSize, u8 CmdType);
+//extern s8 HalSdioRxCallback(PHAL_SDIO_ADAPTER pSDIODev, VOID *pData, u16 Offset, u16 PktSize, u8 CmdType);
 	return HalSdioRxCallback((u8 *)pbuf, 0, pbuf->buf_size, pbuf->type); // ?????????
 }
 

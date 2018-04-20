@@ -45,14 +45,15 @@ volatile uint8_t * HardSetPin(PinName pin, HAL_GPIO_PIN_MODE pmode, uint8_t val)
 			extern HAL_GPIO_ADAPTER gBoot_Gpio_Adapter;
 			_pHAL_Gpio_Adapter = &gBoot_Gpio_Adapter;
 		}
-		if(_pHAL_Gpio_Adapter->Gpio_Func_En == 0) GPIO_FuncOn_8195a();
-		wait_us(100);
-		// delayMicroseconds(100);
+		if(_pHAL_Gpio_Adapter->Gpio_Func_En == 0) {
+			GPIO_FuncOn_8195a();
+			HalDelayUs(100); // delayMicroseconds(100); wait_us(100);
+		}
 		// paddr = 0x42000000 + (0x40001000 + 0x0c * (ippin >> 5) - 0x40000000) * 32 + ((ippin & 0x1f) * 4);
 #if CONFIG_DEBUG_LOG > 3		
 		GpioFunctionChk(ippin, ENABLE);
 #endif		
-    	GPIO_PullCtrl_8195a(ippin, HAL_GPIO_HIGHZ); // Make the pin pull control default as High-Z
+    	GPIO_PullCtrl_8195a(pin, HAL_GPIO_HIGHZ); // Make the pin pull control default as High-Z
 		paddr = BitBandPeriAddr((void *)(GPIO_REG_BASE + GPIO_PORTB_DR * (ippin >> 5)),  ippin & 0x1f);
 		*paddr = val;						// data register
 		HAL_GPIO_PIN gpio;
@@ -61,7 +62,7 @@ volatile uint8_t * HardSetPin(PinName pin, HAL_GPIO_PIN_MODE pmode, uint8_t val)
 		HAL_GPIO_Init_8195a(&gpio);
 		*paddr = val;						// data register
 //		paddr[(GPIO_PORTB_DDR - GPIO_PORTB_DR) * 32] = pmode == DOUT_PUSH_PULL;	// data direction
-//		GPIO_PullCtrl_8195a(ippin, pmode);					// set GPIO_PULL_CTRLx
+//		GPIO_PullCtrl_8195a(pin, pmode);					// set GPIO_PULL_CTRLx
 //		paddr[(GPIO_PORTB_CTRL - GPIO_PORTB_DR) * 32] = 0;		// data source control, we should keep it as default: data source from software
 	}
 	return paddr;

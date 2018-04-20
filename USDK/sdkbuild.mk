@@ -18,11 +18,6 @@ SRC_C_LIST = $(patsubst sdk/%,$(SDK_PATH)%,$(ADD_SRC_C)) $(patsubst sdk/%,$(SDK_
 OBJ_LIST = $(addprefix $(OBJ_DIR)/,$(patsubst %.c,%.o,$(SRC_C_LIST)))
 DEPENDENCY_LIST = $(patsubst %.c,$(OBJ_DIR)/%.d,$(SRC_C_LIST))
 
-TARGET ?= build
-OBJ_DIR ?= $(TARGET)/obj
-BIN_DIR ?= $(TARGET)/bin
-ELFFILE ?= $(OBJ_DIR)/$(TARGET).axf
-
 all: prerequirement application
 mp: prerequirement application
 

@@ -52,7 +52,7 @@ all: LIBS +=_rtsp _usbh _usbd
 mp: LIBS +=_rtsp _usbh _usbd
 endif
 # m c nosys gcc
-PATHLIBS = sdk/component/soc/realtek/8195a/misc/bsp/lib/common/gcc
+PATHLIBS = sdk/component/soc/realtek/8195a/misc/bsp/lib/common/GCC
 
 ifdef USE_SDRAM
 CFLAGS += -DUSE_SDRAM=1
@@ -412,6 +412,10 @@ SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/ram_libc.c
 SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/ram_libgloss_retarget.c
 SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/rtl_eabi_cast_ram.c
 SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/rtl_math_ram.c
+ifdef SWO_DEBUG_OUT_ENA
+INCLUDES += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd
+SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/swo.c
+endif
 #if +- nostdlib..
 ifndef USE_GCC_LIB 
 SRC_C += sdk/component/soc/realtek/8195a/misc/rtl_std_lib/lib_rtlstd/ram_pvvx_libc.c 

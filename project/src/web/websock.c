@@ -214,7 +214,7 @@ WebsocketTxFrame(TCP_SERV_CONN *ts_conn, uint32 opcode, uint8 *raw_data, uint32 
 		head_len = 2;
 	};
 	if(opcode & (WS_MASK_FLG << 8)) {
-		mask.ud ^= rand();
+		mask.ud = rand();
 		head.uc[1] |= WS_MASK_FLG;
 		head.uc[head_len] = mask.uc[0];
 		head.uc[head_len+1] = mask.uc[1];

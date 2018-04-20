@@ -2,7 +2,8 @@
 # SDK CONFIG
 #=============================================
 USE_SDRAM = 1
-#WEB_INA219_DRV = 1
+#SWO_DEBUG_OUT_ENA = 1
+WEB_INA219_DRV = 1
 #WEB_MLX90614_DRV = 1
 WEB_ADC_DRV = 1
 #USE_SDCARD = 1
@@ -97,4 +98,8 @@ ADD_SRC_C += project/src/web/web_int_vars.c
 else
 ADD_SRC_C += project/src/web/_sci_web.c
 ADD_SRC_C += project/src/web/_sci_web_user.c
+endif
+
+ifdef SWO_DEBUG_OUT_ENA
+CFLAGS += -DSWO_DEBUG_OUT_ENA=1
 endif

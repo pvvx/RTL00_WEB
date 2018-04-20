@@ -794,6 +794,15 @@ VOID HalSsiTxFIFOThresholdRtl8195a(VOID *Adaptor, u32 txftl)
     HAL_SSI_WRITE32(Index, REG_DW_SSI_TXFTLR, TxftlrValue);
 }
 
+VOID HalSsiTModRtl8195a(VOID *Adaptor, SSI_CTRLR0_TMOD tmod)
+{
+    PHAL_SSI_ADAPTOR pHalSsiAdaptor = (PHAL_SSI_ADAPTOR) Adaptor;
+    u8   Index = pHalSsiAdaptor->Index;
+    /* REG_DW_SSI_CTRLR0 */
+    u32 Ctrlr0Value = HAL_SSI_READ32(Index, REG_DW_SSI_CTRLR0) & BIT_INVC_CTRLR0_TMOD;
+    Ctrlr0Value |= BIT_CTRLR0_TMOD(pHalSsiAdaptor->TransferMode);
+    HAL_SSI_WRITE32(Index, REG_DW_SSI_CTRLR0, Ctrlr0Value);
+}
 
 HAL_Status
 HalSsiIntWriteRtl8195a(

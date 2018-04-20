@@ -13,27 +13,27 @@
 
 /*
  * in hal_platform.h
-#define BITBAND_REG_BASE		0x40001000
+#define GPIO_REG_BASE		0x40001000
  */
 
 /*
  * in rtl8195a_gpio.h
  *
-#define BITBAND_PORTA_DR           0x00        // data register
-#define BITBAND_PORTA_DDR          0x04        // data direction
-#define BITBAND_PORTA_CTRL         0x08        // data source control, we should keep it as default: data source from software
+#define REG_PORTA_DR           0x00        // data register
+#define REG_PORTA_DDR          0x04        // data direction
+#define REG_PORTA_CTRL         0x08        // data source control, we should keep it as default: data source from software
 
-#define BITBAND_PORTB_DR           0x0c        // data register
-#define BITBAND_PORTB_DDR          0x10        // data direction
-#define BITBAND_PORTB_CTRL         0x14        // data source control, we should keep it as default: data source from software
+#define REG_PORTB_DR           0x0c        // data register
+#define REG_PORTB_DDR          0x10        // data direction
+#define REG_PORTB_CTRL         0x14        // data source control, we should keep it as default: data source from software
 
-#define BITBAND_PORTC_DR           0x18        // data register
-#define BITBAND_PORTC_DDR          0x1c        // data direction
-#define BITBAND_PORTC_CTRL         0x20        // data source control, we should keep it as default: data source from software
+#define REG_PORTC_DR           0x18        // data register
+#define REG_PORTC_DDR          0x1c        // data direction
+#define REG_PORTC_CTRL         0x20        // data source control, we should keep it as default: data source from software
 
-#define BITBAND_EXT_PORTA          0x50        // GPIO IN read or OUT read back
-#define BITBAND_EXT_PORTB          0x54        // GPIO IN read or OUT read back
-#define BITBAND_EXT_PORTC          0x58        // GPIO IN read or OUT read back
+#define REG_EXT_PORTA          0x50        // GPIO IN read or OUT read back
+#define REG_EXT_PORTB          0x54        // GPIO IN read or OUT read back
+#define REG_EXT_PORTC          0x58        // GPIO IN read or OUT read back
 */
 
 #define BITBAND_PERI_REF	0x40000000
@@ -147,7 +147,8 @@
 volatile uint8_t * BitBandAddr(void *addr, uint8_t bit);
 volatile uint8_t * BitBandPeriAddr(void *addr, uint8_t bit);
 volatile uint8_t * GetOutPinBitBandAddr(PinName pin);
+#define GetDirPinBitBandAddr(pin) (GetOutPinBitBandAddr(pin) + 4*32)
 volatile uint8_t * GetInPinBitBandAddr(PinName pin);
-volatile uint8_t * HardSetPin(PinName pin, HAL_GPIO_PIN_MODE pmode, uint8_t val);
+volatile uint8_t * HardSetPin(PinName pin, HAL_GPIO_PIN_MODE pmode, uint8_t val); /* return pointer bit out register */
 
 #endif // _BITBAND_IO_H_

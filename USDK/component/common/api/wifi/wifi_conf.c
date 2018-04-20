@@ -518,7 +518,7 @@ int wifi_connect(
 			struct {
 				u8 bssid[ETH_ALEN + 2];
 				void * p;
-			} bs = { 0 };
+			} bs;
 			memcpy(bs.bssid, pWifi->bssid.octet, ETH_ALEN);
 			for(int i = 0; i < ETH_ALEN; i++) {
 				flg += bs.bssid[i];
@@ -529,6 +529,9 @@ int wifi_connect(
 			}
 			else {
 				use_bssid = 1;
+				bs.bssid[ETH_ALEN] = 0;
+				bs.bssid[ETH_ALEN+1] = 0;
+				bs.p = 0;
 				wext_set_bssid(WLAN0_NAME, bs.bssid);
 			}
 		}

@@ -1,19 +1,22 @@
 #---------------------------
-# User defined (in userset.mk)
+# Set Paths & Tools
 #---------------------------
-SDK_PATH ?= ../SDKRTLA/USDK/
-#GCC_PATH = d:/MCU/GNU_Tools_ARM_Embedded/6.2017-q1-update/bin/# + or set in PATH
-OPENOCD_PATH = d:/MCU/OpenOCD/bin/
-TOOLS_PATH ?= $(SDK_PATH)component/soc/realtek/8195a/misc/iar_utility/common/tools/
+SDK_PATH ?= ../RTL00_WEB/USDK/
+#GCC_PATH ?= d:/MCU/GNU_Tools_ARM_Embedded/7.2017-q4-major/bin/# + or set in PATH
+TOOLS_PATH ?= $(SDK_PATH)
+
 FLASHER_TYPE ?= Jlink
-PYTHON27_PATH ?= c:/Python27/
-#FLASHER_TYPE ?= OCD
-FLASHER_PATH ?= $(SDK_PATH)flasher/
-JLINK_PATH ?= D:/MCU/SEGGER/JLink_V612i/
-JLINK_GDBSRV ?= JLinkGDBServer.exe
-#---------------------------
-# Default
-#---------------------------
+
+ifneq ($(shell uname), Linux)
+PYTHON ?= C:/Python27/python
+OPENOCD ?= d:/MCU/OpenOCD/bin/openocd.exe
+JLINK_PATH ?= D:/MCU/SEGGER/JLink_V630g/
+else
+PYTHON ?= python
+OPENOCD ?= /mnt/d/MCU/OpenOCD/bin/openocd.exe
+JLINK_PATH ?= /mnt/d/MCU/SEGGER/JLink_V630g/
+endif
+
 # Compilation tools
 CROSS_COMPILE = $(GCC_PATH)arm-none-eabi-
 AR = $(CROSS_COMPILE)ar
@@ -32,15 +35,4 @@ OBJ_DIR ?= $(TARGET)/obj
 BIN_DIR ?= $(TARGET)/bin
 ELFFILE ?= $(OBJ_DIR)/$(TARGET).axf
 
-# Make bunary tools
-ifneq ($(shell uname), Linux)
-EXE = .exe
-endif
-PICK = $(TOOLS_PATH)pick$(EXE)
-PADDING = $(TOOLS_PATH)padding$(EXE)
-CHCKSUM = $(TOOLS_PATH)checksum$(EXE)
-PYTHON = $(PYTHON27)python$(EXE)
-
-# openocd tools
-OPENOCD = $(OPENOCD_PATH)openocd
 

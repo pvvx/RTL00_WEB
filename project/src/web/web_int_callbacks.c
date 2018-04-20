@@ -384,6 +384,36 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 #endif
         ifcmp("start") tcp_puts("0x%08x", web_conn->udata_start);
         else ifcmp("stop") tcp_puts("0x%08x", web_conn->udata_stop);
+#ifdef WEB_INA219_DRV
+        else ifcmp("ina219") {
+        	  if(CheckSCB(SCB_WEBSOC)) {
+extern int ina219_ws(TCP_SERV_CONN *ts_conn, char cmd);
+				  int x = ina219_ws(ts_conn, cstr[6]);
+        		  if(x < 0) SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
+        		  else tcp_puts("%d", x);
+        	  }
+        }
+#endif
+#ifdef WEB_MLX90614_DRV
+        else ifcmp("mlx90614") {
+        	  if(CheckSCB(SCB_WEBSOC)) {
+extern int mlx90614_ws(TCP_SERV_CONN *ts_conn, char cmd);
+				  int x = mlx90614_ws(ts_conn, cstr[8]);
+        		  if(x < 0) SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
+        		  else tcp_puts("%d", x);
+        	  }
+        }
+#endif
+#ifdef WEB_ADC_DRV
+        else ifcmp("adc") {
+        	  if(CheckSCB(SCB_WEBSOC)) {
+extern int adc_ws(TCP_SERV_CONN *ts_conn, char cmd);
+				  int x = adc_ws(ts_conn, cstr[3]);
+        		  if(x < 0) SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
+        		  else tcp_puts("%d", x);
+        	  }
+        }
+#endif
 #if USE_WEB_AUTH_LEVEL
         else ifcmp("realm") tcp_puts("%u", web_conn->auth_realm);
         else ifcmp("auth") tcp_puts("%u", web_conn->auth_level);
@@ -441,7 +471,7 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
           else ifcmp("rdec") tcp_puts("%d", *((uint32 *)(ahextoul(cstr+4)&(~3))));
 #endif // #if WEB_DEBUG_FUNCTIONS
           else ifcmp("ip") {
-        	  uint32 cur_ip;
+        	  uint32 cur_ip = 0;
         	  if(netif_default != NULL) cur_ip = netif_default->ip_addr.addr;
 			  tcp_puts(IPSTR, IP2STR(&cur_ip));
           }
@@ -452,36 +482,6 @@ void ICACHE_FLASH_ATTR web_int_callback(TCP_SERV_CONN *ts_conn, uint8 *cstr)
 #endif
           else tcp_put('?');
         }
-#ifdef WEB_INA219_DRV
-        else ifcmp("ina219") {
-        	  if(CheckSCB(SCB_WEBSOC)) {
-extern int ina219_ws(TCP_SERV_CONN *ts_conn, char cmd);
-				  int x = ina219_ws(ts_conn, cstr[6]);
-        		  if(x < 0) SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
-        		  else tcp_puts("%d", x);
-        	  }
-        }
-#endif
-#ifdef WEB_MLX90614_DRV
-        else ifcmp("mlx90614") {
-        	  if(CheckSCB(SCB_WEBSOC)) {
-extern int mlx90614_ws(TCP_SERV_CONN *ts_conn, char cmd);
-				  int x = mlx90614_ws(ts_conn, cstr[8]);
-        		  if(x < 0) SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
-        		  else tcp_puts("%d", x);
-        	  }
-        }
-#endif
-#ifdef WEB_ADC_DRV
-        else ifcmp("adc") {
-        	  if(CheckSCB(SCB_WEBSOC)) {
-extern int adc_ws(TCP_SERV_CONN *ts_conn, char cmd);
-				  int x = adc_ws(ts_conn, cstr[3]);
-        		  if(x < 0) SetSCB(SCB_FCLOSE|SCB_DISCONNECT);
-        		  else tcp_puts("%d", x);
-        	  }
-        }
-#endif
         else ifcmp("cfg_") {
 			cstr += 4;
 			ifcmp("web_") {

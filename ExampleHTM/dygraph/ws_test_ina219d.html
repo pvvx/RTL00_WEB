@@ -3,27 +3,22 @@
   <head>
     <link rel="stylesheet" href="ina2.css">
     <title>Get data INA219</title>
-    <script type="text/javascript" src="dygraph.js"></script>
+    <script type="text/javascript" src="dygraph.min.js"></script>
   </head>
   <body>
-    <div style="width:1000px; height:500px;">
-    <div id="div_v"	style="width:100%; height:400px;"></div>
-	<p style="text-align: center;">	
+    <div style="height: auto; width: auto; text-align: center;">
+    <div id="div_v"	style="height:400px;"></div>
 		<input type="button" id="butOnOff" value="Stop">
-		<input type="radio" name='rm1'  id="FixEnd"/>
+		<input type="radio" checked name='rm1'  id="FixEnd"/>
 		<label for="FixEnd">Fixed</label>
-		<input type="radio" checked name='rm1' id="FixNone"/> 
-		<label for="FixNone">Float</label><br>
-		Window: <span id='wdsize'>?</span> sec<br>
-		Sample Rate: <span id='smprate'>?</span> smps
-	</p>
-	<div id='labdiv' style="text-align: center;"></div>
+		<input type="radio" name='rm1' id="FixNone"/> 
+		<label for="FixNone">Float</label>
+		<input type="button" id="butSave" value="Save data.csv"><br>
+		Window: <span id='wdsize'>?</span> sec, Sample Rate: <span id='smprate'>?</span> smps
+	<div id='labdiv'></div>
 	</div>
-
 <script type="text/javascript">
-var $ = function(id) {
-	return document.getElementById(id);
-}
+var $ = function(id) { return document.getElementById(id);}
 var stg = 0;
 var smprate = 963.4; // 1819;
 var smps = smprate;
@@ -44,13 +39,13 @@ $("butOnOff").onclick =  function() {
 }
 var datau = [];
 var gu;
-//window.onresize= function(){//	alert('Размеры div #Test изменены.');}	
 function wsping() {
 	clearTimeout(wstt);
 	ws.send('ina219'); 
-	wstt = setTimeout(wsping, 500);
+	wstt = setTimeout(wsping, 150);
 }
 ws = new WebSocket('ws://rtl871x0/web.cgi');
+//ws = new WebSocket("ws://"+window.location.host.toString()+"/web.cgi");
 ws.binaryType = 'arraybuffer';
 ws.onopen = function(){ ws.send('user=rtl871x:supervisor'); ws.send('sys_debug=0'); wstt = setTimeout(wsping, 50);};
 ws.onmessage = function (event) {
@@ -83,19 +78,12 @@ ws.onmessage = function (event) {
 					    datau,
 						{
 							title: 'U & I (INA219)',
-//							rightGap: 250,
 							showRangeSelector: true,
-//							drawPoints: true,
-//							rollPeriod: 10,
-//							errorBars: true,
-//							fillGraph: true,
 							showRoller: true,
-//							maxNumberWidth: 10,
 							xlabel: 'T(sec)',
 							ylabel: 'U(V)',
 							y2label: 'I(mA)',
 							colors: ['rgb(51,204,204)','rgb(255,100,100)'],
-//							highlightSeriesOpts: { strokeWidth: 2 },
 							series : { 'I': { axis: 'y2' } },
 							axes: { 
 								x: {valueFormatter: function(x){return this.getLabels()[0] + ': '+ x.toPrecision(5);}},
@@ -103,9 +91,8 @@ ws.onmessage = function (event) {
 								y2: {valueRange: [0,]}},
 							labels: ['T', 'U', 'I'],
 							labelsDiv: $('labdiv'),
-							legend: 'always',  // "follow"
+							legend: 'always',
 							digitsAfterDecimal: 3,
-//							legendFormatter: legendFormatter
 						});
 						setInterval(function(){renderChart()}, 50);
 						stg = 1;
@@ -118,7 +105,6 @@ function wsSmpRate() {
 	$('smprate').innerHTML = smps.toFixed(1);
 }
 var renderChart = function() {
-//    $('div_v').style.height = (window.innerHeight-180) + 'px';
 	var dl;
 	if (gu.dateWindow_) { 
 		dl = gu.dateWindow_[1] - gu.dateWindow_[0];
@@ -134,6 +120,41 @@ var renderChart = function() {
 	$("wdsize").innerHTML = dl.toFixed(3);
 	if(rend) gu.updateOptions({'file': datau});
 }
-</script>
-  </body>
+function convertArrayOfObjectsToCSV(value){
+	var result, ctr, keys, columnDelimiter, lineDelimiter, data;
+	data = value.data || null;
+	if (data == null || !data.length) {return null;}
+	columnDelimiter = value.columnDelimiter || ';';
+	lineDelimiter = value.lineDelimiter || '\n';
+	keys = Object.keys(data[1]);
+	result = '';
+	result += keys.join(columnDelimiter);
+	result += lineDelimiter;
+	data.forEach(function(item){
+		ctr = 0;
+		keys.forEach(function(key){
+			if (ctr > 0) 
+				result += columnDelimiter;
+			result += item[key];
+			ctr++;
+		});
+		result += lineDelimiter;
+	});
+    return result;
+} 
+$("butSave").onclick =  function() { 	
+	var csv = convertArrayOfObjectsToCSV({data: datau});
+	if (!csv.match(/^data:text\/csv/i)) {csv = 'data:text/csv;charset=utf-8,' + csv;}
+	var encodedUri = encodeURI(csv);
+	var link = document.createElement('a');
+	link.setAttribute('href', encodedUri);
+	link.setAttribute('download',"data.csv");
+	link.click(); 
+}
+if(window.innerHeight > 320) $('div_v').style.height = (window.innerHeight-100) + 'px';
+window.onresize = function(){    
+	if(window.innerHeight > 320) $('div_v').style.height = (window.innerHeight-100) + 'px';
+//	$('div_v').style.width = (window.innerWidth-50) + 'px';
+}	
+</script></body>
 </html>

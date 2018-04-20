@@ -75,7 +75,8 @@ int32_t spi_master_write_stream(spi_t *obj, char *tx_buffer, uint32_t length);
 int32_t spi_master_write_read_stream(spi_t *obj, char *tx_buffer, 
         char *rx_buffer, uint32_t length);
 int32_t spi_slave_read_stream_timeout(spi_t *obj, char *rx_buffer, uint32_t length, uint32_t timeout_ms);
-
+void spi_flush_rx_fifo (spi_t *obj);
+void spi_set_tmod(spi_t *obj, SSI_CTRLR0_TMOD tmod); // 0 Read & Write, 1 Write only, 2 Read Only
 #ifdef CONFIG_GDMA_EN    
 int32_t spi_slave_read_stream_dma(spi_t *obj, char *rx_buffer, uint32_t length);
 int32_t spi_slave_write_stream_dma(spi_t *obj, char *tx_buffer, uint32_t length);
